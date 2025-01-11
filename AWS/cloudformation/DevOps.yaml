@@ -157,7 +157,7 @@ Resources:
         Type: CODEPIPELINE
       Source:
         Type: CODEPIPELINE
-        BuildSpec: deploy/AWS/builds/docker-build.yaml
+        BuildSpec: AWS/builds/docker-build.yaml
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Type: LINUX_CONTAINER
@@ -239,7 +239,7 @@ Resources:
                 StackName: !Sub "${GitBranch}-${GitSourceRepo}-devops"
                 Capabilities: CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND
                 RoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/CloudFormationRole"
-                TemplatePath: App::deploy/AWS/cloudformation/DevOps.yaml
+                TemplatePath: App::AWS/cloudformation/DevOps.yaml
                 ParameterOverrides: !Sub |
                   {
                     "GitSourceRepo": "${GitSourceRepo}",
@@ -261,7 +261,7 @@ Resources:
                 EnvironmentVariables: !Sub |
                   [
                     {"name": "REPOSITORY_URI", "value": "${BaseImageEcrRepository.RepositoryUri}"},
-                    {"name": "DOCKER_FILE", "value": "deploy/AWS/ecs/base/Dockerfile"}
+                    {"name": "DOCKER_FILE", "value": "AWS/ecs/base/Dockerfile"}
                   ]
               InputArtifacts:
                 - Name: App
@@ -279,7 +279,7 @@ Resources:
                 EnvironmentVariables: !Sub |
                   [
                     {"name": "REPOSITORY_URI", "value": "${NginxImageEcrRepository.RepositoryUri}"},
-                    {"name": "DOCKER_FILE", "value": "deploy/AWS/ecs/nginx/Dockerfile"}
+                    {"name": "DOCKER_FILE", "value": "AWS/ecs/nginx/Dockerfile"}
                   ]
               InputArtifacts:
                 - Name: App
