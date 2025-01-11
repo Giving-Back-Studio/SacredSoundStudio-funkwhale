@@ -262,7 +262,8 @@ Resources:
                   [
                     {"name": "REPOSITORY_URI", "value": "${BaseImageEcrRepository.RepositoryUri}"},
                     {"name": "DOCKER_FILE", "value": "AWS/ecs/base/Dockerfile"},
-                    {"name": "CONTEXT_DIR", "value": "api"}
+                    {"name": "CONTEXT_DIR", "value": "api"},
+                    {"name": "DOCKER_BUILDKIT", "value": "1"}
                   ]
               InputArtifacts:
                 - Name: App
@@ -281,7 +282,8 @@ Resources:
                   [
                     {"name": "REPOSITORY_URI", "value": "${NginxImageEcrRepository.RepositoryUri}"},
                     {"name": "DOCKER_FILE", "value": "AWS/ecs/nginx/Dockerfile"},
-                    {"name": "CONTEXT_DIR", "value": "."}
+                    {"name": "CONTEXT_DIR", "value": "."},
+                    {"name": "DOCKER_BUILDKIT", "value": "1"}
                   ]
               InputArtifacts:
                 - Name: App

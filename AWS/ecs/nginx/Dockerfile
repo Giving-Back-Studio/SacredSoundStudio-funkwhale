@@ -4,6 +4,6 @@ STOPSIGNAL SIGQUIT
 
 RUN apk add --update curl
 
-COPY deploy/AWS/ecs/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY AWS/ecs/nginx/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80 81
