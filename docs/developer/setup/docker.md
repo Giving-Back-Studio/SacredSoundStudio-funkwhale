@@ -11,7 +11,7 @@ Funkwhale can be run in Docker containers for local development. You can work on
    :::{tab-item} SSH
 
    ```sh
-   git clone git@dev.funkwhale.audio/funkwhale/funkwhale.git
+   git clone git@github.com:Giving-Back-Studio/SacredSoundStudio-funkwhale.git
    cd funkwhale
    ```
 
@@ -20,7 +20,7 @@ Funkwhale can be run in Docker containers for local development. You can work on
    :::{tab-item} HTTPS
 
    ```sh
-   git clone https://dev.funkwhale.audio/funkwhale/funkwhale.git
+   git clone https://github.com/Giving-Back-Studio/SacredSoundStudio-funkwhale.git
    cd funkwhale
    ```
 
@@ -29,16 +29,6 @@ Funkwhale can be run in Docker containers for local development. You can work on
    ::::
 
 ## Set up your Docker environment
-
-````{note}
-
-Funkwhale provides a `dev.yml` file that contains the required docker compose setup. You need to pass the `-f dev.yml` flag you run docker compose commands to ensure it uses this file. If you don't want to add this each time, you can export it as a `COMPOSE_FILE` variable:
-
-```sh
-export COMPOSE_FILE=dev.yml
-```
-
-````
 
 To set up your Docker environment:
 
@@ -58,21 +48,27 @@ To set up your Docker environment:
 3. Create a network for federation support
 
    ```sh
-   sudo docker network create federation
+   docker network create federation
    ```
 
-Once you've set everything up, you need to build the containers. Run this command any time there are upstream changes or dependency changes to ensure you're up-to-date.
+Once you've set everything up, you are ready to run the containers. Run this command any time there are upstream changes or dependency changes to ensure you're up-to-date.
 
 ```sh
-sudo docker compose -f dev.yml build
+docker compose up
+```
+
+## Hop into the api container
+
+```sh
+docker exec -it funkwhale-api bash
 ```
 
 ## Set up the database
 
-Funkwhale relies on a postgresql database to store information. To set this up, you need to run the `funkwhale-manage migrate` command:
+Funkwhale relies on a postgresql database to store information. To set this up, you need to run the `funkwhale-manage migrate` command from within the API container:
 
 ```sh
-sudo docker compose -f dev.yml run --rm api funkwhale-manage migrate
+funkwhale-manage migrate
 ```
 
 This command creates all the required tables. You need to run this whenever there are changes to the API schema. You can run this at any time without causing issues.
@@ -84,7 +80,7 @@ You need to create some local data to mimic a production environment.
 1. Create a superuser so you can log in to your local app:
 
    ```sh
-   sudo docker compose -f dev.yml run --rm api funkwhale-manage fw users create --superuser
+   funkwhale-manage fw users create --superuser
    ```
 
 2. Add some fake data to populate the database. The following command creates 25 artists with random albums, tracks, and metadata.

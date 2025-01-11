@@ -92,7 +92,7 @@ services:
     image: funkwhale-api
     depends_on:
       - postgres
-      # - minio
+      - typesense
       - redis
     command: celery -A funkwhale_api.taskapp worker -l debug -B --concurrency=${CELERYD_CONCURRENCY-0}
     environment:
@@ -124,6 +124,7 @@ services:
     environment:
       - "NGINX_MAX_BODY_SIZE=${NGINX_MAX_BODY_SIZE-100M}"
       - "FUNKWHALE_API_IP=${FUNKHALE_API_IP-api}"
+      - "FUNKWHALE_API_HOST=${FUNKWHALE_API_HOST-api}"
       - "FUNKWHALE_API_PORT=${FUNKWHALE_API_PORT-5000}"
       - "FUNKWHALE_FRONT_IP=${FUNKHALE_FRONT_IP-front}"
       - "FUNKWHALE_FRONT_PORT=${VUE_PORT-8080}"
@@ -137,7 +138,7 @@ services:
       - "${MUSIC_DIRECTORY_SERVE_PATH-./data/music}:/music:ro"
       - ./deploy/funkwhale_proxy.conf:/etc/nginx/funkwhale_proxy.conf:ro
       - "./front:/frontend:ro"
-      - "./data/staticfiles:/staticfiles:ro"
+      - "./data/staticfiles:/usr/share/nginx/html/staticfiles/:ro"
       - "./data/media:/protected/media:ro"
     networks:
       - federation
@@ -152,16 +153,6 @@ services:
       traefik.frontend.passHostHeader: true
       traefik.docker.network: federation
 
-  api-docs:
-    image: swaggerapi/swagger-ui:v3.37.2
-    environment:
-      - "API_URL=/swagger.yml"
-    ports:
-      - "8002:8080"
-    volumes:
-      - "./docs/swagger.yml:/usr/share/nginx/html/swagger.yml"
-      - "./docs/api:/usr/share/nginx/html/api"
-
   typesense:
     env_file:
       - .env.dev
@@ -174,21 +165,6 @@ services:
     command: --data-dir /data --enable-cors
     profiles:
       - typesense
-
-  # minio:
-  #   image: minio/minio
-  #   command: server /data
-  #   volumes:
-  #     - "./data/${COMPOSE_PROJECT_NAME-node1}/minio:/data"
-  #   environment:
-  #     - "MINIO_ACCESS_KEY=${AWS_ACCESS_KEY_ID-access_key}"
-  #     - "MINIO_SECRET_KEY=${AWS_SECRET_ACCESS_KEY-secret_key}"
-  #     - "MINIO_HTTP_TRACE: /dev/stdout"
-  #   ports:
-  #     - "9000:9000"
-  #   networks:
-  #     - federation
-  #     - internal
 
 networks:
   internal:
