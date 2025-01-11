@@ -10,7 +10,7 @@ Parameters:
     Default: SacredSoundStudio-funkwhale
     MinLength: 1
     MaxLength: 100
-    ConstraintDescription: You must enter a BitBucket repository name
+    ConstraintDescription: You must enter a GitHub repository name
 
   GitBranch:
     Type: String
@@ -80,7 +80,7 @@ Resources:
                   - 'cloudformation:Get*'
                   - 'cloudformation:Create*'
                   - 'cloudformation:Update*'
-              - Resource: !Ref BitBucketConnection
+              - Resource: !Ref GitHubConnection
                 Effect: Allow
                 Action: 'codestar-connections:UseConnection'
 
