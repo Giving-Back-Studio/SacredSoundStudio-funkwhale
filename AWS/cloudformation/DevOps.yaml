@@ -393,4 +393,4 @@ Resources:
             Resource:
               - !GetAtt CodeTests.Arn
               - !GetAtt DockerBuild.Arn
-              - !GetAtt E2ETests.Arn
+              - !GetAtt FrontendBuild.Arn
