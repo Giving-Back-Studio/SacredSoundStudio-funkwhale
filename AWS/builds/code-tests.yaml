@@ -8,16 +8,16 @@ phases:
   build:
     on-failure: ABORT
     commands:
-      - aws cloudformation validate-template --template-body file://deploy/AWS/cloudformation/Stack.yaml
-      - aws cloudformation validate-template --template-body file://deploy/AWS/cloudformation/RDS.yaml
-      - aws cloudformation validate-template --template-body file://deploy/AWS/cloudformation/DevOps.yaml
-      - aws cloudformation validate-template --template-body file://deploy/AWS/cloudformation/FargateService.yaml
-      - aws cloudformation validate-template --template-body file://deploy/AWS/cloudformation/VPC.yaml
+      - aws cloudformation validate-template --template-body file://AWS/cloudformation/Stack.yaml
+      - aws cloudformation validate-template --template-body file://AWS/cloudformation/RDS.yaml
+      - aws cloudformation validate-template --template-body file://AWS/cloudformation/DevOps.yaml
+      - aws cloudformation validate-template --template-body file://AWS/cloudformation/FargateService.yaml
+      - aws cloudformation validate-template --template-body file://AWS/cloudformation/VPC.yaml
       - echo "Run more code tests here!"
   post_build:
     on-failure: ABORT
     commands:
-      - aws cloudformation package --template-file deploy/AWS/cloudformation/Stack.yaml --s3-bucket $S3_ARTIFACT_BUCKET --s3-prefix $CODEBUILD_RESOLVED_SOURCE_VERSION --output-template-file stack.yaml
+      - aws cloudformation package --template-file AWS/cloudformation/Stack.yaml --s3-bucket $S3_ARTIFACT_BUCKET --s3-prefix $CODEBUILD_RESOLVED_SOURCE_VERSION --output-template-file stack.yaml
 
 artifacts:
   files:
