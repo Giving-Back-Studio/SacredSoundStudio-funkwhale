@@ -304,7 +304,7 @@ Resources:
                 - Name: NginxImageJSON
               Configuration:
                 ActionMode: REPLACE_ON_FAILURE
-                StackName: !Sub "${GitBranch}-${GitSourceRepo}-app"
+                StackName: !Sub "${GitSourceRepo}-${GitBranch}-app"
                 Capabilities: CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND
                 RoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/CloudFormationRole"
                 TemplatePath: PackagedStack::stack.yaml

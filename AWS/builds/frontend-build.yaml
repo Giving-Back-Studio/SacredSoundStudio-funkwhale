@@ -1,0 +1,17 @@
+version: 0.2
+        
+phases:
+  install:
+    on-failure: ABORT
+    runtime-versions:
+      nodejs: 22
+  build:
+    on-failure: ABORT
+    commands:
+      - cd front
+      - npm install
+      - npm run build:deployment
+
+artifacts:
+  files:
+    - dist/**/*
