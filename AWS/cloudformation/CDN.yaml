@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
 Description:
-  This template runs the ECS task definition on a schedule for different cron events
+  This template creates a CDN to host static assets
 
 Metadata:
   Author: https://www.linkedin.com/in/jacob-foster-508280140/
@@ -16,34 +16,14 @@ Parameters:
   CertificateArn:
     Type: String
     # Must be in us-east-1
-    Default: 'arn:aws:acm:us-east-1:333435094895:certificate/96c0e487-2aab-4c91-94cd-200adaba8169'
-
-  ExistingS3Bucket:
-    Type: String
     Default: ''
-
-Conditions:
-  CreateBucket: !Equals [!Ref ExistingS3Bucket, ""]
+  
+  Bucket:
+    Type: String
 
 Resources:
 
-  Bucket:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    Condition: CreateBucket
-    Properties:
-      AccessControl: Private
-      CorsConfiguration:
-        CorsRules:
-          - AllowedHeaders:
-              - '*'
-            AllowedMethods:
-              - GET
-            AllowedOrigins:
-              - 'https://staging.30seconds.com'
-            ExposedHeaders: []
-            Id: allow
-            MaxAge: 3000
+
 
   CloudFrontOriginAccess:
     Type: AWS::CloudFront::OriginAccessControl
@@ -75,12 +55,11 @@ Resources:
               - OPTIONS
           AccessControlAllowOrigins:
             Items:
-              - 'https://staging.30seconds.com'
+              - 'https://staging.sacredsound.app'
           OriginOverride: true
 
   BucketPolicy:
     Type: AWS::S3::BucketPolicy
-    Condition: CreateBucket
     Properties:
       Bucket: !Ref Bucket
       PolicyDocument:
@@ -143,68 +122,16 @@ Resources:
     Properties:
       DistributionConfig:
         Aliases:
-          - staging.30seconds.com
-          - staging-media.30seconds.com
-          - staging-static.30seconds.com
+          - staging.sacredsound.app
         Comment: Staging CloudFront Distribution
         DefaultCacheBehavior:
-          TargetOriginId: django-backend
-          AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
+          TargetOriginId: s3-bucket
+          AllowedMethods: [GET, HEAD]
           ViewerProtocolPolicy: redirect-to-https
           Compress: true
-          OriginRequestPolicyId: '216adef6-5c7f-47e4-b989-5492eafa07d3'
-          CachePolicyId: !Ref BackendCachePolicy
+          CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6'
           ResponseHeadersPolicyId: !Ref CorsResponsePolicy
         CacheBehaviors:
-          - TargetOriginId: s3-bucket
-            AllowedMethods: [GET, HEAD]
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6' # AWS Managed Cache optimized
-            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: '/static/*'
-          - TargetOriginId: s3-bucket
-            AllowedMethods: [GET, HEAD]
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6' # AWS Managed Cache optimized
-            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: '/tip/lg/*'
-          - TargetOriginId: s3-bucket
-            AllowedMethods: [GET, HEAD]
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6' # AWS Managed Cache optimized
-            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: '/tip/md/*'
-          - TargetOriginId: s3-bucket
-            AllowedMethods: [GET, HEAD]
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6' # AWS Managed Cache optimized
-            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: '/tip/orig/*'
-          - TargetOriginId: s3-bucket
-            AllowedMethods: [GET, HEAD]
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6' # AWS Managed Cache optimized
-            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: '/tip_image/*'
-          - TargetOriginId: s3-bucket
-            AllowedMethods: [GET, HEAD]
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6' # AWS Managed Cache optimized
-            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: '/tipitem/*'
-          - TargetOriginId: s3-bucket
-            AllowedMethods: [GET, HEAD]
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6' # AWS Managed Cache optimized
-            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: '/comment/*'
           - TargetOriginId: django-backend
             AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
             ViewerProtocolPolicy: redirect-to-https
@@ -212,94 +139,7 @@ Resources:
             OriginRequestPolicyId: '216adef6-5c7f-47e4-b989-5492eafa07d3'
             CachePolicyId: !Ref NoCachePolicy
             ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: 'user/action/*'
-          - TargetOriginId: django-backend
-            AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            OriginRequestPolicyId: '216adef6-5c7f-47e4-b989-5492eafa07d3'
-            CachePolicyId: !Ref NoCachePolicy
-            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: '*feed/'
-          - TargetOriginId: django-backend
-            AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            OriginRequestPolicyId: '216adef6-5c7f-47e4-b989-5492eafa07d3'
-            CachePolicyId: !Ref NoCachePolicy
-            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: '*/comments/*'
-          - TargetOriginId: django-backend
-            AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            OriginRequestPolicyId: '216adef6-5c7f-47e4-b989-5492eafa07d3'
-            CachePolicyId: !Ref NoCachePolicy
-            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: '*/submit-tip/*'
-          - TargetOriginId: django-backend
-            AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            OriginRequestPolicyId: '216adef6-5c7f-47e4-b989-5492eafa07d3'
-            CachePolicyId: !Ref NoCachePolicy
-            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: '*/be/*'
-          - TargetOriginId: django-backend
-            AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            OriginRequestPolicyId: '216adef6-5c7f-47e4-b989-5492eafa07d3'
-            CachePolicyId: !Ref NoCachePolicy
-            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: '*/check_like'
-          - TargetOriginId: django-backend
-            AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            OriginRequestPolicyId: '216adef6-5c7f-47e4-b989-5492eafa07d3'
-            CachePolicyId: !Ref NoCachePolicy
-            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: '*/draft'
-          - TargetOriginId: django-backend
-            AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            OriginRequestPolicyId: '216adef6-5c7f-47e4-b989-5492eafa07d3'
-            CachePolicyId: !Ref NoCachePolicy
-            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: '/email/*'
-          - TargetOriginId: django-backend
-            AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            OriginRequestPolicyId: '216adef6-5c7f-47e4-b989-5492eafa07d3'
-            CachePolicyId: !Ref NoCachePolicy
-            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: '/accounts/*'
-          - TargetOriginId: django-backend
-            AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            OriginRequestPolicyId: '216adef6-5c7f-47e4-b989-5492eafa07d3'
-            CachePolicyId: !Ref NoCachePolicy
-            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: '/logout/'
-          - TargetOriginId: django-backend
-            AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            OriginRequestPolicyId: '216adef6-5c7f-47e4-b989-5492eafa07d3'
-            CachePolicyId: !Ref NoCachePolicy
-            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: '/admin/*'
-          - TargetOriginId: s3-bucket
-            AllowedMethods: [GET, HEAD]
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6' # AWS Managed Cache optimized
-            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
-            PathPattern: '/user/*'
+            PathPattern: 'api/*'
         Enabled: true
         Origins:
           - Id: django-backend
@@ -309,18 +149,18 @@ Resources:
               OriginSSLProtocols:
                 - TLSv1.2
           - Id: s3-bucket
-            DomainName: !If [CreateBucket, !Sub "${Bucket}.s3.amazonaws.com", !Sub "${ExistingS3Bucket}.s3.amazonaws.com"]
+            DomainName: !Sub "${Bucket}.s3.amazonaws.com"
             OriginAccessControlId: !GetAtt CloudFrontOriginAccess.Id
             S3OriginConfig:
               OriginAccessIdentity: ""
         PriceClass: PriceClass_200
-        ViewerCertificate: 
-          AcmCertificateArn: !Ref CertificateArn
-          SslSupportMethod: sni-only
-          MinimumProtocolVersion: TLSv1.2_2021
+        # ViewerCertificate: 
+        #   AcmCertificateArn: !Ref CertificateArn
+        #   SslSupportMethod: sni-only
+        #   MinimumProtocolVersion: TLSv1.2_2021
 
 Outputs:
   Bucket:
-    Value: !If [CreateBucket, !Ref Bucket, !Ref ExistingS3Bucket]
+    Value: !Ref Bucket
   DistributionId:
     Value: !Ref CDN

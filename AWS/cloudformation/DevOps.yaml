@@ -44,6 +44,24 @@ Resources:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
 
+  StaticSiteBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      Name: !Sub 'sacredsound-funkwhale-frontend-${GitBranch}'
+      AccessControl: Private
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - GET
+            AllowedOrigins:
+              - 'https://staging.sacredsound.app'
+            ExposedHeaders: []
+            Id: allow
+            MaxAge: 3000
+
   CodePipelineServiceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -66,7 +84,9 @@ Resources:
                   - codebuild:StartBuild
                   - codebuild:BatchGetBuilds
                   - iam:PassRole
-              - Resource: !Sub arn:aws:s3:::${CodePipelineArtifactBucket}/*
+              - Resource:
+                  - !Sub arn:aws:s3:::${CodePipelineArtifactBucket}/*
+                  - !Sub arn:aws:s3:::${StaticSiteBucket}/*
                 Effect: Allow
                 Action:
                   - s3:PutObject
@@ -166,19 +186,19 @@ Resources:
       Name: !Sub "${GitSourceRepo}-${GitBranch}-docker-build"
       ServiceRole: !Ref CodeBuildServiceRole
 
-  E2ETests:
+  FrontendBuild:
     Type: AWS::CodeBuild::Project
     Properties:
       Artifacts:
         Type: CODEPIPELINE
       Source:
         Type: CODEPIPELINE
-        BuildSpec: AWS/builds/e2e-tests.yaml
+        BuildSpec: AWS/builds/frontend-build.yaml
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Type: LINUX_CONTAINER
         Image: "aws/codebuild/standard:4.0"
-      Name: !Sub "${GitSourceRepo}-${GitBranch}-e2e-tests"
+      Name: !Sub "${GitSourceRepo}-${GitBranch}-frontend-build"
       ServiceRole: !Ref CodeBuildServiceRole
 
   GitHubConnection:
@@ -290,6 +310,19 @@ Resources:
               OutputArtifacts:
                 - Name: NginxImageJSON
               RunOrder: 1
+            - Name: BuildFrontend
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Ref FrontendBuild
+              InputArtifacts:
+                - Name: App
+              OutputArtifacts:
+                - Name: PackagedFrontend
+              RunOrder: 1
         - Name: DeployApplicationStack
           Actions:
             - Name: UpdateCloudFourmation
@@ -312,8 +345,22 @@ Resources:
                   {
                     "ClusterName": "${GitSourceRepo}-${GitBranch}",
                     "BaseImage": { "Fn::GetParam" : [ "BaseImageJSON", "imagedefinitions.json", "imageUri" ] },
-                    "NginxImage": { "Fn::GetParam" : [ "NginxImageJSON", "imagedefinitions.json", "imageUri" ] }
+                    "NginxImage": { "Fn::GetParam" : [ "NginxImageJSON", "imagedefinitions.json", "imageUri" ] },
+                    "StaticSiteBucket": "${StaticSiteBucket}"
                   }
+        - Name: DeployFrontend
+          Actions:
+            - Name: UpdateFrontend
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: S3
+                Version: 1
+              InputArtifacts:
+                - Name: PackagedFrontend
+              Configuration:
+                BucketName: !Ref StaticSiteBucket
+                Extract: true
 
   DeveloperAccessPolicy:
     Type: AWS::IAM::ManagedPolicy

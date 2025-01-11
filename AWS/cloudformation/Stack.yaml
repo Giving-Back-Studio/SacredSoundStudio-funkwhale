@@ -23,6 +23,9 @@ Parameters:
     Type: Number
     Default: 5000
 
+  StaticSiteBucket:
+    Type: String
+
 Resources:
 
   Cluster:
@@ -224,12 +227,35 @@ Resources:
         CdnId: !GetAtt CDN.Outputs.DistributionId
       TemplateURL: FargateService.yaml
 
+  TypesenseService:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        ServiceName: Typesense
+        Cluster: !Ref Cluster
+        Command: 'sh deploy/docker/run-web.sh'
+        VPC: !GetAtt VPC.Outputs.VPCId
+        SubnetA: !GetAtt VPC.Outputs.PrivateSubnet0
+        SubnetB: !GetAtt VPC.Outputs.PrivateSubnet1
+        ExecutionRole: !Ref ExecutionRole
+        TaskRole: !Ref TaskRole
+        AutoScalingRole: !GetAtt AutoScalingRole.Arn
+        ContainerPort: '8101'
+        ContainerSecurityGroup: !Ref ContainerSecurityGroup
+        Image: 'typesense/typesense:0.24.0'
+        HealthCheckPath: "/"
+        MaxContainers: 10
+        AutoScalingTargetValue: 75
+        AutoScalingRequestCountValue: 150
+      TemplateURL: FargateService.yaml
+
   CDN:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
         ClusterName: !Ref ClusterName
         BackendLoadBalancerUrl: !GetAtt LoadBalancer.DNSName
+        Bucket: !Ref StaticSiteBucket
       TemplateURL: CDN.yaml
 
   VPC:
