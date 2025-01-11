@@ -48,7 +48,7 @@ Resources:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
     Properties:
-      Name: !Sub 'sacredsound-funkwhale-frontend-${GitBranch}'
+      BucketName: !Sub 'sacredsound-funkwhale-frontend-${GitBranch}'
       AccessControl: Private
       CorsConfiguration:
         CorsRules:
