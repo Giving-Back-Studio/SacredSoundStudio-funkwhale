@@ -261,7 +261,8 @@ Resources:
                 EnvironmentVariables: !Sub |
                   [
                     {"name": "REPOSITORY_URI", "value": "${BaseImageEcrRepository.RepositoryUri}"},
-                    {"name": "DOCKER_FILE", "value": "AWS/ecs/base/Dockerfile"}
+                    {"name": "DOCKER_FILE", "value": "AWS/ecs/base/Dockerfile"},
+                    {"name": "CONTEXT_DIR", "value": "api"}
                   ]
               InputArtifacts:
                 - Name: App
@@ -279,7 +280,8 @@ Resources:
                 EnvironmentVariables: !Sub |
                   [
                     {"name": "REPOSITORY_URI", "value": "${NginxImageEcrRepository.RepositoryUri}"},
-                    {"name": "DOCKER_FILE", "value": "AWS/ecs/nginx/Dockerfile"}
+                    {"name": "DOCKER_FILE", "value": "AWS/ecs/nginx/Dockerfile"},
+                    {"name": "CONTEXT_DIR", "value": "."}
                   ]
               InputArtifacts:
                 - Name: App

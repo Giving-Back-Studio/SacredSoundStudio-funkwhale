@@ -14,7 +14,7 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
-      - docker build --cache-from $REPOSITORY_URI:latest -t $REPOSITORY_URI:latest . -f $DOCKER_FILE
+      - docker build --cache-from $REPOSITORY_URI:latest -t $REPOSITORY_URI:latest $CONTEXT_DIR -f $DOCKER_FILE
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
   post_build:
     commands:
