@@ -227,30 +227,30 @@ Resources:
         CdnId: !GetAtt CDN.Outputs.DistributionId
       TemplateURL: FargateService.yaml
 
-  TypesenseService:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      Parameters:
-        ServiceName: Typesense
-        Cluster: !Ref Cluster
-        Command: '--data-dir /data --enable-cors'
-        VPC: !GetAtt VPC.Outputs.VPCId
-        SubnetA: !GetAtt VPC.Outputs.PrivateSubnet0
-        SubnetB: !GetAtt VPC.Outputs.PrivateSubnet1
-        ExecutionRole: !Ref ExecutionRole
-        TaskRole: !Ref TaskRole
-        AutoScalingRole: !GetAtt AutoScalingRole.Arn
-        ContainerPort: '8101'
-        ContainerSecurityGroup: !Ref ContainerSecurityGroup
-        Image: 'typesense/typesense:0.24.0'
-        HealthCheckPath: "/health"
-        MaxContainers: 10
-        AutoScalingTargetValue: 75
-        RDSConnectionSecret: !GetAtt RDSCluster.Outputs.ConnectionSecret
-        RedisUrl: !GetAtt RedisUrl.Value
-        S3Bucket: !GetAtt CDN.Outputs.Bucket
-        CdnId: !GetAtt CDN.Outputs.DistributionId
-      TemplateURL: FargateService.yaml
+  # TypesenseService:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     Parameters:
+  #       ServiceName: Typesense
+  #       Cluster: !Ref Cluster
+  #       Command: '--data-dir /data --enable-cors'
+  #       VPC: !GetAtt VPC.Outputs.VPCId
+  #       SubnetA: !GetAtt VPC.Outputs.PrivateSubnet0
+  #       SubnetB: !GetAtt VPC.Outputs.PrivateSubnet1
+  #       ExecutionRole: !Ref ExecutionRole
+  #       TaskRole: !Ref TaskRole
+  #       AutoScalingRole: !GetAtt AutoScalingRole.Arn
+  #       ContainerPort: '8101'
+  #       ContainerSecurityGroup: !Ref ContainerSecurityGroup
+  #       Image: 'typesense/typesense:0.24.0'
+  #       HealthCheckPath: "/health"
+  #       MaxContainers: 10
+  #       AutoScalingTargetValue: 75
+  #       RDSConnectionSecret: !GetAtt RDSCluster.Outputs.ConnectionSecret
+  #       RedisUrl: !GetAtt RedisUrl.Value
+  #       S3Bucket: !GetAtt CDN.Outputs.Bucket
+  #       CdnId: !GetAtt CDN.Outputs.DistributionId
+  #     TemplateURL: FargateService.yaml
 
   CDN:
     Type: AWS::CloudFormation::Stack
