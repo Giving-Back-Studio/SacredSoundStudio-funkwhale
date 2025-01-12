@@ -205,7 +205,7 @@ Resources:
         ServiceName: WebApp
         Cluster: !Ref Cluster
         Command: 'sh docker/server.sh'
-        HealthcheckPath: '/api/v2/instance/nodeinfo/2.1/'
+        HealthCheckPath: '/api/v2/instance/nodeinfo/2.1/'
         VPC: !GetAtt VPC.Outputs.VPCId
         SubnetA: !GetAtt VPC.Outputs.PrivateSubnet0
         SubnetB: !GetAtt VPC.Outputs.PrivateSubnet1
@@ -218,7 +218,6 @@ Resources:
         ContainerSecurityGroup: !Ref ContainerSecurityGroup
         Image: !Ref BaseImage
         NginxImage: !Ref NginxImage
-        HealthCheckPath: "/"
         MaxContainers: 10
         AutoScalingTargetValue: 75
         AutoScalingRequestCountValue: 150
@@ -244,7 +243,7 @@ Resources:
         ContainerPort: '8101'
         ContainerSecurityGroup: !Ref ContainerSecurityGroup
         Image: 'typesense/typesense:0.24.0'
-        HealthCheckPath: "/"
+        HealthCheckPath: "/health"
         MaxContainers: 10
         AutoScalingTargetValue: 75
         AutoScalingRequestCountValue: 150
