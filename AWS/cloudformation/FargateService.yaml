@@ -153,7 +153,7 @@ Resources:
               Image: !Ref NginxImage
               DependsOn:
                 - ContainerName: !Ref ServiceName
-                  Condition: HEALTHY
+                  Condition: START
               PortMappings:
                 - ContainerPort: 80
               Ulimits:
