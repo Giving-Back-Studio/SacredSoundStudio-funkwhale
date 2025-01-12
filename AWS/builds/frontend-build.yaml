@@ -4,7 +4,7 @@ phases:
   install:
     on-failure: ABORT
     runtime-versions:
-      nodejs: 22
+      nodejs: 20
   build:
     on-failure: ABORT
     commands:
