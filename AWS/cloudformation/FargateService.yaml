@@ -32,7 +32,7 @@ Parameters:
   Certificate:
     Type: String
     # Update with the certificate ARN from Certificate Manager, which must exist in the same region.
-    Default: 'arn:aws:acm:us-west-1:333435094895:certificate/1e2bde85-a5dd-4dec-80c5-824e077167a2'
+    Default: 'arn:aws:acm:us-east-2:476114146039:certificate/09f586ea-f0a8-4f39-ad4d-851f7dd5c7f3'
   Image:
     Type: String
   NginxImage:

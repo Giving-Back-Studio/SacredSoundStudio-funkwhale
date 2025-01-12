@@ -16,7 +16,7 @@ Parameters:
   CertificateArn:
     Type: String
     # Must be in us-east-1
-    Default: ''
+    Default: 'arn:aws:acm:us-east-1:476114146039:certificate/93093181-5707-4687-a47f-b5151fca5030'
   
   Bucket:
     Type: String
@@ -154,10 +154,10 @@ Resources:
             S3OriginConfig:
               OriginAccessIdentity: ""
         PriceClass: PriceClass_200
-        # ViewerCertificate: 
-        #   AcmCertificateArn: !Ref CertificateArn
-        #   SslSupportMethod: sni-only
-        #   MinimumProtocolVersion: TLSv1.2_2021
+        ViewerCertificate:
+          AcmCertificateArn: !Ref CertificateArn
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
 
 Outputs:
   Bucket:
