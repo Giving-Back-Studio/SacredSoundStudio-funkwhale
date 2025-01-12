@@ -171,7 +171,9 @@ Resources:
 
   LoadBalancerWaitHandle:
     Condition: UseLoadBalancer
-    DependsOn: ListenerHTTP
+    DependsOn:
+      - ListenerHTTPS
+      - ListenerHTTP
     Type: "AWS::CloudFormation::WaitConditionHandle"
 
   WaitHandle:
