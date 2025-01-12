@@ -246,7 +246,10 @@ Resources:
         HealthCheckPath: "/health"
         MaxContainers: 10
         AutoScalingTargetValue: 75
-        AutoScalingRequestCountValue: 150
+        RDSConnectionSecret: !GetAtt RDSCluster.Outputs.ConnectionSecret
+        RedisUrl: !GetAtt RedisUrl.Value
+        S3Bucket: !GetAtt CDN.Outputs.Bucket
+        CdnId: !GetAtt CDN.Outputs.DistributionId
       TemplateURL: FargateService.yaml
 
   CDN:
