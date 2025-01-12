@@ -9,7 +9,7 @@ phases:
     on-failure: ABORT
     commands:
       - cd front
-      - npm install
+      - yarn install
       - npm run build:deployment
 
 artifacts:
