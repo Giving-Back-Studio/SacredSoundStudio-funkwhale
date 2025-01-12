@@ -87,17 +87,7 @@ Resources:
         ParametersInCacheKeyAndForwardedToOrigin:
           EnableAcceptEncodingBrotli: true
           EnableAcceptEncodingGzip: true
-          CookiesConfig:
-            CookieBehavior: whitelist
-            Cookies:
-              - user_id
-          HeadersConfig:
-            HeaderBehavior: none
-          QueryStringsConfig:
-            QueryStringBehavior: whitelist
-            QueryStrings:
-              - next
-              - hl
+
   NoCachePolicy:
     Type: AWS::CloudFront::CachePolicy
     Properties:
@@ -153,7 +143,7 @@ Resources:
             OriginAccessControlId: !GetAtt CloudFrontOriginAccess.Id
             S3OriginConfig:
               OriginAccessIdentity: ""
-        PriceClass: PriceClass_200
+        PriceClass: PriceClass_All
         ViewerCertificate:
           AcmCertificateArn: !Ref CertificateArn
           SslSupportMethod: sni-only

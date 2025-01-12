@@ -182,7 +182,7 @@ Resources:
       Parameters:
         ServiceName: Worker
         Cluster: !Ref Cluster
-        Command: 'celery -A thirtysec worker -Q celery,low,django-fix -l info -E --concurrency=10'
+        Command: 'celery -A funkwhale_api.taskapp worker -l debug -B --concurrency=10'
         VPC: !GetAtt VPC.Outputs.VPCId
         ContainerSecurityGroup: !Ref ContainerSecurityGroup
         SubnetA: !GetAtt VPC.Outputs.PrivateSubnet0
@@ -204,7 +204,8 @@ Resources:
       Parameters:
         ServiceName: WebApp
         Cluster: !Ref Cluster
-        Command: 'sh deploy/docker/run-web.sh'
+        Command: 'sh docker/server.sh'
+        HealthcheckPath: '/api/v2/instance/nodeinfo/2.1/'
         VPC: !GetAtt VPC.Outputs.VPCId
         SubnetA: !GetAtt VPC.Outputs.PrivateSubnet0
         SubnetB: !GetAtt VPC.Outputs.PrivateSubnet1
@@ -233,7 +234,7 @@ Resources:
       Parameters:
         ServiceName: Typesense
         Cluster: !Ref Cluster
-        Command: 'sh deploy/docker/run-web.sh'
+        Command: '--data-dir /data --enable-cors'
         VPC: !GetAtt VPC.Outputs.VPCId
         SubnetA: !GetAtt VPC.Outputs.PrivateSubnet0
         SubnetB: !GetAtt VPC.Outputs.PrivateSubnet1

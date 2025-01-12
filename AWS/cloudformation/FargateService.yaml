@@ -110,26 +110,13 @@ Resources:
         - Name: !Ref ServiceName
           Image: !Ref Image
           Command: !Split [" ", !Ref Command]
-          HealthCheck:
-            Fn::If:
-              - UseNginx
-              - Command: [ "CMD-SHELL", "goss -g deploy/swarm/checks/web-goss.yaml validate"]
-                StartPeriod: 30
-                Interval: 10
-              - !Ref "AWS::NoValue"
           Environment:
             - Name: REDIS_URL
               Value: !Ref RedisUrl
             - Name: C_FORCE_ROOT
               Value: 'true'
             - Name: DJANGO_SETTINGS_MODULE
-              Value: 'thirtysec.settings.production_ecs'
-            - Name: UWSGI_HOST
-              Value: '0.0.0.0'
-            - Name: UWSGI_PORT
-              Value: '5000'
-            - Name: UWSGI_PROCESSES
-              Value: '8'
+              Value: 'config.settings.aws'
             - Name: MAINTENANCE_MODE
               Value: 0
             - Name: S3_BUCKET
@@ -160,11 +147,6 @@ Resources:
               awslogs-region: !Ref AWS::Region
               awslogs-group: !Ref LogGroup
               awslogs-stream-prefix: ecs
-        - Name: xray-daemon
-          Image: amazon/aws-xray-daemon
-          PortMappings:
-            - ContainerPort: 2000
-              Protocol: udp
         - Fn::If:
             - UseNginx
             - Name: nginx
