@@ -125,6 +125,12 @@ Resources:
               Value: !Ref AWS::Region
             - Name: CDN_ID
               Value: !Ref CdnId
+            - Name: MEDIA_ROOT
+              Value: '/data/media'
+            - Name: MUSIC_DIRECTORY_PATH
+              Value: '/data/music'
+            - Name: FUNKWHALE_HOST_NAME
+              Value: 'staging.sacredsound.app'
           Secrets:
             - Name: DB_USERNAME
               ValueFrom: !Sub "${RDSConnectionSecret}:username::"
@@ -151,6 +157,13 @@ Resources:
             - UseNginx
             - Name: nginx
               Image: !Ref NginxImage
+              Environment:
+                - Name: MEDIA_ROOT
+                  Value: '/data/media'
+                - Name: MUSIC_DIRECTORY_PATH
+                  Value: '/data/music'
+                - Name: FUNKWHALE_HOST_NAME
+                  Value: 'staging.sacredsound.app'
               DependsOn:
                 - ContainerName: !Ref ServiceName
                   Condition: START
