@@ -87,6 +87,12 @@ Resources:
         ParametersInCacheKeyAndForwardedToOrigin:
           EnableAcceptEncodingBrotli: true
           EnableAcceptEncodingGzip: true
+          CookiesConfig:
+            CookieBehavior: none
+          HeadersConfig:
+            HeaderBehavior: none
+          QueryStringsConfig:
+            QueryStringBehavior: none
 
   NoCachePolicy:
     Type: AWS::CloudFront::CachePolicy
