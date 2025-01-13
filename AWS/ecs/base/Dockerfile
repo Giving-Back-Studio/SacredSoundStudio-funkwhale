@@ -84,7 +84,7 @@ RUN --mount=type=cache,target=~/.cache/pip; \
     watchfiles==0.18.1; \
   fi
 
-FROM public.ecr.aws/docker/library/alpine:3.17:3.17 as production
+FROM public.ecr.aws/docker/library/alpine:3.17 as production
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
