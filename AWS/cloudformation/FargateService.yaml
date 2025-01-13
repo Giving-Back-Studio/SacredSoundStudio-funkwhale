@@ -111,7 +111,7 @@ Resources:
           Image: !Ref Image
           Command: !Split [" ", !Ref Command]
           Environment:
-            - Name: REDIS_URL
+            - Name: CACHE_URL
               Value: !Ref RedisUrl
             - Name: C_FORCE_ROOT
               Value: 'true'
@@ -127,10 +127,20 @@ Resources:
               Value: !Ref CdnId
             - Name: MEDIA_ROOT
               Value: '/data/media'
+            - Name: STATIC_ROOT
+              Value: '/staticfiles'
             - Name: MUSIC_DIRECTORY_PATH
               Value: '/data/music'
-            - Name: FUNKWHALE_HOST_NAME
+            - Name: FUNKWHALE_HOSTNAME
               Value: 'staging.sacredsound.app'
+            - Name: FUNKWHALE_HOSTNAME_SUFFIX
+              Value: 'sacredsound.app'
+            - Name: FUNKWHALE_HOSTNAME_PREFIX
+              Value: 'staging'
+            - Name: FUNKWHALE_PROTOCOL
+              Value: 'https'
+            - Name: FUNKWHALE_URL
+              Value: 'https://staging.sacredsound.app'
           Secrets:
             - Name: DB_USERNAME
               ValueFrom: !Sub "${RDSConnectionSecret}:username::"
