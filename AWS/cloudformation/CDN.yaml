@@ -120,6 +120,13 @@ Resources:
         Aliases:
           - staging.sacredsound.app
         Comment: Staging CloudFront Distribution
+        CustomErrorResponses:
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: '/'
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: '/'
         DefaultRootObject: 'index.html'
         DefaultCacheBehavior:
           TargetOriginId: s3-bucket
