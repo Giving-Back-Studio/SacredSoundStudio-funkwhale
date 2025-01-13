@@ -293,6 +293,7 @@ Resources:
 
   LogGroup:
     Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
     Properties:
       LogGroupName: !Join ['', [/ecs/, !Ref ServiceName, TaskDefinition]]
 
