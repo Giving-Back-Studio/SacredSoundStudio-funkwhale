@@ -176,7 +176,7 @@ Resources:
                   Value: '/data/media'
                 - Name: MUSIC_DIRECTORY_PATH
                   Value: '/data/music'
-                - Name: FUNKWHALE_HOST_NAME
+                - Name: FUNKWHALE_HOSTNAME
                   Value: 'staging.sacredsound.app'
               DependsOn:
                 - ContainerName: !Ref ServiceName
