@@ -155,7 +155,7 @@ Resources:
           - Id: s3-bucket
             DomainName: !Sub "${Bucket}.s3.amazonaws.com"
             OriginAccessControlId: !GetAtt CloudFrontOriginAccess.Id
-            OriginPath: "/front/dist/"
+            OriginPath: "/front/dist"
             S3OriginConfig:
               OriginAccessIdentity: ""
           - Id: s3-bucket-admin
