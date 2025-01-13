@@ -176,6 +176,13 @@ Resources:
           ToPort: 80
           SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
 
+  DjangoSecretKey:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: Secret key for Django
+      GenerateSecretString: 
+        PasswordLength: 42
+
   WorkerService:
     Type: AWS::CloudFormation::Stack
     Properties: 
@@ -196,6 +203,7 @@ Resources:
         RedisUrl: !GetAtt RedisUrl.Value
         S3Bucket: !GetAtt CDN.Outputs.Bucket
         CdnId: !GetAtt CDN.Outputs.DistributionId
+        DjangoSecretKey: !Ref DjangoSecretKey
       TemplateURL: FargateService.yaml
 
   WebService:
@@ -225,6 +233,7 @@ Resources:
         RedisUrl: !GetAtt RedisUrl.Value
         S3Bucket: !GetAtt CDN.Outputs.Bucket
         CdnId: !GetAtt CDN.Outputs.DistributionId
+        DjangoSecretKey: !Ref DjangoSecretKey
       TemplateURL: FargateService.yaml
 
   # TypesenseService:

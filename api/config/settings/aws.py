@@ -17,6 +17,7 @@ MANAGERS = (
     ('Jacob', 'jacobef10@gmail.com'),
 )
 
+DJANGO_SECRET_KEY = getenv('DJANGO_SECRET_KEY')
 
 def filter_transactions(event, hint):
     url_string = event["request"]["url"]
