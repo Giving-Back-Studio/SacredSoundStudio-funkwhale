@@ -289,13 +289,15 @@ Resources:
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
       Policies:
-        - PolicyName: AllowReadConnectionSecret
+        - PolicyName: AllowReadSecrets
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action: 'secretsmanager:GetSecretValue'
-                Resource: !GetAtt RDSCluster.Outputs.ConnectionSecret
+                Resource:
+                  - !GetAtt RDSCluster.Outputs.ConnectionSecret
+                  - !Ref DjangoSecretKey
 
   TaskRole:
     Type: AWS::IAM::Role
