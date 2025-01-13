@@ -120,6 +120,7 @@ Resources:
         Aliases:
           - staging.sacredsound.app
         Comment: Staging CloudFront Distribution
+        DefaultRootObject: 'index.html'
         DefaultCacheBehavior:
           TargetOriginId: s3-bucket
           AllowedMethods: [GET, HEAD]
@@ -136,6 +137,13 @@ Resources:
             CachePolicyId: !Ref NoCachePolicy
             ResponseHeadersPolicyId: !Ref CorsResponsePolicy
             PathPattern: 'api/*'
+          - TargetOriginId: s3-bucket-admin
+            AllowedMethods: [GET, HEAD]
+            ViewerProtocolPolicy: redirect-to-https
+            Compress: true
+            CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6'
+            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
+            PathPattern: 'staticfiles/*'
         Enabled: true
         Origins:
           - Id: django-backend
@@ -145,6 +153,12 @@ Resources:
               OriginSSLProtocols:
                 - TLSv1.2
           - Id: s3-bucket
+            DomainName: !Sub "${Bucket}.s3.amazonaws.com"
+            OriginAccessControlId: !GetAtt CloudFrontOriginAccess.Id
+            OriginPath: "/front/dist/"
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+          - Id: s3-bucket-admin
             DomainName: !Sub "${Bucket}.s3.amazonaws.com"
             OriginAccessControlId: !GetAtt CloudFrontOriginAccess.Id
             S3OriginConfig:
