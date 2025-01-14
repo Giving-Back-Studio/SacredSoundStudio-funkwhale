@@ -176,12 +176,8 @@ Resources:
           PortMappings:
             - ContainerPort: !Ref ContainerPort
           MountPoints:
-            - Fn::If:
-              - UseEfs
-                - SourceVolume: "efsVolume"
-                  ContainerPath: "/mount/efs"
-                  ReadOnly: true
-                - !Ref "AWS::NoValue"
+            - SourceVolume: "efsVolume"
+              ContainerPath: "/data"
           Ulimits:
             - Name: nofile
               HardLimit: 65536
