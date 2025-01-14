@@ -204,6 +204,8 @@ Resources:
         S3Bucket: !GetAtt CDN.Outputs.Bucket
         CdnId: !GetAtt CDN.Outputs.DistributionId
         DjangoSecretKey: !Ref DjangoSecretKey
+        Cpu: 512
+        Memory: 1GB
       TemplateURL: FargateService.yaml
 
   WebService:
