@@ -2,6 +2,7 @@ version: "3"
 
 services:
   front:
+    profiles: ["full", "min"]
     build:
       context: front
       dockerfile: Dockerfile.dev
@@ -22,6 +23,7 @@ services:
     command: "yarn dev --host"
 
   postgres:
+    profiles: ["full", "min"]
     env_file:
       - .env.dev
       - .env
@@ -35,6 +37,7 @@ services:
       - internal
 
   redis:
+    profiles: ["full"]
     env_file:
       - .env.dev
       - .env
@@ -45,6 +48,7 @@ services:
       - internal
 
   api:
+    profiles: ["full", "min"]
     env_file:
       - .env.dev
       - .env
@@ -86,13 +90,13 @@ services:
       - "node3.funkwhale.test:172.17.0.1"
 
   celeryworker:
+    profiles: ["full"]
     env_file:
       - .env.dev
       - .env
     image: funkwhale-api
     depends_on:
       - postgres
-      - typesense
       - redis
     command: celery -A funkwhale_api.taskapp worker -l debug -B --concurrency=${CELERYD_CONCURRENCY-0}
     environment:
@@ -115,6 +119,7 @@ services:
       - "node3.funkwhale.test:172.17.0.1"
 
   nginx:
+    profiles: ["full", "min"]
     env_file:
       - .env.dev
       - .env
@@ -154,6 +159,7 @@ services:
       traefik.docker.network: federation
 
   typesense:
+    profiles: ["full"]
     env_file:
       - .env.dev
       - .env
