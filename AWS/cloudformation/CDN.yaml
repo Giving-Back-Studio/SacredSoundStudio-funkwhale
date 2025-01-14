@@ -113,6 +113,24 @@ Resources:
           QueryStringsConfig:
             QueryStringBehavior: none
 
+  IndexCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Comment: Caching Policy for SPA index
+        DefaultTTL: 300
+        MaxTTL: 300
+        MinTTL: 300
+        Name: !Sub "${ClusterName}-SPA-Index"
+        ParametersInCacheKeyAndForwardedToOrigin:
+          CookiesConfig:
+            CookieBehavior: none
+          EnableAcceptEncodingGzip: false
+          HeadersConfig:
+            HeaderBehavior: none
+          QueryStringsConfig:
+            QueryStringBehavior: none
+
   CDN:
     Type: AWS::CloudFront::Distribution
     Properties:
@@ -151,6 +169,13 @@ Resources:
             CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6'
             ResponseHeadersPolicyId: !Ref CorsResponsePolicy
             PathPattern: 'staticfiles/*'
+          - AllowedMethods: [GET, HEAD, OPTIONS]
+            CachedMethods: [GET, HEAD, OPTIONS]
+            CachePolicyId: !Ref IndexCachePolicy
+            PathPattern: '*index.html'
+            TargetOriginId: s3-bucket
+            ViewerProtocolPolicy: redirect-to-https
+            OriginRequestPolicyId: '88a5eaf4-2fd4-4709-b370-b4c650ea3fcf' # AWS Managed S3 CORS
         Enabled: true
         Origins:
           - Id: django-backend
