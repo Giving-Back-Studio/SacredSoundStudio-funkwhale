@@ -261,6 +261,7 @@ Resources:
         RedisUrl: !GetAtt RedisUrl.Value
         S3Bucket: !GetAtt CDN.Outputs.Bucket
         CdnId: !GetAtt CDN.Outputs.DistributionId
+        DjangoSecretKey: !Ref DjangoSecretKey
       TemplateURL: FargateService.yaml
 
   CDN:

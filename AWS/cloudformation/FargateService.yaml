@@ -27,7 +27,6 @@ Parameters:
     Type: String
   DjangoSecretKey:
     Type: String
-    Default: ''
   RedisUrl:
     Type: String
   S3Bucket:
