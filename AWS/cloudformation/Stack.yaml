@@ -206,6 +206,7 @@ Resources:
         DjangoSecretKey: !Ref DjangoSecretKey
         Cpu: 512
         Memory: 1GB
+        EfsFileSystemId: !Ref EFS
       TemplateURL: FargateService.yaml
 
   WebService:
@@ -236,6 +237,7 @@ Resources:
         S3Bucket: !GetAtt CDN.Outputs.Bucket
         CdnId: !GetAtt CDN.Outputs.DistributionId
         DjangoSecretKey: !Ref DjangoSecretKey
+        EfsFileSystemId: !Ref EFS
       TemplateURL: FargateService.yaml
 
   TypesenseService:
@@ -262,7 +264,11 @@ Resources:
         S3Bucket: !GetAtt CDN.Outputs.Bucket
         CdnId: !GetAtt CDN.Outputs.DistributionId
         DjangoSecretKey: !Ref DjangoSecretKey
+        EfsFileSystemId: !Ref EFS
       TemplateURL: FargateService.yaml
+
+  EFS:
+    Type: AWS::EFS::FileSystem
 
   CDN:
     Type: AWS::CloudFormation::Stack

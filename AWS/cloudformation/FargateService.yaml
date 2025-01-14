@@ -75,6 +75,8 @@ Parameters:
     Type: String
     Default: 0.5GB
     AllowedValues: [0.5GB, 1GB, 2GB]
+  EfsFileSystemId:
+    Type: String
 
 Conditions:
   UseLoadBalancer: !Not 
@@ -116,6 +118,15 @@ Resources:
       ExecutionRoleArn: !Ref ExecutionRole
       # "The Amazon Resource Name (ARN) of an AWS Identity and Access Management (IAM) role that grants containers in the task permission to call AWS APIs on your behalf."
       TaskRoleArn: !Ref TaskRole
+      Volumes:
+        - Name: "efsVolume"
+          EfsVolumeConfiguration:
+            FileSystemId: !Ref EfsFileSystemId
+            RootDirectory: "/"
+            TransitEncryption: "ENABLED"
+            TransitEncryptionPort: integer
+            AuthorizationConfig:
+              Iam: "ENABLED"
       ContainerDefinitions:
         - Name: !Ref ServiceName
           Image: !Ref Image
@@ -164,6 +175,13 @@ Resources:
               ValueFrom: !Sub "${DjangoSecretKey}"
           PortMappings:
             - ContainerPort: !Ref ContainerPort
+          MountPoints:
+            - Fn::If:
+              - UseEfs
+                - SourceVolume: "efsVolume"
+                  ContainerPath: "/mount/efs"
+                  ReadOnly: true
+                - !Ref "AWS::NoValue"
           Ulimits:
             - Name: nofile
               HardLimit: 65536
