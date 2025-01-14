@@ -143,6 +143,8 @@ Resources:
               Value: 'https'
             - Name: FUNKWHALE_URL
               Value: 'https://staging.sacredsound.app'
+            - Name: TYPESENSE_API_KEY
+              Value: "apikey"
           Secrets:
             - Name: DB_USERNAME
               ValueFrom: !Sub "${RDSConnectionSecret}:username::"
