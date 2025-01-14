@@ -70,10 +70,11 @@ Parameters:
   Cpu:
     Type: Number
     Default: 256
+    AllowedValues: [256, 512, 1024, 2048, 4096]
   Memory:
     Type: String
     Default: 0.5GB
-    Options: [0.5GB, 1GB, 2GB]
+    AllowedValues: [0.5GB, 1GB, 2GB]
 
 Conditions:
   UseLoadBalancer: !Not 
