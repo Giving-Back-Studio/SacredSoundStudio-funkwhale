@@ -128,15 +128,7 @@ onMounted(() => {
 <template>
   <aside :class="['ui', 'vertical', 'left', 'visible', 'wide', {'collapsed': isCollapsed}, 'sidebar', 'component-sidebar']">
     <header class="ui basic segment header-wrapper">
-      <router-link
-        :title="'Funkwhale'"
-        :to="{name: logoUrl}"
-      >
-        <i class="logo bordered inverted vibrant big icon">
-          <logo class="logo" />
-          <span class="visually-hidden">{{ $t('components.Sidebar.link.home') }}</span>
-        </i>
-      </router-link>
+      <div class="spacer"></div>
       <nav class="top ui compact right aligned inverted text menu">
         <div class="right menu">
           <div
@@ -524,32 +516,6 @@ onMounted(() => {
           >
             {{ $t('components.Sidebar.link.channels') }}
           </router-link>
-          <div class="item">
-            <h3 class="header">
-              {{ $t('components.Sidebar.header.more') }}
-            </h3>
-            <div class="menu">
-              <router-link
-                class="item"
-                to="/about"
-                active-class="router-link-exact-active active"
-              >
-                <i class="info icon" />
-                {{ $t('components.Sidebar.link.about') }}
-              </router-link>
-            </div>
-          </div>
-          <div
-            v-if="!isProduction"
-            class="item"
-          >
-            <a
-              role="button"
-              href=""
-              class="link item"
-              @click.prevent="emit('show:set-instance-modal')"
-            >{{ $t('components.Sidebar.link.switchInstance') }}</a>
-          </div>
         </nav>
       </section>
     </nav>
