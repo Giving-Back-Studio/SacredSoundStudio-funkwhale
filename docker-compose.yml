@@ -159,7 +159,7 @@ services:
       traefik.docker.network: federation
 
   typesense:
-    profiles: ["full"]
+    profiles: ["full", "typesense"]
     env_file:
       - .env.dev
       - .env
@@ -169,8 +169,6 @@ services:
     volumes:
       - ./typesense/data:/data
     command: --data-dir /data --enable-cors
-    profiles:
-      - typesense
 
 networks:
   internal:
