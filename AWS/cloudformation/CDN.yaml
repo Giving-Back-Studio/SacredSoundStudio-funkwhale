@@ -164,13 +164,34 @@ Resources:
             CachePolicyId: !Ref NoCachePolicy
             ResponseHeadersPolicyId: !Ref CorsResponsePolicy
             PathPattern: 'api/*'
-          - TargetOriginId: s3-bucket-admin
+          - TargetOriginId: s3-bucket-root
             AllowedMethods: [GET, HEAD]
             ViewerProtocolPolicy: redirect-to-https
             Compress: true
             CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6'
             ResponseHeadersPolicyId: !Ref CorsResponsePolicy
             PathPattern: 'staticfiles/*'
+          - TargetOriginId: s3-bucket-root
+            AllowedMethods: [GET, HEAD]
+            ViewerProtocolPolicy: redirect-to-https
+            Compress: true
+            CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6'
+            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
+            PathPattern: 'admin/*'
+          - TargetOriginId: s3-bucket-root
+            AllowedMethods: [GET, HEAD]
+            ViewerProtocolPolicy: redirect-to-https
+            Compress: true
+            CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6'
+            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
+            PathPattern: 'tracks/*'
+          - TargetOriginId: s3-bucket-root
+            AllowedMethods: [GET, HEAD]
+            ViewerProtocolPolicy: redirect-to-https
+            Compress: true
+            CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6'
+            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
+            PathPattern: 'attachments/*'
           - AllowedMethods: [GET, HEAD, OPTIONS]
             CachedMethods: [GET, HEAD, OPTIONS]
             CachePolicyId: !Ref IndexCachePolicy
@@ -192,7 +213,7 @@ Resources:
             OriginPath: "/front/dist"
             S3OriginConfig:
               OriginAccessIdentity: ""
-          - Id: s3-bucket-admin
+          - Id: s3-bucket-root
             DomainName: !Sub "${Bucket}.s3.amazonaws.com"
             OriginAccessControlId: !GetAtt CloudFrontOriginAccess.Id
             S3OriginConfig:
