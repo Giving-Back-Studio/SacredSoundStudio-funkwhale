@@ -77,6 +77,8 @@ Parameters:
     AllowedValues: [0.5GB, 1GB, 2GB]
   EfsFileSystemId:
     Type: String
+  Namespace:
+    Type: String
 
 Conditions:
   UseLoadBalancer: !Not 
@@ -256,7 +258,7 @@ Resources:
       EnableExecuteCommand: true
       ServiceConnectConfiguration:
         Enabled: true
-        Namespace: !Ref Cluster
+        Namespace: !Ref Namespace
         Services:
           - PortName: ContainerPort
             DiscoveryName: !Ref ServiceName
