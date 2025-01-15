@@ -176,6 +176,7 @@ Resources:
               ValueFrom: !Sub "${DjangoSecretKey}"
           PortMappings:
             - ContainerPort: !Ref ContainerPort
+              Name: external
           MountPoints:
             - SourceVolume: "efsVolume"
               ContainerPath: "/data"
@@ -260,7 +261,7 @@ Resources:
         Enabled: true
         Namespace: !Ref Namespace
         Services:
-          - PortName: ContainerPort
+          - PortName: external
             DiscoveryName: !Ref ServiceName
             ClientAliases:
               - DnsName: !Ref ServiceName
