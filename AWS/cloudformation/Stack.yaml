@@ -170,7 +170,7 @@ Resources:
       Parameters:
         ServiceName: Worker
         Cluster: !Ref Cluster
-        Namespace: !Ref Namespace
+        Namespace: !GetAtt Namespace.Arn
         Command: 'celery -A funkwhale_api.taskapp worker -l debug -B --concurrency=10'
         VPC: !GetAtt VPC.Outputs.VPCId
         ContainerSecurityGroup: !GetAtt VPC.Outputs.ContainerSecurityGroup
@@ -197,7 +197,7 @@ Resources:
       Parameters:
         ServiceName: WebApp
         Cluster: !Ref Cluster
-        Namespace: !Ref Namespace
+        Namespace: !GetAtt Namespace.Arn
         Command: 'sh docker/server.sh'
         HealthCheckPath: '/api/v2/instance/nodeinfo/2.1/'
         VPC: !GetAtt VPC.Outputs.VPCId
@@ -229,7 +229,7 @@ Resources:
       Parameters:
         ServiceName: typesense
         Cluster: !Ref Cluster
-        Namespace: !Ref Namespace
+        Namespace: !GetAtt Namespace.Arn
         Command: '--data-dir /data --enable-cors'
         VPC: !GetAtt VPC.Outputs.VPCId
         SubnetA: !GetAtt VPC.Outputs.PrivateSubnet0
