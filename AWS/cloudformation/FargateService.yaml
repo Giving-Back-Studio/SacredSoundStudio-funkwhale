@@ -262,7 +262,7 @@ Resources:
             DiscoveryName: !Ref ServiceName
             ClientAliases:
               - DnsName: !Ref ServiceName
-              - Port: !Ref ContainerPort
+                Port: !Ref ContainerPort
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: DISABLED
