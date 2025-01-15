@@ -403,7 +403,7 @@
     EfsMount2:
       Type: AWS::EFS::MountTarget
       Properties:
-        FileSystemId: !Ref EfSFileSystemId
+        FileSystemId: !Ref EfsFileSystemId
         SubnetId: !Ref PrivateSubnet1
         SecurityGroups:
           - !GetAtt VPC.DefaultSecurityGroup
