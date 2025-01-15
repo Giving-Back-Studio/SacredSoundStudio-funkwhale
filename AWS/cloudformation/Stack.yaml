@@ -162,6 +162,7 @@ Resources:
     Properties:
       Description: 'Service Discovery namespace for the cluster'
       Name: !Ref ClusterName
+      Vpc: !GetAtt VPC.Outputs.VPCId
 
   WorkerService:
     Type: AWS::CloudFormation::Stack
