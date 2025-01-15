@@ -168,7 +168,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties: 
       Parameters:
-        ServiceName: Worker
+        ServiceName: worker
         Cluster: !Ref Cluster
         Namespace: !GetAtt Namespace.Arn
         Command: 'celery -A funkwhale_api.taskapp worker -l debug -B --concurrency=10'
@@ -195,7 +195,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties: 
       Parameters:
-        ServiceName: WebApp
+        ServiceName: web
         Cluster: !Ref Cluster
         Namespace: !GetAtt Namespace.Arn
         Command: 'sh docker/server.sh'
