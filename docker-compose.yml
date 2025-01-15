@@ -37,7 +37,7 @@ services:
       - internal
 
   redis:
-    profiles: ["full"]
+    profiles: ["full", "min"]
     env_file:
       - .env.dev
       - .env
