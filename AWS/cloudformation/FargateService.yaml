@@ -254,6 +254,15 @@ Resources:
       HealthCheckGracePeriodSeconds: !If [UseLoadBalancer, 300, !Ref "AWS::NoValue"]
       LaunchType: FARGATE
       EnableExecuteCommand: true
+      ServiceConnectConfiguration:
+        Enabled: true
+        Namespace: !Ref Cluster
+        Services:
+          - PortName: ContainerPort
+            DiscoveryName: !Ref ServiceName
+            ClientAliases:
+              - DnsName: !Ref ServiceName
+              - Port: !Ref ContainerPort
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: DISABLED
