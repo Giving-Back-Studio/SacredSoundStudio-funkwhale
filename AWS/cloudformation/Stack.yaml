@@ -324,7 +324,7 @@ Resources:
         ClusterName: !Ref ClusterName
         SubnetA: !GetAtt VPC.Outputs.PrivateSubnet0
         SubnetB: !GetAtt VPC.Outputs.PrivateSubnet1
-        ContainerSecurityGroup: !Ref ContainerSecurityGroup
+        ContainerSecurityGroup: !GetAtt VPC.Outputs.ContainerSecurityGroup
         VPC: !GetAtt VPC.Outputs.VPCId
       TemplateURL: RDS.yaml
 
