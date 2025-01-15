@@ -187,7 +187,7 @@ Resources:
         CdnId: !GetAtt CDN.Outputs.DistributionId
         DjangoSecretKey: !Ref DjangoSecretKey
         Cpu: 512
-        Memory: 1GB
+        Memory: 2GB
         EfsFileSystemId: !Ref EFS
       TemplateURL: FargateService.yaml
 
