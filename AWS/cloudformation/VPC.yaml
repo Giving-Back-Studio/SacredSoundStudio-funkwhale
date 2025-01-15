@@ -6,6 +6,9 @@
       Description: The name of the VPC being created.
       Type: String
       Default: "VPC Public and Private with NAT"
+    EfsFileSystemId:
+      Description: The ID of the EFS file system to mount in the private subnets.
+      Type: String
 
   Mappings:
     SubnetConfig:
@@ -388,6 +391,22 @@
           Ref: "PrivateSubnet1"
         RouteTableId:
           Ref: "PrivateRouteTable1"
+
+    EfsMount1:
+      Type: AWS::EFS::MountTarget
+      Properties:
+        FileSystemId: !Ref EfsFileSystemId
+        SubnetId: !Ref PrivateSubnet0
+        SecurityGroups:
+          - !GetAtt VPC.DefaultSecurityGroup
+
+    EfsMount2:
+      Type: AWS::EFS::MountTarget
+      Properties:
+        FileSystemId: !Ref EfSFileSystemId
+        SubnetId: !Ref PrivateSubnet1
+        SecurityGroups:
+          - !GetAtt VPC.DefaultSecurityGroup
 
   Outputs:
 
