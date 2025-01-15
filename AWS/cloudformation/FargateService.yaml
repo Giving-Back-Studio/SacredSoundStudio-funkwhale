@@ -148,11 +148,11 @@ Resources:
             - Name: CDN_ID
               Value: !Ref CdnId
             - Name: MEDIA_ROOT
-              Value: '/data/media'
+              Value: ''
             - Name: STATIC_ROOT
               Value: '/staticfiles'
             - Name: MUSIC_DIRECTORY_PATH
-              Value: '/data/music'
+              Value: ''
             - Name: FUNKWHALE_HOSTNAME
               Value: 'staging.sacredsound.app'
             - Name: FUNKWHALE_HOSTNAME_SUFFIX
