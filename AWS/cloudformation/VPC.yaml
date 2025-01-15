@@ -392,13 +392,50 @@
         RouteTableId:
           Ref: "PrivateRouteTable1"
 
+    LoadBalancerSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: !Join ['', [!Ref VPCName, LoadBalancerSG]]
+        VpcId: !Ref VPC
+        SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 443
+            ToPort: 443
+            CidrIp: 0.0.0.0/0
+          - IpProtocol: tcp
+            FromPort: 80
+            ToPort: 80
+            CidrIp: 0.0.0.0/0
+
+    ContainerSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: !Join ['', [!Ref VPCName, ContainerSG]]
+        VpcId: !Ref VPC
+        SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 80
+            ToPort: 80
+            SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+
+    EfsSecurityGroup:
+      Type: "AWS::EC2::SecurityGroup"
+      Properties:
+        GroupDescription: "Security group for the EFS volume"
+        VpcId: !Ref VPC
+        SecurityGroupIngress:
+          - FromPort: 2049
+            IpProtocol: "tcp"
+            ToPort: 2049
+            SourceSecurityGroupId: !Ref ContainerSecurityGroup
+
     EfsMount1:
       Type: AWS::EFS::MountTarget
       Properties:
         FileSystemId: !Ref EfsFileSystemId
         SubnetId: !Ref PrivateSubnet0
         SecurityGroups:
-          - !GetAtt VPC.DefaultSecurityGroup
+          - !Ref EfsSecurityGroup
 
     EfsMount2:
       Type: AWS::EFS::MountTarget
@@ -406,7 +443,7 @@
         FileSystemId: !Ref EfsFileSystemId
         SubnetId: !Ref PrivateSubnet1
         SecurityGroups:
-          - !GetAtt VPC.DefaultSecurityGroup
+          - !Ref EfsSecurityGroup
 
   Outputs:
 
@@ -438,3 +475,11 @@
     DefaultSecurityGroup:
       Description: "DefaultSecurityGroup Id"
       Value: !GetAtt VPC.DefaultSecurityGroup
+
+    LoadBalancerSecurityGroup:
+      Description: "LoadBalancerSecurityGroup Id"
+      Value: !Ref LoadBalancerSecurityGroup
+
+    ContainerSecurityGroup:
+      Description: "ContainerSecurityGroup Id"
+      Value: !Ref ContainerSecurityGroup

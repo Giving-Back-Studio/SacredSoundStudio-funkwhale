@@ -93,27 +93,12 @@ Resources:
         Fn::Sub: redis://${RedisCache.RedisEndpoint.Address}:${RedisCache.RedisEndpoint.Port}/0
       Description: SSM Parameter for the redis URL
 
-  LoadBalancerSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: !Join ['', [!Ref ClusterName, LoadBalancerSecurityGroup]]
-      VpcId: !GetAtt VPC.Outputs.VPCId
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Scheme: internet-facing
       SecurityGroups:
-        - !Ref LoadBalancerSecurityGroup
+        - !GetAtt VPC.Outputs.LoadBalancerSecurityGroup
       Subnets:
         - !GetAtt VPC.Outputs.PublicSubnet0
         - !GetAtt VPC.Outputs.PublicSubnet1
@@ -165,17 +150,6 @@ Resources:
       ResourceArn: !Ref LoadBalancer
       WebACLArn: !GetAtt WafAcl.Arn
 
-  ContainerSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: !Join ['', [!Ref ClusterName, ContainerSecurityGroup]]
-      VpcId: !GetAtt VPC.Outputs.VPCId
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
-
   DjangoSecretKey:
     Type: AWS::SecretsManager::Secret
     Properties:
@@ -191,7 +165,7 @@ Resources:
         Cluster: !Ref Cluster
         Command: 'celery -A funkwhale_api.taskapp worker -l debug -B --concurrency=10'
         VPC: !GetAtt VPC.Outputs.VPCId
-        ContainerSecurityGroup: !Ref ContainerSecurityGroup
+        ContainerSecurityGroup: !GetAtt VPC.Outputs.ContainerSecurityGroup
         SubnetA: !GetAtt VPC.Outputs.PrivateSubnet0
         SubnetB: !GetAtt VPC.Outputs.PrivateSubnet1
         ExecutionRole: !Ref ExecutionRole
@@ -224,9 +198,9 @@ Resources:
         TaskRole: !Ref TaskRole
         AutoScalingRole: !GetAtt AutoScalingRole.Arn
         LoadBalancer: !Ref LoadBalancer
-        LoadBalancerSecurityGroup: !Ref LoadBalancerSecurityGroup
+        LoadBalancerSecurityGroup: !GetAtt VPC.Outputs.LoadBalancerSecurityGroup
         ContainerPort: !Ref ContainerPort
-        ContainerSecurityGroup: !Ref ContainerSecurityGroup
+        ContainerSecurityGroup: !GetAtt VPC.Outputs.ContainerSecurityGroup
         Image: !Ref BaseImage
         NginxImage: !Ref NginxImage
         MaxContainers: 10
@@ -254,7 +228,7 @@ Resources:
         TaskRole: !Ref TaskRole
         AutoScalingRole: !GetAtt AutoScalingRole.Arn
         ContainerPort: '8101'
-        ContainerSecurityGroup: !Ref ContainerSecurityGroup
+        ContainerSecurityGroup: !GetAtt VPC.Outputs.ContainerSecurityGroup
         Image: 'typesense/typesense:0.24.0'
         HealthCheckPath: "/health"
         MaxContainers: 10
