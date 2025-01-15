@@ -65,5 +65,6 @@ DATABASES = {
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
 AWS_STORAGE_BUCKET_NAME = getenv('S3_BUCKET')
+AWS_S3_CUSTOM_DOMAIN = FUNKWHALE_HOSTNAME
 
 TYPESENSE_HOST = "typesense"
