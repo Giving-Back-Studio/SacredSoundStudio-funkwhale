@@ -120,13 +120,12 @@ Resources:
       TaskRoleArn: !Ref TaskRole
       Volumes:
         - Name: "efsVolume"
-          EfsVolumeConfiguration:
-            FileSystemId: !Ref EfsFileSystemId
+          EFSVolumeConfiguration:
+            FilesystemId: !Ref EfsFileSystemId
             RootDirectory: "/"
             TransitEncryption: "ENABLED"
-            TransitEncryptionPort: integer
             AuthorizationConfig:
-              Iam: "ENABLED"
+              IAM: "ENABLED"
       ContainerDefinitions:
         - Name: !Ref ServiceName
           Image: !Ref Image
