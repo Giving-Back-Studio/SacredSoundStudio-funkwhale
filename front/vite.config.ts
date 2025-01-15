@@ -46,7 +46,11 @@ export default defineConfig(({ mode }) => ({
     })
   ],
   server: {
-    port
+    port: port,
+    watch: {
+      usePolling: true,
+      interval: 1000,
+    },
   },
   resolve: {
     alias: {

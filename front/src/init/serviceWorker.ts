@@ -10,6 +10,7 @@ const logger = useLogger()
 
 export const install: InitModule = ({ store }) => {
   const updateSW = registerSW({
+    immediate: true,
     onRegisterError (error) {
       const importStatementsSupported = navigator.userAgent.includes('Chrome')
         || navigator.userAgent.includes('Chromium')
