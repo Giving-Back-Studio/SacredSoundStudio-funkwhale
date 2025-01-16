@@ -19,15 +19,6 @@ whenever(() => store.state.auth.authenticated, () => {
   router.push('/library')
 })
 
-// Modified isArtist watcher
-whenever(
-  () => store.state.ui.isArtist, 
-  (value) => {
-    logger.log('isArtist changed to:', value)
-  },
-  { immediate: true }
-)
-
 const isLogin = ref(false)
 
 const toggleForm = () => {
