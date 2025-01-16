@@ -19,6 +19,12 @@ export default [
       return next()
     }
   },
+  // Add this to your existing routes
+  {
+    path: '/auth',
+    name: 'auth',
+    component: () => import('~/components/auth/AuthForm.vue')
+  },
   {
     path: '/index.html',
     redirect: to => {
