@@ -45,6 +45,15 @@ export default defineConfig(({ mode }) => ({
       manifest
     })
   ],
+  css: {
+    postcss: {
+      plugins: [
+        require('tailwindcss'),
+        require('autoprefixer'),
+      ],
+    },
+  },
+
   server: {
     port: port,
     watch: {
