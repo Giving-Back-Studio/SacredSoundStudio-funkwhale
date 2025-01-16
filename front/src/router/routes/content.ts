@@ -7,7 +7,7 @@ export default [
     children: [{
       path: '',
       name: 'content.index',
-      component: () => import('~/views/content/Home.vue')
+      component: () => import('~/views/content/MultiUpload.vue')
     }]
   },
   {
