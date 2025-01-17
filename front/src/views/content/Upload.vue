@@ -1,5 +1,14 @@
 <script setup>
 import { ref, computed } from 'vue'
+import axios from 'axios'
+
+import { useStore } from '~/store'
+
+import AttachmentInput from '~/components/common/AttachmentInput.vue'
+
+
+const store = useStore();
+
 
 // Steps configuration
 const steps = [
@@ -16,43 +25,14 @@ const isDraggingCover = ref(false)
 const uploadedFiles = ref([])
 const currentTrackIndex = ref(0)
 
+console.log(store.state.auth.user);
+
 // Album details
 const albumDetails = ref({
-  name: '',
-  description: '',
-  cover: null,
-  coverPreview: null
+  title: '',
+  description: {text: '', content_type: 'text/plain'},
+  cover: null
 })
-
-// Options for metadata
-const categories = [
-  'Studio production',
-  'Music video',
-  'Meditation',
-  'DJ set',
-  'Behind the scenes',
-  'Concert',
-  'Live recording',
-  'Video lesson'
-]
-
-const genres = ['Classical', 'Kirtan', 'Mantra', 'Meditation', 'World']
-const instruments = ['Harmonium', 'Tabla', 'Guitar', 'Sitar', 'Flute']
-const languages = ['Sanskrit', 'Hindi', 'English', 'Bengali']
-const traditions = ['Bhakti', 'Vedic', 'Buddhist', 'Sufi']
-const deities = ['Krishna', 'Shiva', 'Devi', 'Ganesh']
-const intentions = ['Healing', 'Peace', 'Love', 'Devotion']
-const moods = ['Peaceful', 'Energetic', 'Meditative', 'Joyful']
-const tags = ['Sacred', 'Spiritual', 'Traditional', 'Modern']
-const countries = ['India', 'USA', 'UK', 'Australia']
-
-const vocalOptions = {
-  instrumental: 'Instrumental',
-  male: 'Male',
-  female: 'Female',
-  choir: 'Choir',
-  circle: 'Circle'
-}
 
 // Track template
 const createTrackTemplate = () => ({
@@ -97,7 +77,7 @@ const canProceed = computed(() => {
   if (currentStep.value === 1) return !!uploadType.value
   if (currentStep.value === 2) {
     if (uploadType.value === 'album') {
-      return !!albumDetails.value.name && !!albumDetails.value.cover && uploadedFiles.value.length > 0
+      return !!albumDetails.value.title && !!albumDetails.value.cover && uploadedFiles.value.length > 0
     }
     return uploadedFiles.value.length > 0
   }
@@ -112,29 +92,6 @@ const isValid = computed(() => {
 // Methods
 const selectUploadType = (type) => {
   uploadType.value = type
-}
-
-const handleCoverDrop = (e) => {
-  const file = e.dataTransfer.files[0]
-  if (file && file.type.startsWith('image/')) {
-    handleCoverFile(file)
-  }
-  isDraggingCover.value = false
-}
-
-const handleCoverSelect = (e) => {
-  const file = e.target.files[0]
-  if (file) handleCoverFile(file)
-}
-
-const handleCoverFile = (file) => {
-  albumDetails.value.cover = file
-  albumDetails.value.coverPreview = URL.createObjectURL(file)
-}
-
-const removeCover = () => {
-  albumDetails.value.cover = null
-  albumDetails.value.coverPreview = null
 }
 
 const handleContentDrop = (e) => {
@@ -220,12 +177,24 @@ const nextStep = () => {
   if (currentStep.value < steps.length) currentStep.value++
 }
 
-const submitUpload = () => {
+const submitUpload = async () => {
   console.log('Submitting upload:', {
     uploadType: uploadType.value,
     albumDetails: uploadType.value === 'album' ? albumDetails.value : null,
     tracks: tracksMetadata.value
-  })
+  });
+
+  if (uploadType.value === 'album') {
+    try {
+      de
+      albumDetails.value.artist = store.state.auth.profile.id;
+      console.log('Uploading album:', albumDetails.value);
+      const response = await axios.post('albums', albumDetails.value);
+    } catch (error) {
+      //errors.value = (error as BackendError).backendErrors
+      console.log(error)
+    }
+  }
 }
 </script>
 
@@ -294,13 +263,27 @@ const submitUpload = () => {
           </h2>
   
           <!-- Album Details -->
+           <!-- find componenet for this -->
           <div v-if="uploadType === 'album'" class="mb-8">
             <div class="grid grid-cols-2 gap-6 mb-6">
-              <edit-form
-                v-else
-                :object-type="objectType"
-                :object="object"
-              />
+              <div>
+                <label class="block mb-2">Album Title*</label>
+                <input 
+                  v-model="albumDetails.title"
+                  type="text"
+                  class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
+                  placeholder="Enter album title"
+                />
+              </div>
+              <div>
+                <label class="block mb-2">Album Description</label>
+                <textarea
+                  v-model="albumDetails.description.text"
+                  class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
+                  placeholder="Enter album description"
+                  rows="3"
+                ></textarea>
+              </div>
             </div>
             
             <!-- Album Cover Upload -->
@@ -308,41 +291,15 @@ const submitUpload = () => {
               <label class="block mb-2">Album Cover*</label>
               <div 
                 @dragover.prevent
-                @drop.prevent="handleCoverDrop"
                 class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-white transition-colors"
                 :class="{'border-white bg-gray-700': isDraggingCover}"
                 @dragenter="isDraggingCover = true"
                 @dragleave="isDraggingCover = false"
               >
-                <div v-if="albumDetails.cover">
-                  <img 
-                    :src="albumDetails.coverPreview" 
-                    class="w-48 h-48 object-cover mx-auto rounded-lg mb-4"
-                  />
-                  <button 
-                    @click.prevent="removeCover"
-                    class="text-red-400 hover:text-red-300"
-                  >
-                    Remove Cover
-                  </button>
-                </div>
-                <div v-else>
-                  <i class="image icon" />
-                  <p class="text-gray-400">Drag and drop your album cover here or click to browse</p>
-                  <input 
-                    type="file"
-                    @change="handleCoverSelect"
-                    accept="image/*"
-                    class="hidden"
-                    ref="coverInput"
-                  />
-                  <button 
-                    @click="$refs.coverInput.click()"
-                    class="mt-4 px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
-                  >
-                    Browse Files
-                  </button>
-                </div>
+                <attachment-input
+                  v-model="albumDetails.cover"
+                  imageClass="podcast">
+                </attachment-input>
               </div>
             </div>
           </div>
@@ -380,7 +337,7 @@ const submitUpload = () => {
                 <input 
                   type="file"
                   @change="handleFileSelect"
-                  accept="audio/*,video/*"
+                  accept="audio/wav, audio/flac, audio/aiff, video/mp4"
                   multiple
                   class="hidden"
                   ref="fileInput"
@@ -496,31 +453,15 @@ const submitUpload = () => {
             <div class="space-y-4">
               <div>
                 <label class="block mb-2">Genre*</label>
-                <SearchableSelect
-                  v-model="currentTrack.genre"
-                  :options="genres"
-                  placeholder="Select or add genre"
-                  allow-new
-                />
+                <!-- need tag component -->
               </div>
               <div>
                 <label class="block mb-2">Featured Instruments*</label>
-                <SearchableSelect
-                  v-model="currentTrack.featuredInstruments"
-                  :options="instruments"
-                  placeholder="Select or add instruments"
-                  multiple
-                  allow-new
-                />
+                <!-- need tag component -->
               </div>
               <div>
                 <label class="block mb-2">Primary Instrument</label>
-                <SearchableSelect
-                  v-model="currentTrack.primaryInstrument"
-                  :options="instruments"
-                  placeholder="Select or add primary instrument"
-                  allow-new
-                />
+                <!-- need tag component -->
               </div>
             </div>
   
@@ -528,64 +469,27 @@ const submitUpload = () => {
             <div class="col-span-2 grid grid-cols-2 gap-6">
               <div>
                 <label class="block mb-2">Language*</label>
-                <SearchableSelect
-                  v-model="currentTrack.languages"
-                  :options="languages"
-                  placeholder="Select or add languages"
-                  multiple
-                  allow-new
-                />
+                <!-- need tag component -->
               </div>
               <div>
                 <label class="block mb-2">Tradition</label>
-                <SearchableSelect
-                  v-model="currentTrack.traditions"
-                  :options="traditions"
-                  placeholder="Select or add traditions"
-                  multiple
-                  allow-new
-                />
+                <!-- need tag component -->
               </div>
               <div>
                 <label class="block mb-2">Deity</label>
-                <SearchableSelect
-                  v-model="currentTrack.deities"
-                  :options="deities"
-                  placeholder="Select or add deities"
-                  multiple
-                  allow-new
-                />
+                <!-- need tag component -->
               </div>
               <div>
                 <label class="block mb-2">Intention</label>
-                <SearchableSelect
-                  v-model="currentTrack.intentions"
-                  :options="intentions"
-                  placeholder="Select or add intentions"
-                  multiple
-                  allow-new
-                />
+                <!-- need tag component -->
               </div>
               <div>
                 <label class="block mb-2">Mood</label>
-                <SearchableSelect
-                  v-model="currentTrack.moods"
-                  :options="moods"
-                  placeholder="Select or add moods"
-                  multiple
-                  allow-new
-                />
+                <!-- need tag component -->
               </div>
               <div>
                 <label class="block mb-2">Tags (max 5)</label>
-                <SearchableSelect
-                  v-model="currentTrack.tags"
-                  :options="tags"
-                  placeholder="Select or add tags"
-                  multiple
-                  :max-items="5"
-                  allow-new
-                />
+                <!-- need tag component -->
               </div>
             </div>
   
@@ -593,16 +497,7 @@ const submitUpload = () => {
             <div class="col-span-2">
               <h3 class="text-lg font-semibold mb-4">Vocals*</h3>
               <div class="grid grid-cols-3 gap-4">
-                <div v-for="(option, key) in vocalOptions" :key="key" class="flex items-center space-x-2">
-                  <input
-                    :id="key"
-                    type="checkbox"
-                    v-model="currentTrack.vocals[key]"
-                    class="w-4 h-4 rounded border-gray-600 text-white focus:ring-2 focus:ring-white"
-                    @change="handleVocalChange(key)"
-                  />
-                  <label :for="key">{{ option }}</label>
-                </div>
+                <!-- need tag component here-->>
               </div>
             </div>
   
@@ -619,12 +514,7 @@ const submitUpload = () => {
               </div>
               <div>
                 <label class="block mb-2">Recording Country</label>
-                <SearchableSelect
-                  v-model="currentTrack.recordingCountry"
-                  :options="countries"
-                  placeholder="Select recording country"
-                  allow-new
-                />
+                <!-- need tag component -->
               </div>
               <div>
                 <label class="block mb-2">Release Date</label>
