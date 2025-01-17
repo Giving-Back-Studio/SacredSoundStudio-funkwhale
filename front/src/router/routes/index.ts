@@ -14,6 +14,15 @@ export default [
     path: '/',
     name: 'index',
     component: () => import('~/components/Home.vue'),
+    beforeEnter(to, from, next) {
+      if (store.state.auth.authenticated) return next('/library')
+      return next()
+    }
+  },
+  {
+    path: '/create',
+    name: 'artistLandingPage',
+    component: () => import('~/components/ArtistLandingPage.vue'),
     beforeEnter (to, from, next) {
       if (store.state.auth.authenticated) return next('/library')
       return next()

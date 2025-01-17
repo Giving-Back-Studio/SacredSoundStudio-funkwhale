@@ -47,6 +47,7 @@ export interface State {
     width: number
   }
   pageTitle: null
+  isArtist: null | boolean
 
   notifications: Record<NotificationsKey, number>
   websocketEventsHandlers: Record<WebSocketEventName, WebSocketHandlers>
@@ -70,6 +71,7 @@ const store: Module<State, RootState> = {
       height: 0,
       width: 0
     },
+    isArtist: null,
     notifications: {
       inbox: 0,
       pendingReviewEdits: 0,
@@ -205,7 +207,10 @@ const store: Module<State, RootState> = {
     },
     window: (state, value) => {
       state.window = value
-    }
+    },
+    setIsArtist(state, value: boolean) {
+      state.isArtist = value
+    },
   },
   actions: {
     async fetchUnreadNotifications ({ commit }) {
