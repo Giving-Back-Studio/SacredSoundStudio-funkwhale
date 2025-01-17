@@ -1,3 +1,234 @@
+<script setup>
+import { ref, computed } from 'vue'
+
+// Steps configuration
+const steps = [
+  { number: 1, title: 'Choose Type' },
+  { number: 2, title: 'Upload Content' },
+  { number: 3, title: 'Track Details' }
+]
+
+// State
+const currentStep = ref(1)
+const uploadType = ref('')
+const isDragging = ref(false)
+const isDraggingCover = ref(false)
+const uploadedFiles = ref([])
+const currentTrackIndex = ref(0)
+
+// Album details
+const albumDetails = ref({
+  name: '',
+  description: '',
+  cover: null,
+  coverPreview: null
+})
+
+// Options for metadata
+const categories = [
+  'Studio production',
+  'Music video',
+  'Meditation',
+  'DJ set',
+  'Behind the scenes',
+  'Concert',
+  'Live recording',
+  'Video lesson'
+]
+
+const genres = ['Classical', 'Kirtan', 'Mantra', 'Meditation', 'World']
+const instruments = ['Harmonium', 'Tabla', 'Guitar', 'Sitar', 'Flute']
+const languages = ['Sanskrit', 'Hindi', 'English', 'Bengali']
+const traditions = ['Bhakti', 'Vedic', 'Buddhist', 'Sufi']
+const deities = ['Krishna', 'Shiva', 'Devi', 'Ganesh']
+const intentions = ['Healing', 'Peace', 'Love', 'Devotion']
+const moods = ['Peaceful', 'Energetic', 'Meditative', 'Joyful']
+const tags = ['Sacred', 'Spiritual', 'Traditional', 'Modern']
+const countries = ['India', 'USA', 'UK', 'Australia']
+
+const vocalOptions = {
+  instrumental: 'Instrumental',
+  male: 'Male',
+  female: 'Female',
+  choir: 'Choir',
+  circle: 'Circle'
+}
+
+// Track template
+const createTrackTemplate = () => ({
+  name: '',
+  description: '',
+  category: '',
+  genre: '',
+  featuredInstruments: [],
+  primaryInstrument: '',
+  languages: [],
+  traditions: [],
+  deities: [],
+  intentions: [],
+  moods: [],
+  tags: [],
+  vocals: {
+    instrumental: false,
+    male: false,
+    female: false,
+    choir: false,
+    circle: false
+  },
+  recordLabel: '',
+  recordingCountry: '',
+  releaseDate: '',
+  uploadedBy: 'Current User',
+  uploadedTime: new Date().toISOString()
+})
+
+// Tracks metadata
+const tracksMetadata = ref([])
+
+// Computed
+const currentTrack = computed({
+  get: () => tracksMetadata.value[currentTrackIndex.value] || createTrackTemplate(),
+  set: (value) => {
+    tracksMetadata.value[currentTrackIndex.value] = value
+  }
+})
+
+const canProceed = computed(() => {
+  if (currentStep.value === 1) return !!uploadType.value
+  if (currentStep.value === 2) {
+    if (uploadType.value === 'album') {
+      return !!albumDetails.value.name && !!albumDetails.value.cover && uploadedFiles.value.length > 0
+    }
+    return uploadedFiles.value.length > 0
+  }
+  return true
+})
+
+const isValid = computed(() => {
+  // Add validation logic for the final step
+  return true
+})
+
+// Methods
+const selectUploadType = (type) => {
+  uploadType.value = type
+}
+
+const handleCoverDrop = (e) => {
+  const file = e.dataTransfer.files[0]
+  if (file && file.type.startsWith('image/')) {
+    handleCoverFile(file)
+  }
+  isDraggingCover.value = false
+}
+
+const handleCoverSelect = (e) => {
+  const file = e.target.files[0]
+  if (file) handleCoverFile(file)
+}
+
+const handleCoverFile = (file) => {
+  albumDetails.value.cover = file
+  albumDetails.value.coverPreview = URL.createObjectURL(file)
+}
+
+const removeCover = () => {
+  albumDetails.value.cover = null
+  albumDetails.value.coverPreview = null
+}
+
+const handleContentDrop = (e) => {
+  const files = Array.from(e.dataTransfer.files)
+  handleFiles(files)
+  isDragging.value = false
+}
+
+const handleFileSelect = (e) => {
+  const files = Array.from(e.target.files)
+  handleFiles(files)
+}
+
+const handleFiles = (files) => {
+  const validFiles = files.filter(file => 
+    file.type.startsWith('audio/') || file.type.startsWith('video/')
+  )
+
+  validFiles.forEach(file => {
+    uploadedFiles.value.push({
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      progress: 0,
+      file
+    })
+    tracksMetadata.value.push(createTrackTemplate())
+    
+    // Simulate upload progress
+    const interval = setInterval(() => {
+      const index = uploadedFiles.value.findIndex(f => f.name === file.name)
+      if (index !== -1) {
+        uploadedFiles.value[index].progress += 10
+        if (uploadedFiles.value[index].progress >= 100) {
+          clearInterval(interval)
+        }
+      }
+    }, 200)
+  })
+}
+
+const removeFile = (index) => {
+  uploadedFiles.value.splice(index, 1)
+  tracksMetadata.value.splice(index, 1)
+  if (currentTrackIndex.value >= uploadedFiles.value.length) {
+    currentTrackIndex.value = Math.max(0, uploadedFiles.value.length - 1)
+  }
+}
+
+const formatFileSize = (size) => {
+  const units = ['B', 'KB', 'MB', 'GB']
+  let i = 0
+  while (size >= 1024 && i < units.length - 1) {
+    size /= 1024
+    i++
+  }
+  return `${size.toFixed(1)} ${units[i]}`
+}
+
+const handleVocalChange = (key) => {
+  if (key === 'instrumental' && currentTrack.value.vocals.instrumental) {
+    Object.keys(currentTrack.value.vocals).forEach(k => {
+      if (k !== 'instrumental') currentTrack.value.vocals[k] = false
+    })
+  } else if (key !== 'instrumental' && currentTrack.value.vocals[key]) {
+    currentTrack.value.vocals.instrumental = false
+  }
+}
+
+const previousTrack = () => {
+  if (currentTrackIndex.value > 0) currentTrackIndex.value--
+}
+
+const nextTrack = () => {
+  if (currentTrackIndex.value < uploadedFiles.value.length - 1) currentTrackIndex.value++
+}
+
+const previousStep = () => {
+  if (currentStep.value > 1) currentStep.value--
+}
+
+const nextStep = () => {
+  if (currentStep.value < steps.length) currentStep.value++
+}
+
+const submitUpload = () => {
+  console.log('Submitting upload:', {
+    uploadType: uploadType.value,
+    albumDetails: uploadType.value === 'album' ? albumDetails.value : null,
+    tracks: tracksMetadata.value
+  })
+}
+</script>
+
 <template>
     <div class="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-6">
       <div class="max-w-4xl mx-auto">
@@ -65,24 +296,11 @@
           <!-- Album Details -->
           <div v-if="uploadType === 'album'" class="mb-8">
             <div class="grid grid-cols-2 gap-6 mb-6">
-              <div>
-                <label class="block mb-2">Album Name*</label>
-                <input 
-                  v-model="albumDetails.name"
-                  type="text"
-                  class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-                  placeholder="Enter album name"
-                />
-              </div>
-              <div>
-                <label class="block mb-2">Album Description</label>
-                <textarea
-                  v-model="albumDetails.description"
-                  class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-                  placeholder="Enter album description"
-                  rows="3"
-                ></textarea>
-              </div>
+              <edit-form
+                v-else
+                :object-type="objectType"
+                :object="object"
+              />
             </div>
             
             <!-- Album Cover Upload -->
@@ -449,234 +667,3 @@
       </div>
     </div>
   </template>
-  
-  <script setup>
-  import { ref, computed } from 'vue'
-  
-  // Steps configuration
-  const steps = [
-    { number: 1, title: 'Choose Type' },
-    { number: 2, title: 'Upload Content' },
-    { number: 3, title: 'Track Details' }
-  ]
-  
-  // State
-  const currentStep = ref(1)
-  const uploadType = ref('')
-  const isDragging = ref(false)
-  const isDraggingCover = ref(false)
-  const uploadedFiles = ref([])
-  const currentTrackIndex = ref(0)
-  
-  // Album details
-  const albumDetails = ref({
-    name: '',
-    description: '',
-    cover: null,
-    coverPreview: null
-  })
-  
-  // Options for metadata
-  const categories = [
-    'Studio production',
-    'Music video',
-    'Meditation',
-    'DJ set',
-    'Behind the scenes',
-    'Concert',
-    'Live recording',
-    'Video lesson'
-  ]
-  
-  const genres = ['Classical', 'Kirtan', 'Mantra', 'Meditation', 'World']
-  const instruments = ['Harmonium', 'Tabla', 'Guitar', 'Sitar', 'Flute']
-  const languages = ['Sanskrit', 'Hindi', 'English', 'Bengali']
-  const traditions = ['Bhakti', 'Vedic', 'Buddhist', 'Sufi']
-  const deities = ['Krishna', 'Shiva', 'Devi', 'Ganesh']
-  const intentions = ['Healing', 'Peace', 'Love', 'Devotion']
-  const moods = ['Peaceful', 'Energetic', 'Meditative', 'Joyful']
-  const tags = ['Sacred', 'Spiritual', 'Traditional', 'Modern']
-  const countries = ['India', 'USA', 'UK', 'Australia']
-  
-  const vocalOptions = {
-    instrumental: 'Instrumental',
-    male: 'Male',
-    female: 'Female',
-    choir: 'Choir',
-    circle: 'Circle'
-  }
-  
-  // Track template
-  const createTrackTemplate = () => ({
-    name: '',
-    description: '',
-    category: '',
-    genre: '',
-    featuredInstruments: [],
-    primaryInstrument: '',
-    languages: [],
-    traditions: [],
-    deities: [],
-    intentions: [],
-    moods: [],
-    tags: [],
-    vocals: {
-      instrumental: false,
-      male: false,
-      female: false,
-      choir: false,
-      circle: false
-    },
-    recordLabel: '',
-    recordingCountry: '',
-    releaseDate: '',
-    uploadedBy: 'Current User',
-    uploadedTime: new Date().toISOString()
-  })
-  
-  // Tracks metadata
-  const tracksMetadata = ref([])
-  
-  // Computed
-  const currentTrack = computed({
-    get: () => tracksMetadata.value[currentTrackIndex.value] || createTrackTemplate(),
-    set: (value) => {
-      tracksMetadata.value[currentTrackIndex.value] = value
-    }
-  })
-  
-  const canProceed = computed(() => {
-    if (currentStep.value === 1) return !!uploadType.value
-    if (currentStep.value === 2) {
-      if (uploadType.value === 'album') {
-        return !!albumDetails.value.name && !!albumDetails.value.cover && uploadedFiles.value.length > 0
-      }
-      return uploadedFiles.value.length > 0
-    }
-    return true
-  })
-  
-  const isValid = computed(() => {
-    // Add validation logic for the final step
-    return true
-  })
-  
-  // Methods
-  const selectUploadType = (type) => {
-    uploadType.value = type
-  }
-  
-  const handleCoverDrop = (e) => {
-    const file = e.dataTransfer.files[0]
-    if (file && file.type.startsWith('image/')) {
-      handleCoverFile(file)
-    }
-    isDraggingCover.value = false
-  }
-  
-  const handleCoverSelect = (e) => {
-    const file = e.target.files[0]
-    if (file) handleCoverFile(file)
-  }
-  
-  const handleCoverFile = (file) => {
-    albumDetails.value.cover = file
-    albumDetails.value.coverPreview = URL.createObjectURL(file)
-  }
-  
-  const removeCover = () => {
-    albumDetails.value.cover = null
-    albumDetails.value.coverPreview = null
-  }
-  
-  const handleContentDrop = (e) => {
-    const files = Array.from(e.dataTransfer.files)
-    handleFiles(files)
-    isDragging.value = false
-  }
-  
-  const handleFileSelect = (e) => {
-    const files = Array.from(e.target.files)
-    handleFiles(files)
-  }
-  
-  const handleFiles = (files) => {
-    const validFiles = files.filter(file => 
-      file.type.startsWith('audio/') || file.type.startsWith('video/')
-    )
-  
-    validFiles.forEach(file => {
-      uploadedFiles.value.push({
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        progress: 0,
-        file
-      })
-      tracksMetadata.value.push(createTrackTemplate())
-      
-      // Simulate upload progress
-      const interval = setInterval(() => {
-        const index = uploadedFiles.value.findIndex(f => f.name === file.name)
-        if (index !== -1) {
-          uploadedFiles.value[index].progress += 10
-          if (uploadedFiles.value[index].progress >= 100) {
-            clearInterval(interval)
-          }
-        }
-      }, 200)
-    })
-  }
-  
-  const removeFile = (index) => {
-    uploadedFiles.value.splice(index, 1)
-    tracksMetadata.value.splice(index, 1)
-    if (currentTrackIndex.value >= uploadedFiles.value.length) {
-      currentTrackIndex.value = Math.max(0, uploadedFiles.value.length - 1)
-    }
-  }
-  
-  const formatFileSize = (size) => {
-    const units = ['B', 'KB', 'MB', 'GB']
-    let i = 0
-    while (size >= 1024 && i < units.length - 1) {
-      size /= 1024
-      i++
-    }
-    return `${size.toFixed(1)} ${units[i]}`
-  }
-  
-  const handleVocalChange = (key) => {
-    if (key === 'instrumental' && currentTrack.value.vocals.instrumental) {
-      Object.keys(currentTrack.value.vocals).forEach(k => {
-        if (k !== 'instrumental') currentTrack.value.vocals[k] = false
-      })
-    } else if (key !== 'instrumental' && currentTrack.value.vocals[key]) {
-      currentTrack.value.vocals.instrumental = false
-    }
-  }
-  
-  const previousTrack = () => {
-    if (currentTrackIndex.value > 0) currentTrackIndex.value--
-  }
-  
-  const nextTrack = () => {
-    if (currentTrackIndex.value < uploadedFiles.value.length - 1) currentTrackIndex.value++
-  }
-  
-  const previousStep = () => {
-    if (currentStep.value > 1) currentStep.value--
-  }
-  
-  const nextStep = () => {
-    if (currentStep.value < steps.length) currentStep.value++
-  }
-  
-  const submitUpload = () => {
-    console.log('Submitting upload:', {
-      uploadType: uploadType.value,
-      albumDetails: uploadType.value === 'album' ? albumDetails.value : null,
-      tracks: tracksMetadata.value
-    })
-  }
-  </script>
