@@ -5,6 +5,13 @@ from . import models
 
 @admin.register(models.Tag)
 class TagAdmin(admin.ModelAdmin):
+    list_display = ["name", "category", "creation_date"]
+    search_fields = ["name"]
+    list_select_related = True
+
+
+@admin.register(models.TagCategory)
+class TagCategoryAdmin(admin.ModelAdmin):
     list_display = ["name", "creation_date"]
     search_fields = ["name"]
     list_select_related = True

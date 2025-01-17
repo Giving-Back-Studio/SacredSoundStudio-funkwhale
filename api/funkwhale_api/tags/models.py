@@ -11,8 +11,19 @@ from django.utils.translation import gettext_lazy as _
 TAG_REGEX = re.compile(r"^((\w+)([\d_]*))$")
 
 
+class TagCategory(models.Model):
+    name = CICharField(max_length=100, unique=True)
+    creation_date = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.name
+
+
 class Tag(models.Model):
     name = CICharField(max_length=100, unique=True)
+    category = models.ForeignKey(
+        TagCategory, related_name="tags", on_delete=models.CASCADE, null=True, blank=True
+    )
     creation_date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
