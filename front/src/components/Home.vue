@@ -22,15 +22,10 @@ const navigateToAuth = () => {
     store.commit('ui/setIsArtist', true)
     logger.log('Navigating to /auth...')
     
-    // Force navigation to happen in the next tick
-    setTimeout(() => {
-      router.push({ 
-        path: '/auth',
-        replace: true
-      }).catch(error => {
-        logger.error('Navigation error:', error)
-      })
-    }, 0)
+    // Use router.replace instead of push and remove setTimeout
+    router.replace('/auth').catch(error => {
+      logger.error('Navigation error:', error)
+    })
   } catch (error) {
     logger.error('Navigation error:', error)
   }

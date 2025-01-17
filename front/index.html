@@ -66,6 +66,13 @@
       }
     }
   </style>
+  <script>
+    const hiddenRoutes = ['/', '/create', '/auth']
+    const shouldHideSidebar = hiddenRoutes.includes(window.location.pathname)
+    if (shouldHideSidebar) {
+      document.getElementById('fake-sidebar')?.classList.add('hidden')
+    }
+  </script>
 </head>
 
 <body id="body">
