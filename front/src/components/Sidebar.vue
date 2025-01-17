@@ -123,10 +123,18 @@ watchEffect(() => {
 onMounted(() => {
   document.getElementById('fake-sidebar')?.classList.add('loaded')
 })
+
+const shouldHideSidebar = computed(() => {
+  const hiddenRoutes = ['/', '/create', '/auth']
+  return hiddenRoutes.includes(route.path)
+})
 </script>
 
 <template>
-  <aside :class="['ui', 'vertical', 'left', 'visible', 'wide', {'collapsed': isCollapsed}, 'sidebar', 'component-sidebar']">
+  <aside
+    v-if="!shouldHideSidebar"
+    :class="['ui', 'vertical', 'left', 'visible', 'wide', {'collapsed': isCollapsed}, 'sidebar', 'component-sidebar']"
+  >
     <header class="ui basic segment header-wrapper">
       <div class="spacer"></div>
       <nav class="top ui compact right aligned inverted text menu">
