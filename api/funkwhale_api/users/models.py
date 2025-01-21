@@ -187,6 +187,7 @@ class User(AbstractUser):
         blank=True,
     )
     settings = JSONField(default=None, null=True, blank=True, max_length=50000)
+    is_artist = models.BooleanField(default=False)
 
     objects = UserManager()
 
