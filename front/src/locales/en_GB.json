@@ -310,11 +310,9 @@
         "albums": "Albums",
         "artists": "Artists",
         "browse": "Browse",
-        "channels": "Channels",
         "createAccount": "Create account",
         "favorites": "Favourites",
         "home": "Home",
-        "library": "Library",
         "login": "Login",
         "moderation": "Moderation",
         "playlists": "Playlists",
@@ -323,7 +321,12 @@
         "search": "Search",
         "settings": "Settings",
         "switchInstance": "Switch instance",
-        "users": "Users"
+        "users": "Users",
+        "library": "Library",
+        "myContent": "My Content",
+        "channels": "Channels",
+        "adminland": "AdminLand",
+        "upload": "Upload"
       }
     },
     "admin": {
