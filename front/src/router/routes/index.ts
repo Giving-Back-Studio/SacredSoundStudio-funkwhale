@@ -85,6 +85,24 @@ export default [
     beforeEnter: requireLoggedIn()
   },
   ...content,
+  {
+    path: '/mycontent',
+    name: 'content.me',
+    component: () => import('~/views/content/MyContent.vue'),
+    beforeEnter: requireLoggedIn(),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/mychannel',
+    name: 'channels.me',
+    component: () => import('~/views/channels/MyChannel.vue'),
+    beforeEnter: requireLoggedIn(),
+    meta: {
+      requiresAuth: true
+    }
+  },
   ...manage,
   ...library,
   {
