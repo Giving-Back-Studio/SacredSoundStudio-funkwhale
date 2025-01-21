@@ -35,8 +35,6 @@ const themes = useThemeList()
 const { t, locale: i18nLocale } = useI18n()
 
 const route = useRoute()
-const isCollapsed = ref(true)
-watch(() => route.path, () => (isCollapsed.value = true))
 
 const additionalNotifications = computed(() => store.getters['ui/additionalNotifications'])
 const logoUrl = computed(() => store.state.auth.authenticated ? 'library.index' : 'index')
@@ -53,47 +51,13 @@ const labels = computed(() => ({
   administration: t('components.Sidebar.label.administration')
 }))
 
-type SidebarMenuTabs = 'explore' | 'myLibrary'
-const expanded = ref<SidebarMenuTabs>('explore')
-
-const ROUTE_MAPPINGS: Record<SidebarMenuTabs, RouteRecordName[]> = {
-  explore: [
-    'search',
-    'library.index',
-    'library.podcasts.browse',
-    'library.albums.browse',
-    'library.albums.detail',
-    'library.artists.browse',
-    'library.artists.detail',
-    'library.tracks.detail',
-    'library.playlists.browse',
-    'library.playlists.detail',
-    'library.radios.browse',
-    'library.radios.detail'
-  ],
-  myLibrary: [
-    'library.me',
-    'library.albums.me',
-    'library.artists.me',
-    'library.playlists.me',
-    'library.radios.me',
-    'favorites'
-  ]
+const ROUTE_MAPPINGS = {
+  library: ['library.index', 'library.albums.browse', 'library.artists.browse', 'library.tracks.browse'],
+  myContent: ['library.me', 'library.albums.me', 'library.artists.me', 'library.playlists.me'],
+  myChannel: ['channels.me', 'channels.detail'],
+  adminland: ['manage.library.edits', 'manage.moderation.reports.list', 'manage.users.users.list'],
+  upload: ['content.index']
 }
-
-watchEffect(() => {
-  if (ROUTE_MAPPINGS.explore.includes(route.name as RouteRecordName)) {
-    expanded.value = 'explore'
-    return
-  }
-
-  if (ROUTE_MAPPINGS.myLibrary.includes(route.name as RouteRecordName)) {
-    expanded.value = 'myLibrary'
-    return
-  }
-
-  expanded.value = store.state.auth.authenticated ? 'myLibrary' : 'explore'
-})
 
 const moderationNotifications = computed(() =>
   store.state.ui.notifications.pendingReviewEdits
@@ -133,7 +97,7 @@ const shouldHideSidebar = computed(() => {
 <template>
   <aside
     v-if="!shouldHideSidebar"
-    :class="['ui', 'vertical', 'left', 'visible', 'wide', {'collapsed': isCollapsed}, 'sidebar', 'component-sidebar']"
+    :class="['ui', 'vertical', 'left', 'visible', 'wide', 'sidebar', 'component-sidebar']"
   >
     <header class="ui basic segment header-wrapper">
       <div class="spacer"></div>
@@ -338,8 +302,7 @@ const shouldHideSidebar = computed(() => {
         </semantic-modal>
         <div class="item collapse-button-wrapper">
           <button
-            :class="['ui', 'basic', 'big', {'vibrant': !isCollapsed}, 'inverted icon', 'collapse', 'button']"
-            @click="isCollapsed = !isCollapsed"
+            :class="['ui', 'basic', 'big', 'inverted icon', 'collapse', 'button']"
           >
             <i class="sidebar icon" />
           </button>
@@ -347,7 +310,6 @@ const shouldHideSidebar = computed(() => {
       </nav>
     </header>
     <div class="ui basic search-wrapper segment">
-      <search-bar @search="isCollapsed = false" />
     </div>
     <div
       v-if="!$store.state.auth.authenticated"
@@ -388,142 +350,44 @@ const shouldHideSidebar = computed(() => {
           role="navigation"
           :aria-label="labels.mainMenu"
         >
-          <div :class="[{ collapsed: expanded !== 'explore' }, 'collapsible item']">
-            <h2
-              class="header"
-              role="button"
-              tabindex="0"
-              @click="expanded = 'explore'"
-              @focus="expanded = 'explore'"
-            >
-              {{ $t('components.Sidebar.header.explore') }}
-              <i
-                v-if="expanded !== 'explore'"
-                class="angle right icon"
-              />
-            </h2>
-            <div class="menu">
-              <router-link
-                class="item"
-                :to="{name: 'search'}"
-              >
-                <i class="search icon" />
-                {{ $t('components.Sidebar.link.search') }}
-              </router-link>
-              <router-link
-                class="item"
-                :to="{name: 'library.index'}"
-                active-class="_active"
-              >
-                <i class="music icon" />
-                {{ $t('components.Sidebar.link.browse') }}
-              </router-link>
-              <router-link
-                class="item"
-                :to="{name: 'library.podcasts.browse'}"
-              >
-                <i class="podcast icon" />
-                {{ $t('components.Sidebar.link.podcasts') }}
-              </router-link>
-              <router-link
-                class="item"
-                :to="{name: 'library.albums.browse'}"
-              >
-                <i class="compact disc icon" />
-                {{ $t('components.Sidebar.link.albums') }}
-              </router-link>
-              <router-link
-                class="item"
-                :to="{name: 'library.artists.browse'}"
-              >
-                <i class="user icon" />
-                {{ $t('components.Sidebar.link.artists') }}
-              </router-link>
-              <router-link
-                class="item"
-                :to="{name: 'library.playlists.browse'}"
-              >
-                <i class="list icon" />
-                {{ $t('components.Sidebar.link.playlists') }}
-              </router-link>
-              <router-link
-                class="item"
-                :to="{name: 'library.radios.browse'}"
-              >
-                <i class="feed icon" />
-                {{ $t('components.Sidebar.link.radios') }}
-              </router-link>
-            </div>
-          </div>
-          <div
-            v-if="$store.state.auth.authenticated"
-            :class="[{ collapsed: expanded !== 'myLibrary' }, 'collapsible item']"
+          <router-link
+            class="item"
+            :to="{name: 'index'}"
           >
-            <h3
-              class="header"
-              role="button"
-              tabindex="0"
-              @click="expanded = 'myLibrary'"
-              @focus="expanded = 'myLibrary'"
-            >
-              {{ $t('components.Sidebar.header.library') }}
-              <i
-                v-if="expanded !== 'myLibrary'"
-                class="angle right icon"
-              />
-            </h3>
-            <div class="menu">
-              <router-link
-                class="item"
-                :to="{name: 'library.me'}"
-              >
-                <i class="music icon" />
-                {{ $t('components.Sidebar.link.browse') }}
-              </router-link>
-              <router-link
-                class="item"
-                :to="{name: 'library.albums.me'}"
-              >
-                <i class="compact disc icon" />
-                {{ $t('components.Sidebar.link.albums') }}
-              </router-link>
-              <router-link
-                class="item"
-                :to="{name: 'library.artists.me'}"
-              >
-                <i class="user icon" />
-                {{ $t('components.Sidebar.link.artists') }}
-              </router-link>
-              <router-link
-                class="item"
-                :to="{name: 'library.playlists.me'}"
-              >
-                <i class="list icon" />
-                {{ $t('components.Sidebar.link.playlists') }}
-              </router-link>
-              <router-link
-                class="item"
-                :to="{name: 'library.radios.me'}"
-              >
-                <i class="feed icon" />
-                {{ $t('components.Sidebar.link.radios') }}
-              </router-link>
-              <router-link
-                class="item"
-                :to="{name: 'favorites'}"
-              >
-                <i class="heart icon" />
-                {{ $t('components.Sidebar.link.favorites') }}
-              </router-link>
-            </div>
-          </div>
+            {{ $t('components.Sidebar.link.library') }}
+          </router-link>
+
           <router-link
             v-if="$store.state.auth.authenticated"
-            class="header item"
-            :to="{name: 'subscriptions'}"
+            class="item"
+            :to="{ path: '/mycontent' }"
           >
-            {{ $t('components.Sidebar.link.channels') }}
+            {{ $t('components.Sidebar.link.myContent') }}
           </router-link>
+
+          <router-link
+            v-if="$store.state.auth.authenticated"
+            class="item"
+            :to="{ path: '/mychannel' }"
+          >
+            {{ $t('components.Sidebar.link.myChannel') }}
+          </router-link>
+
+          <router-link
+            v-if="$store.state.auth.availablePermissions['settings']"
+            class="item"
+            :to="{ path: '/adminland' }"
+          >
+            {{ $t('components.Sidebar.link.adminland') }}
+          </router-link>
+
+          <router-link
+            v-if="$store.state.auth.authenticated"
+            class="item upload-button"
+            :to="{ path: '/upload' }"
+          >
+            {{ $t('components.Sidebar.link.upload') }}
+          </router-link> 
         </nav>
       </section>
     </nav>
