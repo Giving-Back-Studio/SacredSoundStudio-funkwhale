@@ -211,6 +211,7 @@ class UserReadSerializer(serializers.ModelSerializer):
             "date_joined",
             "privacy_level",
             "avatar",
+            "artist",
         ]
 
     def get_permissions(self, o):

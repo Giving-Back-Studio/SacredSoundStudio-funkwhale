@@ -12,19 +12,30 @@ TAG_REGEX = re.compile(r"^((\w+)([\d_]*))$")
 
 
 class TagCategory(models.Model):
-    name = CICharField(max_length=100, unique=True)
+    name = CICharField(max_length=100)
     creation_date = models.DateTimeField(default=timezone.now)
+    max_tags = models.PositiveIntegerField(default=5)
+    required = models.BooleanField(default=False)
+    content_type = models.ForeignKey(
+        ContentType, null=True, on_delete=models.SET_NULL,
+    )
+
+    class Meta:
+        unique_together = ("name", "content_type")
 
     def __str__(self):
         return self.name
 
 
 class Tag(models.Model):
-    name = CICharField(max_length=100, unique=True)
+    name = CICharField(max_length=100)
     category = models.ForeignKey(
         TagCategory, related_name="tags", on_delete=models.CASCADE, null=True, blank=True
     )
     creation_date = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        unique_together = ("name", "category")
 
     def __str__(self):
         return self.name

@@ -11,6 +11,7 @@ from funkwhale_api.tags import views as tags_views
 router = common_routers.OptionalSlashRouter()
 router.register(r"activity", activity_views.ActivityViewSet, "activity")
 router.register(r"tags", tags_views.TagViewSet, "tags")
+router.register(r"tag-categories", tags_views.TagCategoryViewSet, "tag-categories")
 router.register(r"plugins", common_views.PluginViewSet, "plugins")
 router.register(r"tracks", views.TrackViewSet, "tracks")
 router.register(r"uploads", views.UploadViewSet, "uploads")

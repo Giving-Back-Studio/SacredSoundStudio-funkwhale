@@ -19,7 +19,23 @@ class TagFilter(filters.FilterSet):
 
     class Meta:
         model = models.Tag
-        fields = {"name": ["exact", "startswith"]}
+        fields = {"name": ["exact", "startswith"], "category__name": ["exact"]}
+
+
+class TagCategoryFilter(filters.FilterSet):
+    q = fields.SearchFilter(search_fields=["name"])
+    ordering = django_filters.OrderingFilter(
+        fields=(
+            ("name", "name"),
+            ("creation_date", "creation_date"),
+            ("content_type", "content_type"),
+            ("__size", "length"),
+        )
+    )
+
+    class Meta:
+        model = models.TagCategory
+        fields = {"name": ["exact"], "content_type__model": ["exact"]}
 
 
 def get_by_similar_tags(qs, tags):

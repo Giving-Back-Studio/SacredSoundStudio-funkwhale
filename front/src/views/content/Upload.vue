@@ -3,12 +3,15 @@ import { ref, computed } from 'vue'
 import axios from 'axios'
 
 import { useStore } from '~/store'
+import useLogger from '~/composables/useLogger'
 
 import AttachmentInput from '~/components/common/AttachmentInput.vue'
+import TagCategorySelector from '~/components/library/TagCategorySelector.vue'
+import FileUploadWidget from '~/components/library/FileUploadWidget.vue'
 
 
 const store = useStore();
-
+const logger = useLogger();
 
 // Steps configuration
 const steps = [
@@ -24,6 +27,7 @@ const isDragging = ref(false)
 const isDraggingCover = ref(false)
 const uploadedFiles = ref([])
 const currentTrackIndex = ref(0)
+const upload = ref()
 
 console.log(store.state.auth.user);
 
@@ -38,23 +42,7 @@ const albumDetails = ref({
 const createTrackTemplate = () => ({
   name: '',
   description: '',
-  category: '',
-  genre: '',
-  featuredInstruments: [],
-  primaryInstrument: '',
-  languages: [],
-  traditions: [],
-  deities: [],
-  intentions: [],
-  moods: [],
-  tags: [],
-  vocals: {
-    instrumental: false,
-    male: false,
-    female: false,
-    choir: false,
-    circle: false
-  },
+  tags: {},
   recordLabel: '',
   recordingCountry: '',
   releaseDate: '',
@@ -186,8 +174,7 @@ const submitUpload = async () => {
 
   if (uploadType.value === 'album') {
     try {
-      de
-      albumDetails.value.artist = store.state.auth.profile.id;
+      albumDetails.value.artist = store.state.auth.profile.artist;
       console.log('Uploading album:', albumDetails.value);
       const response = await axios.post('albums', albumDetails.value);
     } catch (error) {
@@ -196,6 +183,52 @@ const submitUpload = async () => {
     }
   }
 }
+
+const trackCategories = ref([])
+
+const fetchTrackCategories = async () => {
+  const params = {
+    content_type__model: 'track'
+  }
+
+  const measureLoading = logger.time('Fetching track categories')
+  try {
+    const response = await axios.get('tag-categories/', {
+      params,
+      paramsSerializer: {
+        indexes: null
+      }
+    })
+
+    trackCategories.value = response.data.results
+  } catch (error) {
+    useErrorHandler(error)
+    trackCategories.value = undefined
+  } finally {
+    measureLoading()
+  }
+}
+fetchTrackCategories()
+
+const library = ref()
+const fetchLibrary = async () => {
+  const measureLoading = logger.time('Fetching library')
+  try {
+    const response = await axios.get('libraries/?scope=me')
+    library.value = response.data.results[0]
+  } catch (error) {
+    useErrorHandler(error)
+    library.value = undefined
+  } finally {
+    measureLoading()
+  }
+}
+fetchLibrary()
+
+const uploadData = computed(() => ({
+  library: library.uuid
+}))
+
 </script>
 
 <template>
@@ -307,6 +340,11 @@ const submitUpload = async () => {
           <!-- Content Upload -->
           <div>
             <label class="block mb-2">Upload Content*</label>
+            <file-upload-widget
+                  ref="upload"
+                  v-model="uploadedFiles"
+                  :class="['ui', 'icon', 'basic', 'button']"
+                  :data="uploadData">
             <div 
               @dragover.prevent
               @drop.prevent="handleContentDrop"
@@ -317,7 +355,6 @@ const submitUpload = async () => {
             >
               <div v-if="uploadedFiles.length === 0">
                 <i class="image icon" />
-                <p class="text-gray-400 mb-4">Drag and drop your files here or click to browse</p>
                 <div class="bg-gray-700 rounded-lg p-4 mb-4 mx-auto max-w-lg">
                   <h4 class="font-semibold mb-2">File Requirements:</h4>
                   <div class="text-sm text-gray-400 text-left">
@@ -334,20 +371,11 @@ const submitUpload = async () => {
                     </ul>
                   </div>
                 </div>
-                <input 
-                  type="file"
-                  @change="handleFileSelect"
-                  accept="audio/wav, audio/flac, audio/aiff, video/mp4"
-                  multiple
-                  class="hidden"
-                  ref="fileInput"
-                />
-                <button 
-                  @click="$refs.fileInput.click()"
-                  class="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
-                >
-                  Browse Files
-                </button>
+
+                  <button
+                    class="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">
+                    Browse Files
+                  </button>
               </div>
               <div v-else class="space-y-4">
                 <div 
@@ -379,14 +407,12 @@ const submitUpload = async () => {
                     </button>
                   </div>
                 </div>
-                <button 
-                  @click="$refs.fileInput.click()"
-                  class="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
-                >
+                <button class="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">
                   Add More Files
                 </button>
               </div>
             </div>
+            </file-upload-widget>
           </div>
         </div>
   
@@ -400,7 +426,7 @@ const submitUpload = async () => {
                 :disabled="currentTrackIndex === 0"
                 class="p-2 rounded-lg hover:bg-gray-700 disabled:opacity-50"
               >
-                <i class="left icon" />
+                <i class="left arrow icon" />
               </button>
               <span>Track {{ currentTrackIndex + 1 }} of {{ uploadedFiles.length }}</span>
               <button 
@@ -408,7 +434,7 @@ const submitUpload = async () => {
                 :disabled="currentTrackIndex === uploadedFiles.length - 1"
                 class="p-2 rounded-lg hover:bg-gray-700 disabled:opacity-50"
               >
-                <i class="right icon" />
+                <i class="right arrow icon" />
               </button>
             </div>
           </div>
@@ -416,114 +442,46 @@ const submitUpload = async () => {
           <!-- Track Form -->
           <div class="grid grid-cols-2 gap-6">
             <!-- Basic Info -->
-            <div class="space-y-4">
-              <div>
-                <label class="block mb-2">Track Name*</label>
-                <input 
-                  v-model="currentTrack.name"
-                  type="text"
-                  class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-                  placeholder="Enter track name"
-                />
-              </div>
-              <div>
-                <label class="block mb-2">Description</label>
-                <textarea
-                  v-model="currentTrack.description"
-                  class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-                  placeholder="Enter track description"
-                  rows="3"
-                ></textarea>
-              </div>
-              <div>
-                <label class="block mb-2">Category*</label>
-                <select 
-                  v-model="currentTrack.category"
-                  class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-                >
-                  <option value="">Select category</option>
-                  <option v-for="category in categories" :key="category" :value="category">
-                    {{ category }}
-                  </option>
-                </select>
-              </div>
+            <div>
+              <label class="block mb-2">Track Name *</label>
+              <input 
+                v-model="currentTrack.name"
+                type="text"
+                class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
+                placeholder="Enter track name"
+              />
+            </div>
+
+            <div>
+              <label class="block mb-2">Description</label>
+              <textarea
+                v-model="currentTrack.description"
+                class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
+                placeholder="Enter track description"
+                rows="3"
+              ></textarea>
+            </div>
+            
+            <!-- Additional Details -->
+            <div>
+              <label class="block mb-2">Record Label</label>
+              <input 
+                v-model="currentTrack.recordLabel"
+                type="text"
+                class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
+                placeholder="Enter record label"
+              />
             </div>
   
             <!-- Metadata -->
-            <div class="space-y-4">
-              <div>
-                <label class="block mb-2">Genre*</label>
-                <!-- need tag component -->
-              </div>
-              <div>
-                <label class="block mb-2">Featured Instruments*</label>
-                <!-- need tag component -->
-              </div>
-              <div>
-                <label class="block mb-2">Primary Instrument</label>
-                <!-- need tag component -->
-              </div>
-            </div>
-  
-            <!-- Additional Metadata -->
-            <div class="col-span-2 grid grid-cols-2 gap-6">
-              <div>
-                <label class="block mb-2">Language*</label>
-                <!-- need tag component -->
-              </div>
-              <div>
-                <label class="block mb-2">Tradition</label>
-                <!-- need tag component -->
-              </div>
-              <div>
-                <label class="block mb-2">Deity</label>
-                <!-- need tag component -->
-              </div>
-              <div>
-                <label class="block mb-2">Intention</label>
-                <!-- need tag component -->
-              </div>
-              <div>
-                <label class="block mb-2">Mood</label>
-                <!-- need tag component -->
-              </div>
-              <div>
-                <label class="block mb-2">Tags (max 5)</label>
-                <!-- need tag component -->
-              </div>
-            </div>
-  
-            <!-- Vocals Section -->
-            <div class="col-span-2">
-              <h3 class="text-lg font-semibold mb-4">Vocals*</h3>
-              <div class="grid grid-cols-3 gap-4">
-                <!-- need tag component here-->>
-              </div>
-            </div>
-  
-            <!-- Additional Details -->
-            <div class="col-span-2 grid grid-cols-2 gap-6">
-              <div>
-                <label class="block mb-2">Record Label</label>
-                <input 
-                  v-model="currentTrack.recordLabel"
-                  type="text"
-                  class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-                  placeholder="Enter record label"
-                />
-              </div>
-              <div>
-                <label class="block mb-2">Recording Country</label>
-                <!-- need tag component -->
-              </div>
-              <div>
-                <label class="block mb-2">Release Date</label>
-                <input 
-                  v-model="currentTrack.releaseDate"
-                  type="date"
-                  class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-                />
-              </div>
+            <div
+              v-for="category in trackCategories">
+              <label class="block mb-2">{{ category.name }}{{ category.required ? ' *' : '' }}</label>
+              <tag-category-selector
+                v-model="currentTrack.tags[category.name]"
+                :category="category.name"
+                :maxTags="category.max_tags"
+                class="w-full" />
             </div>
           </div>
         </div>

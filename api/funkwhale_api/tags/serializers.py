@@ -4,6 +4,13 @@ from rest_framework import serializers
 from . import models
 
 
+
+class TagCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.TagCategory
+        fields = ["name", "creation_date", "max_tags", "required"]
+
+
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Tag

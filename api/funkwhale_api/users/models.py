@@ -188,6 +188,13 @@ class User(AbstractUser):
     )
     settings = JSONField(default=None, null=True, blank=True, max_length=50000)
     is_artist = models.BooleanField(default=False)
+    artist = models.OneToOneField(
+        "music.Artist",
+        related_name="user",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
 
     objects = UserManager()
 

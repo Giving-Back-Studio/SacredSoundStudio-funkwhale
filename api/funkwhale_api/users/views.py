@@ -52,16 +52,12 @@ class RegisterView(registration_views.RegisterView):
             artist.save()
             library = Library.objects.create(
                 name=user.username,
-                actor=user.actor
+                actor=user.actor,
+                privacy_level="instance"
             )
             library.save()
-            channel = Channel.objects.create(
-                artist=artist,
-                attributed_to=user.actor,
-                actor=user.actor,
-                library=library
-            )
-            channel.save()
+            user.artist = artist
+            user.save()
 
         return user
 
