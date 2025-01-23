@@ -14,6 +14,8 @@ from rest_framework.response import Response
 from funkwhale_api.common import authentication, preferences, throttling
 
 from . import models, serializers, tasks
+from funkwhale_api.music.models import Artist, Library
+from funkwhale_api.audio.models import Channel
 
 
 @extend_schema_view(post=extend_schema(operation_id="register", methods=["post"]))
@@ -40,6 +42,22 @@ class RegisterView(registration_views.RegisterView):
             authentication.send_email_confirmation(self.request, user)
         if user.invitation:
             user.invitation.set_invited_user(user)
+
+        if serializer.validated_data.get("is_artist"):
+            artist = Artist.objects.create(
+                name=user.username,
+                attributed_to=user.actor,
+                content_category="music"
+            )
+            artist.save()
+            library = Library.objects.create(
+                name=user.username,
+                actor=user.actor,
+                privacy_level="instance"
+            )
+            library.save()
+            user.artist = artist
+            user.save()
 
         return user
 

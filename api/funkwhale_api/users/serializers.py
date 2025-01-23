@@ -49,6 +49,7 @@ class RegisterSerializer(RS):
     invitation = serializers.CharField(
         required=False, allow_null=True, allow_blank=True
     )
+    is_artist = serializers.BooleanField(required=False, allow_null=True)
 
     def __init__(self, *args, **kwargs):
         self.approval_enabled = preferences.get("moderation__signup_approval_enabled")
@@ -107,6 +108,9 @@ class RegisterSerializer(RS):
         if self.validated_data.get("invitation"):
             user.invitation = self.validated_data.get("invitation")
             update_fields.append("invitation")
+        if self.validated_data.get("is_artist"):
+            user.is_artist = self.validated_data.get("is_artist")
+            update_fields.append("is_artist")
         user.save(update_fields=update_fields)
         if user_request:
             common_utils.on_commit(
@@ -202,10 +206,12 @@ class UserReadSerializer(serializers.ModelSerializer):
             "email",
             "is_staff",
             "is_superuser",
+            "is_artist",
             "permissions",
             "date_joined",
             "privacy_level",
             "avatar",
+            "artist",
         ]
 
     def get_permissions(self, o):

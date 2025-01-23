@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { BackendError, Channel } from '~/types'
-
+// example
 import { computed, watch, ref } from 'vue'
 import axios from 'axios'
 
