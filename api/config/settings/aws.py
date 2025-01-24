@@ -70,4 +70,4 @@ PROXY_MEDIA = False
 
 TYPESENSE_HOST = "typesense"
 
-EMAIL_BACKEND = 'django_ses.SESBackend'
+#EMAIL_BACKEND = 'django_ses.SESBackend'
