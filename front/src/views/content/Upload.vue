@@ -38,8 +38,6 @@ const showSuccessModal = ref(false);
 
 console.log(store.state.auth.user);
 
-const supportedExtensions = computed(() => store.state.ui.supportedExtensions)
-
 // Album details
 const albumDetails = ref({
   title: '',
@@ -295,7 +293,7 @@ const goToLibrary = () => {
                 :class="{'border-white': currentStep >= step.number}"
               >
                 <div 
-                  class="w-10 h-10 rounded-full flex items-center justify-center"
+                  class="w-10 h-10 rounded-full flex items-center justify-center z-10"
                   :class="currentStep >= step.number ? 'bg-white text-black' : 'border-2 border-gray-600'"
                 >
                   {{ step.number }}
@@ -309,7 +307,7 @@ const goToLibrary = () => {
               </div>
               <div 
                 v-if="step.number < steps.length" 
-                class="absolute top-5 -right-1/2 w-full h-0.5"
+                class="absolute top-5 -right-1/2 w-full h-0.5 z-0"
                 :class="currentStep > step.number ? 'bg-white' : 'bg-gray-600'"
               ></div>
             </div>
@@ -317,7 +315,7 @@ const goToLibrary = () => {
         </div>
   
         <!-- Step 1: Choose Upload Type -->
-        <div v-if="currentStep === 1" class="bg-gray-800 rounded-lg p-8 mb-6">
+        <div v-if="currentStep === 1" class="rounded-lg p-8 mb-6">
           <h2 class="text-2xl font-bold mb-6">Choose Upload Type</h2>
           <div class="grid grid-cols-2 gap-6">
             <button 
@@ -343,7 +341,7 @@ const goToLibrary = () => {
   
         <!-- Step 2: Upload Content -->
         <div
-          class="bg-gray-800 rounded-lg p-8 mb-6"
+          class="rounded-lg p-8 mb-6"
           :class="currentStep === 2 ? '' : 'hidden'"
         >
           <h2 class="text-2xl font-bold mb-6">
@@ -403,6 +401,7 @@ const goToLibrary = () => {
                 v-model="uploadedFiles"
                 :class="['ui', 'icon', 'basic', 'button', 'w-full']"
                 :data="uploadData"
+                accept=".wav,.flac,.aiff,.mp4"
                 @input-file="inputFile"
               >
             <div 
@@ -426,8 +425,7 @@ const goToLibrary = () => {
                     </ul>
                     <p class="mb-2">For video:</p>
                     <ul class="list-disc list-inside">
-                      <li>File type: MP4</li>
-                      <li>Highest resolution :)</li>
+                      <li>Coming Soon!</li>
                     </ul>
                   </div>
                 </div>
@@ -482,7 +480,7 @@ const goToLibrary = () => {
         </div>
   
         <!-- Step 3: Track Details -->
-        <div v-if="currentStep === 3" class="bg-gray-800 rounded-lg p-8 mb-6">
+        <div v-if="currentStep === 3" class="rounded-lg p-8 mb-6">
           <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold">Track Details</h2>
             <span class="text-gray-400 text-sm">{{ currentTrack.file.file.name }}</span>
@@ -527,7 +525,18 @@ const goToLibrary = () => {
                 rows="3"
               ></textarea>
             </div>
-            
+
+            <!-- Metadata -->
+            <div
+              v-for="category in trackCategories">
+              <label class="block mb-2">{{ category.name }}{{ category.required ? ' *' : '' }}</label>
+              <tag-category-selector
+                v-model="currentTrack.categoryTags[category.name]"
+                :category="category.name"
+                :maxTags="category.max_tags"
+                class="w-full" />
+            </div>
+
             <!-- Additional Details -->
             <div>
               <label class="block mb-2">Record Label</label>
@@ -546,17 +555,6 @@ const goToLibrary = () => {
                 class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
                 placeholder="Enter release date"
               />
-            </div>
-  
-            <!-- Metadata -->
-            <div
-              v-for="category in trackCategories">
-              <label class="block mb-2">{{ category.name }}{{ category.required ? ' *' : '' }}</label>
-              <tag-category-selector
-                v-model="currentTrack.categoryTags[category.name]"
-                :category="category.name"
-                :maxTags="category.max_tags"
-                class="w-full" />
             </div>
           </div>
         </div>
@@ -578,14 +576,16 @@ const goToLibrary = () => {
           >
             Next
           </button>
-          <button 
-            v-else
-            @click="submitUpload"
-            class="px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors ml-auto"
-            :disabled="!isReadyToPublish"
-          >
-            Publish
-          </button>
+          <div v-else>
+            <button
+              v-if="isReadyToPublish"
+              @click="submitUpload"
+              class="px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors ml-auto"
+            >
+              Publish
+            </button>
+            <div v-else>Uploading...</div>
+          </div>
         </div>
       </div>
     </div>
@@ -593,7 +593,7 @@ const goToLibrary = () => {
       <header class="header">
         Success!
       </header>
-      <section class="content centered">
+      <section class="content centered text-black">
         <div>Thank you for uploading your magic!</div>
       </section>
     </semantic-modal>
