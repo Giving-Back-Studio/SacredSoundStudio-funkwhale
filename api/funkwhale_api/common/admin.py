@@ -1,4 +1,4 @@
-from django.contrib.admin import site  # noqa: F401
+from django.contrib.admin import site, StackedInline  # noqa: F401
 from django.contrib.admin import ModelAdmin
 from django.contrib.admin import register as initial_register
 from django.db.models.fields.related import RelatedField

@@ -1,5 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
 from django import forms
+from admin_sort.admin import SortableAdminMixin
 
 from funkwhale_api.common import admin
 
@@ -28,42 +29,30 @@ class ContentTypeSelectField(forms.ModelChoiceField):
 class TagCategoryModelForm(forms.ModelForm):
     class Meta:
         model = models.TagCategory
-        fields = ['name', 'max_tags', 'content_type', 'required']
+        fields = ['name', 'max_tags', 'content_type', 'required', 'order']
 
     content_type = ContentTypeSelectField()
 
 
-class CategorySelectField(forms.ModelChoiceField):
-    def __init__(self, *args, **kwargs):
-        super().__init__(
-            queryset=models.TagCategory.objects.all(), 
-            *args, 
-            **kwargs
-        )
-
-
-class TagModelForm(forms.ModelForm):
-    class Meta:
-        model = models.Tag
-        fields = ['name', 'category']
-
-    # Customize a specific field
-    category = CategorySelectField()
+class TagCategoryInline(admin.StackedInline):
+    model = models.TagCategory
+    filter_horizontal = ('tags',)
 
 
 @admin.register(models.Tag)
 class TagAdmin(admin.ModelAdmin):
-    list_display = ["name", "category", "creation_date"]
+    list_display = ["name", "creation_date"]
     search_fields = ["name"]
-    list_filter = ["category"]
+    list_filter = ["categories"]
     list_select_related = True
-    form = TagModelForm
+    filter_horizontal = ('categories',)
 
 
 @admin.register(models.TagCategory)
-class TagCategoryAdmin(admin.ModelAdmin):
+class TagCategoryAdmin(SortableAdminMixin, admin.ModelAdmin):
     list_display = ["name", "creation_date", "content_type"]
     search_fields = ["name"]
+    position_field = 'order'
     list_select_related = True
     form = TagCategoryModelForm
 

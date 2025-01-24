@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 import axios from 'axios'
+import { useCookies } from '@vueuse/integrations/useCookies'
+import { useRouter } from 'vue-router'
 
 import { useStore } from '~/store'
 import useLogger from '~/composables/useLogger'
@@ -8,10 +10,14 @@ import useLogger from '~/composables/useLogger'
 import AttachmentInput from '~/components/common/AttachmentInput.vue'
 import TagCategorySelector from '~/components/library/TagCategorySelector.vue'
 import FileUploadWidget from '~/components/library/FileUploadWidget.vue'
+import SemanticModal from '~/components/semantic/Modal.vue'
+import content from '~/router/routes/content'
 
 
 const store = useStore();
 const logger = useLogger();
+const getCookie = useCookies();
+const router = useRouter();
 
 // Steps configuration
 const steps = [
@@ -28,6 +34,7 @@ const isDraggingCover = ref(false)
 const uploadedFiles = ref([])
 const currentTrackIndex = ref(0)
 const upload = ref()
+const showSuccessModal = ref(false);
 
 console.log(store.state.auth.user);
 
@@ -39,15 +46,15 @@ const albumDetails = ref({
 })
 
 // Track template
-const createTrackTemplate = () => ({
-  name: '',
+const createTrackTemplate = (file) => ({
+  title: file ? file.file.name.split('.')[0]: '',
   description: '',
-  tags: {},
+  categoryTags: new Proxy({}, {
+    get: (target, name) => name in target ? target[name] : []
+  }),
   recordLabel: '',
-  recordingCountry: '',
   releaseDate: '',
-  uploadedBy: 'Current User',
-  uploadedTime: new Date().toISOString()
+  file: file
 })
 
 // Tracks metadata
@@ -72,9 +79,18 @@ const canProceed = computed(() => {
   return true
 })
 
-const isValid = computed(() => {
-  // Add validation logic for the final step
-  return true
+const isReadyToPublish = computed(() => {
+  for (let i = 0; i < uploadedFiles.value.length; i++) {
+    if (!uploadedFiles.value[i].response.uuid) {
+      return false;
+    }
+    const track = tracksMetadata.value[i];
+    if (!track.title) {
+      return false;
+    }
+  }
+
+  return true;
 })
 
 // Methods
@@ -107,17 +123,6 @@ const handleFiles = (files) => {
       file
     })
     tracksMetadata.value.push(createTrackTemplate())
-    
-    // Simulate upload progress
-    const interval = setInterval(() => {
-      const index = uploadedFiles.value.findIndex(f => f.name === file.name)
-      if (index !== -1) {
-        uploadedFiles.value[index].progress += 10
-        if (uploadedFiles.value[index].progress >= 100) {
-          clearInterval(interval)
-        }
-      }
-    }, 200)
   })
 }
 
@@ -172,16 +177,49 @@ const submitUpload = async () => {
     tracks: tracksMetadata.value
   });
 
+  const artistId = store.state.auth.profile.artist;
+  let albumId = null;
+
   if (uploadType.value === 'album') {
     try {
-      albumDetails.value.artist = store.state.auth.profile.artist;
-      console.log('Uploading album:', albumDetails.value);
+      albumDetails.value.artist = artistId;
       const response = await axios.post('albums', albumDetails.value);
+
+      albumId = response.data.id;
     } catch (error) {
       //errors.value = (error as BackendError).backendErrors
       console.log(error)
     }
   }
+  
+  let uploadPromises = [];
+  for (let i = 0; i < uploadedFiles.value.length; i++) {
+    const track = tracksMetadata.value[i];
+    const trackData = {
+      title: track.title,
+      description: {
+        text: track.description,
+        content_type: 'text/plain'
+      },
+      record_label: track.recordLabel,
+      release_date: track.releaseDate,
+      album: albumId,
+      artist: artistId,
+      upload: uploadedFiles.value[i].response.uuid
+    };
+
+    const tags = [];
+    for (const category in track.categoryTags) {
+      for (const tag of track.categoryTags[category]) {
+        tags.push({tag: tag, tag_category: category});
+      }
+    }
+    trackData.tagged_items = tags;
+    uploadPromises.push(axios.post('tracks', trackData));
+  }
+  Promise.all(uploadPromises).then(responses => {
+    showSuccessModal.value = true;
+  });
 }
 
 const trackCategories = ref([])
@@ -226,8 +264,20 @@ const fetchLibrary = async () => {
 fetchLibrary()
 
 const uploadData = computed(() => ({
-  library: library.uuid
-}))
+  library: library.value ? library.value.uuid: null,
+  import_reference: 'draft'
+  }
+))
+
+const inputFile = (newFile) => {
+  if (!newFile) return
+  newFile.active = true
+  tracksMetadata.value.push(createTrackTemplate(newFile))
+}
+
+const goToLibrary = () => {
+  router.push('/library');
+}
 
 </script>
 
@@ -243,7 +293,7 @@ const uploadData = computed(() => ({
                 :class="{'border-white': currentStep >= step.number}"
               >
                 <div 
-                  class="w-10 h-10 rounded-full flex items-center justify-center"
+                  class="w-10 h-10 rounded-full flex items-center justify-center z-10"
                   :class="currentStep >= step.number ? 'bg-white text-black' : 'border-2 border-gray-600'"
                 >
                   {{ step.number }}
@@ -257,7 +307,7 @@ const uploadData = computed(() => ({
               </div>
               <div 
                 v-if="step.number < steps.length" 
-                class="absolute top-5 -right-1/2 w-full h-0.5"
+                class="absolute top-5 -right-1/2 w-full h-0.5 z-0"
                 :class="currentStep > step.number ? 'bg-white' : 'bg-gray-600'"
               ></div>
             </div>
@@ -265,7 +315,7 @@ const uploadData = computed(() => ({
         </div>
   
         <!-- Step 1: Choose Upload Type -->
-        <div v-if="currentStep === 1" class="bg-gray-800 rounded-lg p-8 mb-6">
+        <div v-if="currentStep === 1" class="rounded-lg p-8 mb-6">
           <h2 class="text-2xl font-bold mb-6">Choose Upload Type</h2>
           <div class="grid grid-cols-2 gap-6">
             <button 
@@ -290,7 +340,10 @@ const uploadData = computed(() => ({
         </div>
   
         <!-- Step 2: Upload Content -->
-        <div v-if="currentStep === 2" class="bg-gray-800 rounded-lg p-8 mb-6">
+        <div
+          class="rounded-lg p-8 mb-6"
+          :class="currentStep === 2 ? '' : 'hidden'"
+        >
           <h2 class="text-2xl font-bold mb-6">
             {{ uploadType === 'album' ? 'Album Details & Content' : 'Upload Content' }}
           </h2>
@@ -331,20 +384,26 @@ const uploadData = computed(() => ({
               >
                 <attachment-input
                   v-model="albumDetails.cover"
+                  name="cover"
                   imageClass="podcast">
                 </attachment-input>
               </div>
+              <label for="cover"></label>
             </div>
           </div>
   
           <!-- Content Upload -->
           <div>
             <label class="block mb-2">Upload Content*</label>
-            <file-upload-widget
-                  ref="upload"
-                  v-model="uploadedFiles"
-                  :class="['ui', 'icon', 'basic', 'button']"
-                  :data="uploadData">
+            <form @submit.stop.prevent>
+              <file-upload-widget
+                ref="upload"
+                v-model="uploadedFiles"
+                :class="['ui', 'icon', 'basic', 'button', 'w-full']"
+                :data="uploadData"
+                accept=".wav,.flac,.aiff,.mp4"
+                @input-file="inputFile"
+              >
             <div 
               @dragover.prevent
               @drop.prevent="handleContentDrop"
@@ -366,8 +425,7 @@ const uploadData = computed(() => ({
                     </ul>
                     <p class="mb-2">For video:</p>
                     <ul class="list-disc list-inside">
-                      <li>File type: MP4</li>
-                      <li>Highest resolution :)</li>
+                      <li>Coming Soon!</li>
                     </ul>
                   </div>
                 </div>
@@ -412,14 +470,20 @@ const uploadData = computed(() => ({
                 </button>
               </div>
             </div>
-            </file-upload-widget>
+          </file-upload-widget>
+          </form>
           </div>
+          <span class="text-gray-400 text-sm">
+            We'll upload your magic while you tell us a little bit more about it.
+            Click Next to describe and categorize your content.
+          </span>
         </div>
   
         <!-- Step 3: Track Details -->
-        <div v-if="currentStep === 3" class="bg-gray-800 rounded-lg p-8 mb-6">
+        <div v-if="currentStep === 3" class="rounded-lg p-8 mb-6">
           <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold">Track Details</h2>
+            <span class="text-gray-400 text-sm">{{ currentTrack.file.file.name }}</span>
             <div v-if="uploadedFiles.length > 1" class="flex items-center space-x-4">
               <button 
                 @click="previousTrack"
@@ -443,12 +507,12 @@ const uploadData = computed(() => ({
           <div class="grid grid-cols-2 gap-6">
             <!-- Basic Info -->
             <div>
-              <label class="block mb-2">Track Name *</label>
+              <label class="block mb-2">Track Title *</label>
               <input 
-                v-model="currentTrack.name"
+                v-model="currentTrack.title"
                 type="text"
                 class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-                placeholder="Enter track name"
+                placeholder="Enter track title"
               />
             </div>
 
@@ -461,7 +525,18 @@ const uploadData = computed(() => ({
                 rows="3"
               ></textarea>
             </div>
-            
+
+            <!-- Metadata -->
+            <div
+              v-for="category in trackCategories">
+              <label class="block mb-2">{{ category.name }}{{ category.required ? ' *' : '' }}</label>
+              <tag-category-selector
+                v-model="currentTrack.categoryTags[category.name]"
+                :category="category.name"
+                :maxTags="category.max_tags"
+                class="w-full" />
+            </div>
+
             <!-- Additional Details -->
             <div>
               <label class="block mb-2">Record Label</label>
@@ -472,16 +547,14 @@ const uploadData = computed(() => ({
                 placeholder="Enter record label"
               />
             </div>
-  
-            <!-- Metadata -->
-            <div
-              v-for="category in trackCategories">
-              <label class="block mb-2">{{ category.name }}{{ category.required ? ' *' : '' }}</label>
-              <tag-category-selector
-                v-model="currentTrack.tags[category.name]"
-                :category="category.name"
-                :maxTags="category.max_tags"
-                class="w-full" />
+            <div>
+              <label class="block mb-2">Release Date</label>
+              <input 
+                v-model="currentTrack.releaseDate"
+                type="text"
+                class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
+                placeholder="Enter release date"
+              />
             </div>
           </div>
         </div>
@@ -503,15 +576,25 @@ const uploadData = computed(() => ({
           >
             Next
           </button>
-          <button 
-            v-else
-            @click="submitUpload"
-            class="px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors ml-auto"
-            :disabled="!isValid"
-          >
-            Publish
-          </button>
+          <div v-else>
+            <button
+              v-if="isReadyToPublish"
+              @click="submitUpload"
+              class="px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors ml-auto"
+            >
+              Publish
+            </button>
+            <div v-else>Uploading...</div>
+          </div>
         </div>
       </div>
     </div>
+    <semantic-modal v-model:show="showSuccessModal" @hide="goToLibrary">
+      <header class="header">
+        Success!
+      </header>
+      <section class="content centered text-black">
+        <div>Thank you for uploading your magic!</div>
+      </section>
+    </semantic-modal>
   </template>

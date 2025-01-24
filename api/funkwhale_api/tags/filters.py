@@ -19,7 +19,7 @@ class TagFilter(filters.FilterSet):
 
     class Meta:
         model = models.Tag
-        fields = {"name": ["exact", "startswith"], "category__name": ["exact"]}
+        fields = {"name": ["exact", "startswith"], "categories__name": ["exact"]}
 
 
 class TagCategoryFilter(filters.FilterSet):

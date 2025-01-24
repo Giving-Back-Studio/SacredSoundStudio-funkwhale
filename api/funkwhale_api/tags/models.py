@@ -19,9 +19,13 @@ class TagCategory(models.Model):
     content_type = models.ForeignKey(
         ContentType, null=True, on_delete=models.SET_NULL,
     )
+    order = models.PositiveSmallIntegerField(
+        default=0, blank=False, null=False,
+    )
 
     class Meta:
         unique_together = ("name", "content_type")
+        ordering = ('order', 'name', )
 
     def __str__(self):
         return self.name
@@ -29,13 +33,8 @@ class TagCategory(models.Model):
 
 class Tag(models.Model):
     name = CICharField(max_length=100)
-    category = models.ForeignKey(
-        TagCategory, related_name="tags", on_delete=models.CASCADE, null=True, blank=True
-    )
     creation_date = models.DateTimeField(default=timezone.now)
-
-    class Meta:
-        unique_together = ("name", "category")
+    categories = models.ManyToManyField(TagCategory, related_name="tags", blank=True)
 
     def __str__(self):
         return self.name
@@ -53,6 +52,7 @@ class TaggedItemQuerySet(models.QuerySet):
 class TaggedItem(models.Model):
     creation_date = models.DateTimeField(default=timezone.now)
     tag = models.ForeignKey(Tag, related_name="tagged_items", on_delete=models.CASCADE)
+    tag_category = models.ForeignKey(TagCategory, null=True, on_delete=models.SET_NULL)
     content_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
@@ -65,7 +65,7 @@ class TaggedItem(models.Model):
     objects = TaggedItemQuerySet.as_manager()
 
     class Meta:
-        unique_together = ("tag", "content_type", "object_id")
+        unique_together = ("tag", "content_type", "object_id", "tag_category")
 
     def __str__(self):
         return self.tag.name
