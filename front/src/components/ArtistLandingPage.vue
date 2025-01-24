@@ -13,7 +13,7 @@ const logger = useLogger()
 
 whenever(() => store.state.auth.authenticated, () => {
   logger.log('Authenticated, redirecting to /library…')
-  router.push('/library')
+  router.push('/mycontent')
 })
 
 // FAQ functionality
