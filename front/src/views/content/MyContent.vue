@@ -1,234 +1,207 @@
-<script setup lang="ts">
-import { ref, computed } from 'vue'
-import { 
-  PencilIcon, 
-  SendIcon, 
-  AlertCircleIcon,
-  MusicIcon 
-} from 'lucide-vue-next'
+<script setup>
+import { ref, onMounted } from 'vue'
+import { ChevronLeft, ChevronRight, UploadCloud, Edit2, Trash2, Clock } from 'lucide-vue-next'
 
-interface ContentItem {
-  id: number
-  name: string
-  image: string
-  status: 'draft' | 'in_qa' | 'published' | 'needs_review'
-  uploadDate: string
-  feedback?: string
-}
+const scrollContainers = ref({})
+const scrollPositions = ref({})
 
-// Status filter options
-const statusFilters = [
-  { label: 'All', value: 'all' },
-  { label: 'Drafts', value: 'draft' },
-  { label: 'In QA', value: 'in_qa' },
-  { label: 'Published', value: 'published' },
-  { label: 'Needs Review', value: 'needs_review' }
-] as const
-
-const currentFilter = ref('all')
-const activeFeedback = ref<number | null>(null)
-
-// Mock data - replace with actual API call
-const content = ref<ContentItem[]>([
+const categories = ref([
   {
-    id: 1,
-    name: 'Morning Meditation Chant',
-    image: '/placeholder.svg?height=200&width=300',
-    status: 'published',
-    uploadDate: '2024-01-15T08:00:00Z'
+    id: 'studio',
+    title: 'Studio Production',
+    items: Array.from({ length: 5 }, (_, i) => ({
+      id: `studio-${i}`,
+      title: `Studio Track ${i + 1}`,
+      artist: 'You',
+      duration: '3:45',
+      cover: `/placeholder.svg?height=280&width=280`
+    }))
   },
   {
-    id: 2,
-    name: 'Sacred Sound Journey',
-    image: '/placeholder.svg?height=200&width=300',
-    status: 'draft',
-    uploadDate: '2024-01-16T10:30:00Z'
+    id: 'meditation',
+    title: 'Meditation',
+    items: Array.from({ length: 3 }, (_, i) => ({
+      id: `meditation-${i}`,
+      title: `Meditation Session ${i + 1}`,
+      artist: 'You',
+      duration: '15:00',
+      cover: `/placeholder.svg?height=280&width=280`
+    }))
   },
   {
-    id: 3,
-    name: 'Healing Mantras Collection',
-    image: '/placeholder.svg?height=200&width=300',
-    status: 'needs_review',
-    feedback: 'Please adjust the audio levels in the second track and resubmit.',
-    uploadDate: '2024-01-14T15:45:00Z'
+    id: 'djset',
+    title: 'DJ Set',
+    items: Array.from({ length: 4 }, (_, i) => ({
+      id: `djset-${i}`,
+      title: `DJ Set ${i + 1}`,
+      artist: 'You',
+      duration: '60:00',
+      cover: `/placeholder.svg?height=280&width=280`
+    }))
   },
   {
-    id: 4,
-    name: 'Divine Bhajans Live Recording',
-    image: '/placeholder.svg?height=200&width=300',
-    status: 'in_qa',
-    uploadDate: '2024-01-17T09:15:00Z'
+    id: 'live',
+    title: 'Live Recording',
+    items: Array.from({ length: 2 }, (_, i) => ({
+      id: `live-${i}`,
+      title: `Live Session ${i + 1}`,
+      artist: 'You',
+      duration: '45:00',
+      cover: `/placeholder.svg?height=280&width=280`
+    }))
   }
 ])
 
-// Computed
-const filteredContent = computed(() => {
-  if (currentFilter.value === 'all') return content.value
-  return content.value.filter(item => item.status === currentFilter.value)
-})
-
-// Methods
-const getStatusClass = (status: ContentItem['status']) => {
-  const classes = {
-    draft: 'bg-gray-600 text-white',
-    in_qa: 'bg-blue-600 text-white',
-    published: 'bg-green-600 text-white',
-    needs_review: 'bg-yellow-600 text-white'
-  }
-  return classes[status] || 'bg-gray-600 text-white'
-}
-
-const formatStatus = (status: ContentItem['status']) => {
-  const formats = {
-    draft: 'Draft',
-    in_qa: 'In QA',
-    published: 'Published',
-    needs_review: 'Needs Review'
-  }
-  return formats[status] || status
-}
-
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+const scroll = (categoryId, direction) => {
+  const container = scrollContainers.value[categoryId]
+  if (!container) return
+  
+  const scrollAmount = 600
+  const scrollLeft = direction === 'left' 
+    ? container.scrollLeft - scrollAmount
+    : container.scrollLeft + scrollAmount
+    
+  container.scrollTo({
+    left: scrollLeft,
+    behavior: 'smooth'
   })
 }
 
-const showFeedback = (item: ContentItem) => {
-  activeFeedback.value = item.id
+const updateScrollPosition = (categoryId, event) => {
+  scrollPositions.value[categoryId] = event.target.scrollLeft
 }
 
-const hideFeedback = () => {
-  activeFeedback.value = null
+const viewMore = (categoryId) => {
+  console.log(`View more for ${categoryId}`)
 }
 
-const editContent = (item: ContentItem) => {
-  console.log('Edit content:', item.id)
-  // Implement edit functionality
+const initiateUpload = (categoryId) => {
+  console.log(`Initiate upload for ${categoryId}`)
 }
 
-const submitForQA = (item: ContentItem) => {
-  console.log('Submit for QA:', item.id)
-  // Implement submit for QA functionality
+const editContent = (item) => {
+  console.log('Edit content:', item)
 }
+
+const deleteContent = (item) => {
+  console.log('Delete content:', item)
+}
+
+onMounted(() => {
+  categories.value.forEach(category => {
+    scrollPositions.value[category.id] = 0
+  })
+})
 </script>
 
 <template>
-  <main class="main pusher">
-    <div class="max-w-7xl mx-auto px-6 py-4">
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold">My Content</h1>
-        <div class="flex gap-4">
-          <button
-            v-for="filter in statusFilters"
-            :key="filter.value"
-            @click="currentFilter = filter.value"
-            class="px-4 py-2 rounded-full text-sm transition-colors"
-            :class="currentFilter === filter.value 
-              ? 'bg-white text-black' 
-              : 'bg-gray-800 hover:bg-gray-700'"
-          >
-            {{ filter.label }}
-          </button>
-        </div>
-      </div>
-
-      <!-- Content Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div
-          v-for="item in filteredContent"
-          :key="item.id"
-          class="bg-gray-800 rounded-lg overflow-hidden group"
-        >
-          <!-- Content Preview -->
-          <div class="relative aspect-video">
-            <img
-              :src="item.image"
-              :alt="item.name"
-              class="w-full h-full object-cover"
-            />
-            <div class="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-              <button
-                @click="editContent(item)"
-                class="p-2 bg-white text-black rounded-full hover:bg-gray-200 transition-colors"
-                :aria-label="'Edit ' + item.name"
+  <div class="min-h-screen bg-[#F1F4F8]">
+    <main class="container mx-auto px-4 py-8">
+      <h1 class="text-4xl font-bold text-[#434289] mb-8">My Content</h1>
+      
+      <div v-for="category in categories" :key="category.id" class="mb-12">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-[#434289]">{{ category.title }}</h2>
+          <div class="flex items-center gap-4">
+            <div class="flex gap-2">
+              <button 
+                @click="scroll(category.id, 'left')"
+                class="p-2 rounded-full bg-white shadow-sm hover:bg-gray-50 transition-colors"
+                :disabled="scrollPositions[category.id] <= 0"
+                :aria-label="`Scroll ${category.title} left`"
               >
-                <PencilIcon class="w-5 h-5" />
+                <ChevronLeft class="h-5 w-5 text-[#434289]" />
               </button>
-              <button
-                v-if="item.status === 'draft'"
-                @click="submitForQA(item)"
-                class="p-2 bg-white text-black rounded-full hover:bg-gray-200 transition-colors"
-                :aria-label="'Submit ' + item.name + ' for QA'"
+              <button 
+                @click="scroll(category.id, 'right')"
+                class="p-2 rounded-full bg-white shadow-sm hover:bg-gray-50 transition-colors"
+                :aria-label="`Scroll ${category.title} right`"
               >
-                <SendIcon class="w-5 h-5" />
+                <ChevronRight class="h-5 w-5 text-[#434289]" />
               </button>
             </div>
+            <button 
+              class="text-sm font-medium text-[#434289] hover:underline"
+              @click="viewMore(category.id)"
+            >
+              More
+            </button>
           </div>
+        </div>
 
-          <!-- Content Info -->
-          <div class="p-4">
-            <div class="flex items-start justify-between gap-4">
-              <h3 class="font-semibold text-lg line-clamp-1">{{ item.name }}</h3>
-              <div class="flex items-center gap-2">
-                <span
-                  class="px-2 py-1 text-xs rounded-full"
-                  :class="getStatusClass(item.status)"
-                >
-                  {{ formatStatus(item.status) }}
-                </span>
-                <div v-if="item.status === 'needs_review'" class="relative">
-                  <button
-                    @mouseenter="showFeedback(item)"
-                    @mouseleave="hideFeedback"
-                    class="text-yellow-500 hover:text-yellow-400"
-                    :aria-label="'Show feedback for ' + item.name"
-                  >
-                    <AlertCircleIcon class="w-5 h-5" />
-                  </button>
-                  <!-- Feedback Tooltip -->
-                  <div
-                    v-if="activeFeedback === item.id"
-                    class="absolute bottom-full right-0 mb-2 w-64 p-3 bg-gray-900 rounded-lg shadow-xl z-10"
-                  >
-                    <p class="text-sm">{{ item.feedback }}</p>
-                    <div class="absolute bottom-0 right-4 transform translate-y-1/2 rotate-45 w-2 h-2 bg-gray-900"></div>
+        <div 
+          class="relative overflow-hidden"
+          :ref="el => { if (el) scrollContainers[category.id] = el }"
+        >
+          <div 
+            class="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
+            @scroll="updateScrollPosition(category.id, $event)"
+          >
+            <!-- Upload Card -->
+            <div class="flex-none w-[280px]">
+              <button 
+                @click="initiateUpload(category.id)"
+                class="w-full h-full bg-white rounded-lg shadow-sm overflow-hidden transition-transform hover:scale-[1.02] group"
+              >
+                <div class="aspect-square flex flex-col items-center justify-center p-6 border-2 border-dashed border-[#434289] rounded-lg m-4">
+                  <UploadCloud class="h-12 w-12 text-[#434289] mb-4 group-hover:scale-110 transition-transform" />
+                  <p class="font-semibold text-[#434289] text-center">Upload {{ category.title }}</p>
+                  <p class="text-sm text-gray-600 text-center mt-2">Click to browse or drag and drop</p>
+                </div>
+              </button>
+            </div>
+
+            <!-- Content Items -->
+            <div 
+              v-for="item in category.items" 
+              :key="item.id"
+              class="flex-none w-[280px]"
+            >
+              <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-transform hover:scale-[1.02]">
+                <div class="aspect-square relative group">
+                  <img 
+                    :src="item.cover" 
+                    :alt="item.title"
+                    class="w-full h-full object-cover"
+                  />
+                  <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                    <button 
+                      class="p-2 rounded-full bg-white text-[#434289] hover:bg-gray-100"
+                      @click.stop="editContent(item)"
+                    >
+                      <Edit2 class="h-5 w-5" />
+                    </button>
+                    <button 
+                      class="p-2 rounded-full bg-white text-red-500 hover:bg-gray-100"
+                      @click.stop="deleteContent(item)"
+                    >
+                      <Trash2 class="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+                <div class="p-4">
+                  <h3 class="font-semibold text-[#434289] mb-1">{{ item.title }}</h3>
+                  <p class="text-sm text-gray-600">{{ item.artist }}</p>
+                  <div class="flex items-center gap-2 mt-2">
+                    <Clock class="h-4 w-4 text-gray-400" />
+                    <span class="text-sm text-gray-500">{{ item.duration }}</span>
                   </div>
                 </div>
               </div>
             </div>
-            <p class="text-sm text-gray-400 mt-2">
-              {{ formatDate(item.uploadDate) }}
-            </p>
           </div>
         </div>
       </div>
-
-      <!-- Empty State -->
-      <div
-        v-if="filteredContent.length === 0"
-        class="text-center py-16 bg-gray-800 rounded-lg mt-6"
-      >
-        <MusicIcon class="w-16 h-16 mx-auto text-gray-600 mb-4" />
-        <h3 class="text-xl font-semibold mb-2">No content found</h3>
-        <p class="text-gray-400">
-          {{ currentFilter === 'all' 
-            ? "You haven't uploaded any content yet" 
-            : `You don't have any ${formatStatus(currentFilter).toLowerCase()} content` }}
-        </p>
-      </div>
-    </div>
-  </main>
+    </main>
+  </div>
 </template>
 
 <style scoped>
-.line-clamp-1 {
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
-</style> 
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+</style>
