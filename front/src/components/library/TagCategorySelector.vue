@@ -40,7 +40,6 @@ const handleUpdate = () => {
 onMounted(async () => {
   await nextTick()
 
-  debugger;
   $(dropdown.value).dropdown({
     keys: { delimiter: 32 },
     forceSelection: false,
@@ -49,7 +48,7 @@ onMounted(async () => {
     preserveHTML: false,
     maxSelections: props.maxTags,
     apiSettings: {
-      url: store.getters['instance/absoluteUrl']('/api/v1/tags/?name__startswith={query}&ordering=length&page_size=5&category__name='+props.category),
+      url: store.getters['instance/absoluteUrl']('/api/v1/tags/?categories__name='+props.category),
       beforeXHR: function (xhrObject) {
         if (store.state.auth.oauth.accessToken) {
           xhrObject.setRequestHeader('Authorization', store.getters['auth/header'])
@@ -79,7 +78,7 @@ onMounted(async () => {
     },
     fields: { remoteValues: 'results', value: 'name' },
     allowAdditions: true,
-    minCharacters: 1,
+    minCharacters: 0,
     onAdd: handleUpdate,
     onRemove: handleUpdate,
     onLabelRemove: handleUpdate,

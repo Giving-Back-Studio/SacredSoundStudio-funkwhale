@@ -41,23 +41,18 @@ class CategorySelectField(forms.ModelChoiceField):
             **kwargs
         )
 
-
-class TagModelForm(forms.ModelForm):
-    class Meta:
-        model = models.Tag
-        fields = ['name', 'category']
-
-    # Customize a specific field
-    category = CategorySelectField()
+class TagCategoryInline(admin.StackedInline):
+    model = models.TagCategory
+    filter_horizontal = ('tags',)
 
 
 @admin.register(models.Tag)
 class TagAdmin(admin.ModelAdmin):
-    list_display = ["name", "category", "creation_date"]
+    list_display = ["name", "creation_date"]
     search_fields = ["name"]
-    list_filter = ["category"]
+    list_filter = ["categories"]
     list_select_related = True
-    form = TagModelForm
+    filter_horizontal = ('categories',)
 
 
 @admin.register(models.TagCategory)

@@ -390,6 +390,7 @@ class TrackViewSet(
     common_views.SkipFilterForGetObject,
     mixins.DestroyModelMixin,
     viewsets.ReadOnlyModelViewSet,
+    mixins.CreateModelMixin,
 ):
     """
     A simple ViewSet for viewing and editing accounts.
@@ -451,6 +452,15 @@ class TrackViewSet(
         )
         instance.delete()
 
+    def get_serializer_class(self):
+        if self.action in ["create"]:
+            return serializers.TrackCreateSerializer
+        return super().get_serializer_class()
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["user"] = self.request.user
+        return context
 
 def strip_absolute_media_url(path):
     if (

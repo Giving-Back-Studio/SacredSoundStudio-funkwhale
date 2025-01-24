@@ -6,6 +6,14 @@ export default [
     children: [{
       path: '',
       name: 'content.index',
+      component: () => import('~/views/content/Home.vue')
+    }]
+  },
+  {
+    path: '/upload',
+    children: [{
+      path: '',
+      name: 'upload.index',
       component: () => import('~/views/content/Upload.vue')
     }]
   },

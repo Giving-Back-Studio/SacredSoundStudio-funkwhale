@@ -17,6 +17,11 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ["name", "creation_date"]
 
 
+class TaggedItemSerializer(serializers.Serializer):
+    tag = serializers.CharField()
+    tag_category = serializers.CharField()
+
+
 class TagNameField(serializers.CharField):
     def to_internal_value(self, value):
         value = super().to_internal_value(value)

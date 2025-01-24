@@ -790,7 +790,7 @@ class AlbumCreateSerializer(serializers.Serializer):
 
     artist = common_serializers.RelatedField(
         "id",
-        queryset=models.Artist.objects.exclude(channel__isnull=True),
+        queryset=models.Artist.objects.all(),
         required=True,
         serializer=None,
         filters=lambda context: {"attributed_to": context["user"].actor},
@@ -822,6 +822,53 @@ class AlbumCreateSerializer(serializers.Serializer):
         )
         tag_models.set_tags(instance, *(validated_data.get("tags", []) or []))
         instance.artist.get_channel()
+        return instance
+
+
+class TrackCreateSerializer(serializers.ModelSerializer):
+
+    upload = serializers.CharField(required=False, allow_blank=True, max_length=56)
+    tagged_items = tags_serializers.TaggedItemSerializer(many=True)
+    description = common_serializers.ContentSerializer(allow_null=True, required=False)
+
+    class Meta:
+        model = models.Track
+        fields = (
+            "title",
+            "artist",
+            "album",
+            "record_label",
+            "release_date",
+            "description",
+            "tagged_items",
+            "upload"
+        )
+
+    def create(self, validated_data):
+        instance = models.Track.objects.create(
+            attributed_to=self.context["user"].actor,
+            artist=validated_data["artist"],
+            record_label=validated_data["record_label"],
+            release_date=validated_data["release_date"],
+            title=validated_data["title"],
+            album=validated_data["album"]
+        )
+        upload = models.Upload.objects.get(
+            uuid=validated_data.pop("upload")
+        )
+        upload.track = instance
+        common_utils.attach_content(
+            instance, "description", validated_data.get("description")
+        )
+        for tag_data in validated_data.get("tagged_items"):
+            tag, tag_created = tag_models.Tag.objects.get_or_create(name=tag_data["tag"])
+            tag_category = tag_models.TagCategory.objects.get(name=tag_data["tag_category"])
+            obj_tag = tag_models.TaggedItem.objects.create(
+                tag=tag,
+                content_object=instance,
+                tag_category=tag_category
+            )
+            obj_tag.save()
         return instance
 
 
