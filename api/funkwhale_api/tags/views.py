@@ -12,7 +12,7 @@ class TagCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = (
         models.TagCategory.objects.all()
         .annotate(__size=functions.Length("name"))
-        .order_by("name")
+        .order_by("order", "name")
     )
     serializer_class = serializers.TagCategorySerializer
     permission_classes = [oauth_permissions.ScopePermission]

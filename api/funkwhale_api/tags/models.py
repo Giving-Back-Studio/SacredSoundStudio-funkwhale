@@ -19,9 +19,13 @@ class TagCategory(models.Model):
     content_type = models.ForeignKey(
         ContentType, null=True, on_delete=models.SET_NULL,
     )
+    order = models.PositiveSmallIntegerField(
+        default=0, blank=False, null=False,
+    )
 
     class Meta:
         unique_together = ("name", "content_type")
+        ordering = ('order', 'name', )
 
     def __str__(self):
         return self.name
