@@ -62,7 +62,8 @@ const submit = async () => {
   try {
     await axios.post('auth/registration/', {
       ...payload,
-      password2: payload.password1
+      password2: payload.password1,
+      is_artist: store.state.ui.isArtist
     })
 
     logger.info('Successfully created account')

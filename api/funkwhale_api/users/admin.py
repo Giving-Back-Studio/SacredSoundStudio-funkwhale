@@ -56,10 +56,12 @@ class UserAdmin(AuthUserAdmin):
         "last_login",
         "is_staff",
         "is_superuser",
+        "is_artist",
     ]
     list_filter = [
         "is_superuser",
         "is_staff",
+        "is_artist",
         "privacy_level",
         "permission_settings",
         "permission_library",
@@ -79,6 +81,7 @@ class UserAdmin(AuthUserAdmin):
                     "is_active",
                     "is_staff",
                     "is_superuser",
+                    "is_artist",
                     "permission_library",
                     "permission_settings",
                     "permission_moderation",

@@ -7,7 +7,7 @@ import moment from 'moment'
 
 import useLogger from '~/composables/useLogger'
 
-type SupportedExtension = 'flac' | 'ogg' | 'mp3' | 'opus' | 'aac' | 'm4a' | 'aiff' | 'aif'
+type SupportedExtension = 'flac' | 'ogg' | 'mp3' | 'opus' | 'aac' | 'm4a' | 'aiff' | 'aif' | 'wav'
 
 export type WebSocketEventName = 'inbox.item_added' | 'import.status_updated' | 'mutation.created' | 'mutation.updated'
   | 'report.created' | 'user_request.created' | 'Listen'
@@ -65,7 +65,7 @@ const store: Module<State, RootState> = {
     lastDate: new Date(),
     maxMessages: 100,
     messageDisplayDuration: 5 * 1000,
-    supportedExtensions: ['flac', 'ogg', 'mp3', 'opus', 'aac', 'm4a', 'aiff', 'aif'],
+    supportedExtensions: ['flac', 'aiff', 'aif', 'wav'],
     messages: [],
     window: {
       height: 0,

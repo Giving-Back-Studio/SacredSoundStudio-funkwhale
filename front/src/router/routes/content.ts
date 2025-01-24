@@ -3,11 +3,18 @@ import type { RouteRecordRaw } from 'vue-router'
 export default [
   {
     path: '/content',
-    component: () => import('~/views/content/Base.vue'),
     children: [{
       path: '',
       name: 'content.index',
       component: () => import('~/views/content/Home.vue')
+    }]
+  },
+  {
+    path: '/upload',
+    children: [{
+      path: '',
+      name: 'upload.index',
+      component: () => import('~/views/content/Upload.vue')
     }]
   },
   {

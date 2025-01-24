@@ -11,9 +11,26 @@ from django.utils.translation import gettext_lazy as _
 TAG_REGEX = re.compile(r"^((\w+)([\d_]*))$")
 
 
-class Tag(models.Model):
-    name = CICharField(max_length=100, unique=True)
+class TagCategory(models.Model):
+    name = CICharField(max_length=100)
     creation_date = models.DateTimeField(default=timezone.now)
+    max_tags = models.PositiveIntegerField(default=5)
+    required = models.BooleanField(default=False)
+    content_type = models.ForeignKey(
+        ContentType, null=True, on_delete=models.SET_NULL,
+    )
+
+    class Meta:
+        unique_together = ("name", "content_type")
+
+    def __str__(self):
+        return self.name
+
+
+class Tag(models.Model):
+    name = CICharField(max_length=100)
+    creation_date = models.DateTimeField(default=timezone.now)
+    categories = models.ManyToManyField(TagCategory, related_name="tags", blank=True)
 
     def __str__(self):
         return self.name
@@ -31,6 +48,7 @@ class TaggedItemQuerySet(models.QuerySet):
 class TaggedItem(models.Model):
     creation_date = models.DateTimeField(default=timezone.now)
     tag = models.ForeignKey(Tag, related_name="tagged_items", on_delete=models.CASCADE)
+    tag_category = models.ForeignKey(TagCategory, null=True, on_delete=models.SET_NULL)
     content_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
@@ -43,7 +61,7 @@ class TaggedItem(models.Model):
     objects = TaggedItemQuerySet.as_manager()
 
     class Meta:
-        unique_together = ("tag", "content_type", "object_id")
+        unique_together = ("tag", "content_type", "object_id", "tag_category")
 
     def __str__(self):
         return self.tag.name

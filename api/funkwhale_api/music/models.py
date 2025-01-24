@@ -497,6 +497,8 @@ class Track(APIModelMixin):
         on_delete=models.DO_NOTHING,
         related_name="tracks",
     )
+    record_label = models.CharField(blank=True, null=True, max_length=100)
+    release_date = models.CharField(blank=True, null=True, max_length=100)
     # Music entities are attributed to actors, to validate that updates occur
     # from an authorized account. On top of that, we consider the instance actor
     # can update anything under it's own domain
