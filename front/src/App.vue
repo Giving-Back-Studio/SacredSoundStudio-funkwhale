@@ -78,6 +78,12 @@ const showSetInstanceModal = ref(false)
 // NOTE: We're not checking if we're authenticated in the store,
 //       because we want to learn if we are authenticated at all
 store.dispatch('auth/fetchUser')
+
+const isSidebarCollapsed = ref(false)
+
+const handleSidebarCollapse = (collapsed: boolean) => {
+  isSidebarCollapsed.value = collapsed
+}
 </script>
 
 <template>
@@ -97,30 +103,28 @@ store.dispatch('auth/fetchUser')
       :href="url"
     >
 
-    <sidebar
-      :width="width"
-      @show:set-instance-modal="showSetInstanceModal = !showSetInstanceModal"
-      @show:shortcuts-modal="toggleShortcutsModal"
-    />
-    <set-instance-modal v-model:show="showSetInstanceModal" />
-    <service-messages />
-    <transition name="queue">
-      <queue v-show="store.state.ui.queueFocused" />
-    </transition>
+    <Sidebar @update:collapsed="handleSidebarCollapse" />
+    <main :class="['main', 'pusher', { 'sidebar-collapsed': isSidebarCollapsed }]">
+      <set-instance-modal v-model:show="showSetInstanceModal" />
+      <service-messages />
+      <transition name="queue">
+        <queue v-show="store.state.ui.queueFocused" />
+      </transition>
 
-    <router-view v-slot="{ Component }">
-      <template v-if="Component">
-        <keep-alive :max="1">
-          <Suspense>
-            <component :is="Component" />
-            <template #fallback>
-              <!-- TODO (wvffle): Add loader -->
-              {{ $t('App.loading') }}
-            </template>
-          </Suspense>
-        </keep-alive>
-      </template>
-    </router-view>
+      <router-view v-slot="{ Component }">
+        <template v-if="Component">
+          <keep-alive :max="1">
+            <Suspense>
+              <component :is="Component" />
+              <template #fallback>
+                <!-- TODO (wvffle): Add loader -->
+                {{ $t('App.loading') }}
+              </template>
+            </Suspense>
+          </keep-alive>
+        </template>
+      </router-view>
+    </main>
 
     <audio-player />
     <playlist-modal v-if="store.state.auth.authenticated" />

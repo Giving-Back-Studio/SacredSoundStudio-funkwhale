@@ -8,6 +8,7 @@ import { setupDropdown } from '~/utils/fomantic'
 import { useRoute } from 'vue-router'
 import { useStore } from '~/store'
 import { useI18n } from 'vue-i18n'
+import { Menu } from 'lucide-vue-next'
 
 import SemanticModal from '~/components/semantic/Modal.vue'
 import UserModal from '~/components/common/UserModal.vue'
@@ -92,14 +93,24 @@ const shouldHideSidebar = computed(() => {
   const hiddenRoutes = ['/', '/create', '/auth']
   return hiddenRoutes.includes(route.path)
 })
+
+// Add ref for tracking sidebar collapse state
+const isSidebarCollapsed = ref(false)
+
+// Add function to toggle sidebar
+const toggleSidebar = () => {
+  isSidebarCollapsed.value = !isSidebarCollapsed.value
+  emit('update:collapsed', isSidebarCollapsed.value)
+}
 </script>
 
 <template>
   <aside
     v-if="!shouldHideSidebar"
-    :class="['ui', 'vertical', 'left', 'visible', 'wide', 'sidebar', 'component-sidebar']"
+    :class="['ui', 'vertical', 'left', 'visible', 'wide', 'sidebar', 'component-sidebar', { collapsed: isSidebarCollapsed }]"
   >
     <header class="ui basic segment header-wrapper">
+      <Menu class="menu-icon" @click="toggleSidebar" />
       <div class="spacer"></div>
       <nav class="top ui compact right aligned inverted text menu">
         <div class="right menu">
@@ -167,14 +178,6 @@ const shouldHideSidebar = computed(() => {
             </div>
           </div>
         </div>
-        <router-link
-          v-if="$store.state.auth.authenticated"
-          class="item"
-          :to="{name: 'content.index'}"
-        >
-          <i class="upload icon" />
-          <span class="visually-hidden">{{ labels.addContent }}</span>
-        </router-link>
         <template v-if="width > 768">
           <div class="item">
             <div class="ui user-dropdown dropdown">
@@ -350,12 +353,12 @@ const shouldHideSidebar = computed(() => {
           role="navigation"
           :aria-label="labels.mainMenu"
         >
-          <router-link
+          <!-- <router-link
             class="item"
             :to="{name: 'index'}"
           >
             {{ $t('components.Sidebar.link.library') }}
-          </router-link>
+          </router-link> -->
 
           <router-link
             v-if="$store.state.auth.authenticated"
@@ -365,7 +368,7 @@ const shouldHideSidebar = computed(() => {
             {{ $t('components.Sidebar.link.myContent') }}
           </router-link>
 
-          <router-link
+          <!-- <router-link
             v-if="$store.state.auth.authenticated"
             class="item"
             :to="{ path: '/mychannel' }"
@@ -379,7 +382,7 @@ const shouldHideSidebar = computed(() => {
             :to="{ path: '/adminland' }"
           >
             {{ $t('components.Sidebar.link.adminland') }}
-          </router-link>
+          </router-link> -->
 
           <router-link
             v-if="$store.state.auth.authenticated"
@@ -395,35 +398,136 @@ const shouldHideSidebar = computed(() => {
 </template>
 
 <style>
-[type="radio"] {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  height: 0;
-  width: 0;
+/* Menu icon color */
+.menu-icon {
+  color: #A3C4A3 !important;
+  position: absolute !important;
+  top: 1rem !important;
+  left: 1rem !important;
+  cursor: pointer !important;
 }
-[type="radio"] + label::after {
-  content: "";
-  font-size: 1.4em;
+
+/* Wrench icon color with more specific selector */
+.ui.menu .item .wrench.icon,
+.ui.admin-dropdown .wrench.icon,
+.component-sidebar .wrench.icon {
+  color: #373571 !important;
 }
-[type="radio"]:checked + label::after {
-  margin-left: 10px;
-  content: "\2713"; /* Checkmark */
-  font-size: 1.4em;
+
+/* Set sidebar and header background color */
+.ui.vertical.left.visible.wide.sidebar.component-sidebar,
+.ui.vertical.left.visible.wide.sidebar.component-sidebar .header-wrapper {
+  background-color: #D9D9E7 !important;
+  transition: all 0.3s ease !important;
+  width: 275px !important;
 }
-[type="radio"]:checked + label {
-  font-weight: bold;
+
+/* Add collapsed state styles with transition */
+.ui.vertical.left.visible.wide.sidebar.component-sidebar.collapsed {
+  width: 60px !important;
+  min-width: 60px !important;
+  max-width: 60px !important;
 }
-fieldset {
-  border: none;
+
+/* Hide elements when collapsed */
+.ui.vertical.left.visible.wide.sidebar.component-sidebar.collapsed .secondary,
+.ui.vertical.left.visible.wide.sidebar.component-sidebar.collapsed .search-wrapper,
+.ui.vertical.left.visible.wide.sidebar.component-sidebar.collapsed .signup,
+.ui.vertical.left.visible.wide.sidebar.component-sidebar.collapsed .right.menu,
+.ui.vertical.left.visible.wide.sidebar.component-sidebar.collapsed .spacer {
+  display: none !important;
 }
-.back {
-  font-size: 1.25em !important;
-  position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
-  width: 2.25rem !important;
-  height: 2.25rem !important;
-  padding: 0.625rem 0 0 0;
+
+/* Adjust header when collapsed */
+.ui.vertical.left.visible.wide.sidebar.component-sidebar.collapsed .header-wrapper {
+  width: 60px !important;
+  min-width: 60px !important;
+  max-width: 60px !important;
+  padding: 1rem 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+/* Keep menu icon visible when collapsed */
+.ui.vertical.left.visible.wide.sidebar.component-sidebar.collapsed .menu-icon {
+  display: block !important;
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+/* Adjust main content margin */
+#app > div > .main.pusher {
+  transition: margin-left 0.3s ease !important;
+}
+
+#app > div > .main.pusher.sidebar-collapsed {
+  margin-left: 60px !important;
+}
+
+/* Apply color to navigation items only, excluding top icons */
+.ui.vertical.menu .item,
+.ui.vertical.menu .item:hover,
+.secondary .component-sidebar .item,
+.secondary .component-sidebar a {
+  color: #434289 !important;
+}
+
+/* Keep top menu icons with their original color */
+.top.menu .icon,
+.top.menu .item {
+  color: inherit !important;
+}
+
+.ui.menu .item.upload-button {
+  background-color: #434289 !important;
+  color: white !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 4px !important;
+  font-family: 'Montserrat', sans-serif !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  margin: 0.5rem !important;
+}
+
+.ui.menu .item.upload-button:hover {
+  background-color: #373571 !important;
+  color: white !important;
+}
+
+.ui.vertical.menu {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+.ui.vertical.menu .item {
+  width: 80% !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+.ui.vertical.menu .item.active,
+.ui.menu .item.active {
+  background: transparent !important;
+  border-right: none !important;
+}
+
+/* Target My Content link with all its possible states */
+.ui.vertical.menu .item.active.router-link-exact-active[href="/mycontent"],
+.ui.vertical.menu .item.router-link-exact-active[href="/mycontent"],
+.ui.vertical.menu a.item[href="/mycontent"] {
+  background: transparent !important;
+  color: white !important;
+}
+
+/* Ensure hover state stays transparent */
+.ui.vertical.menu .item.active.router-link-exact-active[href="/mycontent"]:hover,
+.ui.vertical.menu .item.router-link-exact-active[href="/mycontent"]:hover,
+.ui.vertical.menu a.item[href="/mycontent"]:hover {
+  background: transparent !important;
+  color: #434289 !important;
 }
 </style>
