@@ -41,7 +41,7 @@ fetchContent()
 
 const categories = computed(() => {
   const cats = {}
-  debugger;
+
   for (const item of content.value) {
     const slimItem = {
       id: item.id,
@@ -53,7 +53,7 @@ const categories = computed(() => {
 
     for (const tagIdx in item.tags) {
       const tag = item.tags[tagIdx]
-      if (cats[tag]) {
+      if (cats[tag] && !cats[tag].includes(slimItem)) {
         cats[tag].push(slimItem)
       } else {
         cats[tag] = [slimItem]
@@ -62,7 +62,7 @@ const categories = computed(() => {
     }
   }
 
-  return cats;
+  return Object.entries(cats).sort((a, b) => b[1].length - a[1].length)
 })
 
 const scroll = (categoryId, direction) => {
@@ -106,10 +106,10 @@ const deleteContent = (item) => {
     <main class="container mx-auto px-4 py-8">
       <h1 class="text-4xl font-bold text-[#434289] mb-8">My Content</h1>
       
-      <div v-for="(items, category, index) in categories" :key="category" class="mb-12">
+      <div v-for="([category, items]) in categories" :key="category" class="mb-12">
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-2xl font-bold text-[#434289]">{{ category }}</h2>
-          <div class="flex items-center gap-4">
+          <div v-if="items.length > 4" class="flex items-center gap-4">
             <div class="flex gap-2">
               <button 
                 @click="scroll(category, 'left')"
