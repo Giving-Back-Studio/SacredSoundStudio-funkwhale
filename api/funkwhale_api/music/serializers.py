@@ -857,6 +857,8 @@ class TrackCreateSerializer(serializers.ModelSerializer):
             uuid=validated_data.pop("upload")
         )
         upload.track = instance
+        upload.import_status = "pending"
+        upload.save()
         common_utils.attach_content(
             instance, "description", validated_data.get("description")
         )
