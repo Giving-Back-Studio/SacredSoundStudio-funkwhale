@@ -88,16 +88,17 @@ const viewMore = (categoryId) => {
   console.log(`View more for ${categoryId}`)
 }
 
-const initiateUpload = (categoryId) => {
-  console.log(`Initiate upload for ${categoryId}`)
-}
-
 const editContent = (item) => {
   console.log('Edit content:', item)
 }
 
 const deleteContent = (item) => {
   console.log('Delete content:', item)
+  axios.delete(`/tracks/${item.id}`)
+    .then(() => {
+      content.value = content.value.filter(i => i.id !== item.id)
+    })
+    .catch(useErrorHandler)
 }
 </script>
 
@@ -105,6 +106,10 @@ const deleteContent = (item) => {
   <div class="min-h-screen bg-[#F1F4F8]">
     <main class="container mx-auto px-4 py-8">
       <h1 class="text-4xl font-bold text-[#434289] mb-8">My Content</h1>
+
+      <div v-if="content.length === 0">
+        You haven't uploaded any content yet. <a href="/upload" class="text-blue-500 hover:underline">Upload now</a>.
+      </div>
       
       <div v-for="([category, items]) in categories" :key="category" class="mb-12">
         <div class="flex justify-between items-center mb-6">
@@ -165,12 +170,22 @@ const deleteContent = (item) => {
                     >
                       <Edit2 class="h-5 w-5" />
                     </button>
-                    <button 
-                      class="p-2 rounded-full bg-white text-red-500 hover:bg-gray-100"
-                      @click.stop="deleteContent(item)"
-                    >
-                      <Trash2 class="h-5 w-5" />
-                    </button>
+                    <dangerous-button @confirm="deleteContent(item)" :class="['p-2', 'rounded-full', 'bg-white', 'text-red-500', 'hover:bg-gray-100']">
+                      <Trash2 class="h-5 w-5 text-red-500" />
+                      <template #modal-header>
+                        <h3>Delete Track?</h3>
+                      </template>
+                      <template #modal-content>
+                        <div>
+                          <p class="text-black">
+                            Are you sure you want to delete "{{ item.title }}"?
+                          </p>
+                        </div>
+                      </template>
+                      <template #modal-confirm>
+                        <span>Delete</span>
+                      </template>
+                    </dangerous-button>
                   </div>
                 </div>
                 <div class="p-4">
