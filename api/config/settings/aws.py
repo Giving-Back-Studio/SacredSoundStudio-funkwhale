@@ -70,4 +70,5 @@ PROXY_MEDIA = False
 
 TYPESENSE_HOST = "typesense"
 
-#EMAIL_BACKEND = 'django_ses.SESBackend'
+EMAIL_BACKEND = 'django_ses.SESBackend'
+DEFAULT_FROM_EMAIL = 'Jacob Foster <jacobef10@gmail.com>'
