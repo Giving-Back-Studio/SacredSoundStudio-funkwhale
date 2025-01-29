@@ -1,56 +1,69 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
+import axios from 'axios'
 import { ChevronLeft, ChevronRight, UploadCloud, Edit2, Trash2, Clock } from 'lucide-vue-next'
+
+import store from '~/store'
+import useLogger from '~/composables/useLogger'
+import useErrorHandler from '~/composables/useErrorHandler'
+
+const logger = useLogger();
 
 const scrollContainers = ref({})
 const scrollPositions = ref({})
 
-const categories = ref([
-  {
-    id: 'studio',
-    title: 'Studio Production',
-    items: Array.from({ length: 5 }, (_, i) => ({
-      id: `studio-${i}`,
-      title: `Studio Track ${i + 1}`,
-      artist: 'You',
-      duration: '3:45',
-      cover: `/placeholder.svg?height=280&width=280`
-    }))
-  },
-  {
-    id: 'meditation',
-    title: 'Meditation',
-    items: Array.from({ length: 3 }, (_, i) => ({
-      id: `meditation-${i}`,
-      title: `Meditation Session ${i + 1}`,
-      artist: 'You',
-      duration: '15:00',
-      cover: `/placeholder.svg?height=280&width=280`
-    }))
-  },
-  {
-    id: 'djset',
-    title: 'DJ Set',
-    items: Array.from({ length: 4 }, (_, i) => ({
-      id: `djset-${i}`,
-      title: `DJ Set ${i + 1}`,
-      artist: 'You',
-      duration: '60:00',
-      cover: `/placeholder.svg?height=280&width=280`
-    }))
-  },
-  {
-    id: 'live',
-    title: 'Live Recording',
-    items: Array.from({ length: 2 }, (_, i) => ({
-      id: `live-${i}`,
-      title: `Live Session ${i + 1}`,
-      artist: 'You',
-      duration: '45:00',
-      cover: `/placeholder.svg?height=280&width=280`
-    }))
+const content = ref([])
+
+// Load TaggedItems filtered by Artist
+const fetchContent = async () => {
+  const params = {
+    artist: store.state.auth.profile.artist
   }
-])
+
+  const measureLoading = logger.time('Fetching My Content')
+  try {
+    const response = await axios.get('/tracks', {
+      params,
+      paramsSerializer: {
+        indexes: null
+      }
+    })
+
+    content.value = response.data.results
+  } catch (error) {
+    useErrorHandler(error)
+    content.value = undefined
+  } finally {
+    measureLoading()
+  }
+}
+fetchContent()
+
+const categories = computed(() => {
+  const cats = {}
+  debugger;
+  for (const item of content.value) {
+    const slimItem = {
+      id: item.id,
+      title: item.title,
+      artist: item.artist.name,
+      duration: item.uploads?.duration,
+      cover: item.cover || item.album.cover?.urls?.medium_square_crop || '/placeholder.svg?height=280&width=280'
+    }
+
+    for (const tagIdx in item.tags) {
+      const tag = item.tags[tagIdx]
+      if (cats[tag]) {
+        cats[tag].push(slimItem)
+      } else {
+        cats[tag] = [slimItem]
+        scrollPositions.value[tag] = 0
+      }
+    }
+  }
+
+  return cats;
+})
 
 const scroll = (categoryId, direction) => {
   const container = scrollContainers.value[categoryId]
@@ -86,12 +99,6 @@ const editContent = (item) => {
 const deleteContent = (item) => {
   console.log('Delete content:', item)
 }
-
-onMounted(() => {
-  categories.value.forEach(category => {
-    scrollPositions.value[category.id] = 0
-  })
-})
 </script>
 
 <template>
@@ -99,30 +106,30 @@ onMounted(() => {
     <main class="container mx-auto px-4 py-8">
       <h1 class="text-4xl font-bold text-[#434289] mb-8">My Content</h1>
       
-      <div v-for="category in categories" :key="category.id" class="mb-12">
+      <div v-for="(items, category, index) in categories" :key="category" class="mb-12">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-[#434289]">{{ category.title }}</h2>
+          <h2 class="text-2xl font-bold text-[#434289]">{{ category }}</h2>
           <div class="flex items-center gap-4">
             <div class="flex gap-2">
               <button 
-                @click="scroll(category.id, 'left')"
+                @click="scroll(category, 'left')"
                 class="p-2 rounded-full bg-white shadow-sm hover:bg-gray-50 transition-colors"
-                :disabled="scrollPositions[category.id] <= 0"
-                :aria-label="`Scroll ${category.title} left`"
+                :disabled="scrollPositions[category] <= 0"
+                :aria-label="`Scroll ${category} left`"
               >
                 <ChevronLeft class="h-5 w-5 text-[#434289]" />
               </button>
               <button 
-                @click="scroll(category.id, 'right')"
+                @click="scroll(category, 'right')"
                 class="p-2 rounded-full bg-white shadow-sm hover:bg-gray-50 transition-colors"
-                :aria-label="`Scroll ${category.title} right`"
+                :aria-label="`Scroll ${category} right`"
               >
                 <ChevronRight class="h-5 w-5 text-[#434289]" />
               </button>
             </div>
             <button 
               class="text-sm font-medium text-[#434289] hover:underline"
-              @click="viewMore(category.id)"
+              @click="viewMore(category)"
             >
               More
             </button>
@@ -131,29 +138,16 @@ onMounted(() => {
 
         <div 
           class="relative overflow-hidden"
-          :ref="el => { if (el) scrollContainers[category.id] = el }"
+          :ref="el => { if (el) scrollContainers[category] = el }"
         >
           <div 
             class="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
-            @scroll="updateScrollPosition(category.id, $event)"
+            @scroll="updateScrollPosition(category, $event)"
           >
-            <!-- Upload Card -->
-            <div class="flex-none w-[280px]">
-              <button 
-                @click="initiateUpload(category.id)"
-                class="w-full h-full bg-white rounded-lg shadow-sm overflow-hidden transition-transform hover:scale-[1.02] group"
-              >
-                <div class="aspect-square flex flex-col items-center justify-center p-6 border-2 border-dashed border-[#434289] rounded-lg m-4">
-                  <UploadCloud class="h-12 w-12 text-[#434289] mb-4 group-hover:scale-110 transition-transform" />
-                  <p class="font-semibold text-[#434289] text-center">Upload {{ category.title }}</p>
-                  <p class="text-sm text-gray-600 text-center mt-2">Click to browse or drag and drop</p>
-                </div>
-              </button>
-            </div>
 
             <!-- Content Items -->
             <div 
-              v-for="item in category.items" 
+              v-for="item in items" 
               :key="item.id"
               class="flex-none w-[280px]"
             >
