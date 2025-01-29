@@ -56,6 +56,14 @@ class RegisterView(registration_views.RegisterView):
                 privacy_level="instance"
             )
             library.save()
+            channel = Channel.objects.create(
+                library=library,
+                actor=user.actor,
+                attributed_to=user.actor,
+                artist=artist
+            )
+            channel.save()
+
             user.artist = artist
             user.save()
 
