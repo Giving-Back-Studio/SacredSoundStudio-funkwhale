@@ -72,3 +72,4 @@ TYPESENSE_HOST = "typesense"
 
 EMAIL_BACKEND = 'django_ses.SESBackend'
 DEFAULT_FROM_EMAIL = 'Sacred Sound <Team@sacredsound.app>'
+AWS_SES_REGION_NAME = getenv('AWS_DEFAULT_REGION')
