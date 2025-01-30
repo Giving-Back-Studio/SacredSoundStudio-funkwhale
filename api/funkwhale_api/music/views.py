@@ -257,7 +257,6 @@ class LibraryViewSet(
     lookup_field = "uuid"
     queryset = (
         models.Library.objects.all()
-        .filter(channel=None)
         .select_related("actor")
         .order_by("-creation_date")
         .annotate(_uploads_count=Count("uploads"))
