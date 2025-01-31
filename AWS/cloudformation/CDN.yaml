@@ -191,6 +191,13 @@ Resources:
             Compress: true
             CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6'
             ResponseHeadersPolicyId: !Ref CorsResponsePolicy
+            PathPattern: '__sized__/*'
+          - TargetOriginId: s3-bucket-root
+            AllowedMethods: [GET, HEAD]
+            ViewerProtocolPolicy: redirect-to-https
+            Compress: true
+            CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6'
+            ResponseHeadersPolicyId: !Ref CorsResponsePolicy
             PathPattern: 'tracks/*'
           - TargetOriginId: s3-bucket-root
             AllowedMethods: [GET, HEAD]
