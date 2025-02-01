@@ -95,13 +95,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F1F4F8]">
+  <div class="min-h-screen main with-background">
     <main class="container mx-auto px-4 py-8">
-      <h1 class="text-4xl font-bold text-[#434289] mb-8">My Content</h1>
+      <h1 class="text-4xl mb-8 font-serif">My Content</h1>
       
       <div v-for="category in categories" :key="category.id" class="mb-12">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-[#434289]">{{ category.title }}</h2>
+          <h2 class="text-2xl font-serif">{{ category.title }}</h2>
           <div class="flex items-center gap-4">
             <div class="flex gap-2">
               <button 
@@ -110,18 +110,18 @@ onMounted(() => {
                 :disabled="scrollPositions[category.id] <= 0"
                 :aria-label="`Scroll ${category.title} left`"
               >
-                <ChevronLeft class="h-5 w-5 text-[#434289]" />
+                <ChevronLeft class="h-5 w-5" />
               </button>
               <button 
                 @click="scroll(category.id, 'right')"
                 class="p-2 rounded-full bg-white shadow-sm hover:bg-gray-50 transition-colors"
                 :aria-label="`Scroll ${category.title} right`"
               >
-                <ChevronRight class="h-5 w-5 text-[#434289]" />
+                <ChevronRight class="h-5 w-5" />
               </button>
             </div>
             <button 
-              class="text-sm font-medium text-[#434289] hover:underline"
+              class="text-sm font-medium hover:underline"
               @click="viewMore(category.id)"
             >
               More
@@ -141,7 +141,7 @@ onMounted(() => {
             <div class="flex-none w-[280px]">
               <button 
                 @click="initiateUpload(category.id)"
-                class="w-full h-full bg-white rounded-lg shadow-sm overflow-hidden transition-transform hover:scale-[1.02] group"
+                class="w-full h-full bg-white rounded-lg shadow-sm overflow-hidden transition-transform hover:scale-[1.02] group cursor-pointer hover:bg-white"
               >
                 <div class="aspect-square flex flex-col items-center justify-center p-6 border-2 border-dashed border-[#434289] rounded-lg m-4">
                   <UploadCloud class="h-12 w-12 text-[#434289] mb-4 group-hover:scale-110 transition-transform" />
@@ -196,6 +196,15 @@ onMounted(() => {
   </div>
 </template>
 
+<style>
+/* Remove scoped to ensure these styles take precedence */
+.main.with-background {
+  background: var(--site-background) !important;
+}
+
+/* Rest of your styles can remain scoped */
+</style>
+
 <style scoped>
 .scrollbar-hide {
   -ms-overflow-style: none;
@@ -203,5 +212,30 @@ onMounted(() => {
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+:deep(h1), :deep(h2) {
+  color: var(--primary-color);
+}
+
+:deep(.text-primary) {
+  color: var(--primary-color);
+}
+
+:deep(button), :deep(.button) {
+  color: var(--primary-color);
+}
+
+:deep(.bg-primary) {
+  background-color: var(--primary-color);
+}
+
+:deep(.content-card) {
+  background: var(--form-background);
+}
+
+/* Add this new style to force white background on hover */
+button:hover {
+  background-color: white !important;
 }
 </style>

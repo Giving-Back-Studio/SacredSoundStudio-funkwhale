@@ -8,7 +8,7 @@ import { setupDropdown } from '~/utils/fomantic'
 import { useRoute } from 'vue-router'
 import { useStore } from '~/store'
 import { useI18n } from 'vue-i18n'
-import { Menu } from 'lucide-vue-next'
+import { Menu, Settings } from 'lucide-vue-next'
 
 import SemanticModal from '~/components/semantic/Modal.vue'
 import UserModal from '~/components/common/UserModal.vue'
@@ -81,8 +81,28 @@ watchEffect(() => {
   if (store.state.auth.authenticated) {
     setupDropdown('.admin-dropdown', el.value)
   }
-
-  setupDropdown('.user-dropdown', el.value)
+  
+  setupDropdown('.user-dropdown', el.value, {
+    action: 'click',
+    direction: 'downward',
+    transition: 'dropdown',
+    on: 'click',
+    // Adding these to modify the user menu for beta:
+    closable: true,
+    allowCategorySelection: false,
+    selectOnKeydown: false,
+    forceSelection: false,
+    hideAdditions: true,
+    match: 'none',
+    // Add these new options to restrict menu items
+    useLabels: false,
+    maxSelections: 0,
+    showOnFocus: false,
+    apiSettings: false,
+    saveRemoteData: false,
+    useSearch: false,
+    fullTextSearch: false
+  })
 })
 
 onMounted(() => {
@@ -120,7 +140,7 @@ const toggleSidebar = () => {
             :title="labels.administration"
           >
             <div class="item ui inline admin-dropdown dropdown">
-              <i class="wrench icon" />
+              <Settings class="wrench icon" />
               <div
                 v-if="moderationNotifications > 0"
                 :class="['ui', 'accent', 'mini', 'bottom floating', 'circular', 'label']"
@@ -180,31 +200,23 @@ const toggleSidebar = () => {
         </div>
         <template v-if="width > 768">
           <div class="item">
-            <div class="ui user-dropdown dropdown">
-              <img
-                v-if="$store.state.auth.authenticated && $store.state.auth.profile?.avatar && $store.state.auth.profile?.avatar.urls.medium_square_crop"
-                class="ui avatar image"
-                alt=""
-                :src="$store.getters['instance/absoluteUrl']($store.state.auth.profile?.avatar.urls.medium_square_crop)"
-              >
-              <actor-avatar
-                v-else-if="$store.state.auth.authenticated"
-                :actor="{preferred_username: $store.state.auth.username, full_username: $store.state.auth.username,}"
-              />
-              <i
-                v-else
-                class="cog icon"
-              />
-              <div
-                v-if="$store.state.ui.notifications.inbox + additionalNotifications > 0"
-                :class="['ui', 'accent', 'mini', 'bottom floating', 'circular', 'label']"
-              >
-                {{ $store.state.ui.notifications.inbox + additionalNotifications }}
+            <div class="ui dropdown user-dropdown">
+              <div class="trigger">
+                <img
+                  v-if="$store.state.auth.authenticated && $store.state.auth.profile?.avatar && $store.state.auth.profile?.avatar.urls.medium_square_crop"
+                  class="ui avatar image"
+                  alt=""
+                  :src="$store.getters['instance/absoluteUrl']($store.state.auth.profile?.avatar.urls.medium_square_crop)"
+                >
+                <actor-avatar
+                  v-else-if="$store.state.auth.authenticated"
+                  :actor="{preferred_username: $store.state.auth.username, full_username: $store.state.auth.username,}"
+                />
+                <i v-else class="cog icon" />
               </div>
-              <user-menu
-                v-bind="$attrs"
-                :width="width"
-              />
+              <div class="menu dropdown-menu">
+                <user-menu v-bind="$attrs" :width="width" />
+              </div>
             </div>
           </div>
         </template>
@@ -386,7 +398,7 @@ const toggleSidebar = () => {
 
           <router-link
             v-if="$store.state.auth.authenticated"
-            class="item upload-button"
+            class="ui primary button"
             :to="{ path: '/upload' }"
           >
             {{ $t('components.Sidebar.link.upload') }}
@@ -529,5 +541,45 @@ const toggleSidebar = () => {
 .ui.vertical.menu a.item[href="/mycontent"]:hover {
   background: transparent !important;
   color: #434289 !important;
+}
+
+.ui.dropdown.user-dropdown {
+  position: relative !important;
+  
+  .trigger {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+
+  .dropdown-menu {
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    left: auto !important;
+    min-width: 200px !important;
+    background: var(--sidebar-background) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 4px !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
+    margin-top: 0.5rem !important;
+    z-index: 1000 !important;
+    
+    .menu {
+      position: static !important;
+      border: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
+    }
+    
+    .item {
+      color: var(--primary-color) !important;
+      padding: 0.8rem 1rem !important;
+      
+      &:hover {
+        background-color: rgba(0,0,0,0.05) !important;
+      }
+    }
+  }
 }
 </style>

@@ -1,3 +1,27 @@
+.ui.modal {
+  &:not(.fullscreen) {
+    position: absolute !important;
+    top: 4em !important;
+    right: auto !important;
+    left: 4.5em !important;
+    width: 300px !important;
+    max-width: 300px !important;
+    height: auto !important;
+    margin: 0 !important;
+    transform: none !important;
+    z-index: 1001 !important;
+  }
+  
+  .content {
+    max-height: calc(90vh - 10em) !important;
+    overflow-y: auto !important;
+  }
+  
+  .header {
+    padding: 1rem !important;
+  }
+}
+
 .ui.overlay.fullscreen.modal {
   .user-modal-title,
   .user-modal-subtitle {
@@ -21,6 +45,7 @@
 
 .scrolling.dimmable.dimmed {
   > .dimmer {
+    z-index: 1000 !important;
     overflow: auto;
     --webkit-overflow-scrolling: touch;
   }

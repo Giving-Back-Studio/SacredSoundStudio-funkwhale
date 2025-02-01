@@ -2,8 +2,42 @@
   outline-color: white;
 }
 button, *[role="button"] {
-  * {
-    cursor: pointer;
+  background-color: #434289;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-family: var(--body-font);
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: darken(#434289, 5%);
+  }
+
+  &:active {
+    background-color: darken(#434289, 10%);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+    pointer-events: none;
+  }
+}
+
+// Make secondary button styles more specific to override Semantic UI
+button.secondary,
+.ui.button.secondary {
+  background-color: #A3C4A3 !important;
+  color: #434289 !important;
+
+  &:hover {
+    background-color: darken(#A3C4A3, 5%) !important;
+  }
+
+  &:active {
+    background-color: darken(#A3C4A3, 10%) !important;
   }
 }
 
@@ -12,25 +46,17 @@ button, *[role="button"] {
 }
 
 button.reset {
+  background: transparent;
   border: none;
   margin: 0;
   padding: 0;
   width: auto;
   overflow: visible;
-
-  background: transparent;
-
-  /* inherit font & color from ancestor */
   color: inherit;
   font: inherit;
-
-  /* Normalize `line-height`. Cannot be changed from `normal` in Firefox 4+. */
   line-height: normal;
-
-  /* Corrects font smoothing for webkit */
   -webkit-font-smoothing: inherit;
   -moz-osx-font-smoothing: inherit;
-  /* Corrects inability to style clickable `input` types in iOS */
   -webkit-appearance: none;
   text-align: inherit;
 }
@@ -106,4 +132,32 @@ button.reset {
   -webkit-box-shadow: none;
   box-shadow: none;
   pointer-events: none !important;
+}
+
+.ui.button {
+  &.primary {
+    background-color: var(--primary-color);
+    color: white;
+    
+    &:hover {
+      background-color: var(--primary-hover-color);
+    }
+    
+    &:active {
+      background-color: var(--primary-active-color);
+    }
+  }
+  
+  &.alternative {
+    background-color: var(--alternative-color);
+    color: white;
+    
+    &:hover {
+      background-color: var(--alternative-hover-color);
+    }
+    
+    &:active {
+      background-color: var(--alternative-active-color);
+    }
+  }
 }

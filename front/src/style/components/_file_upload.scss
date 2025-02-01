@@ -1,12 +1,10 @@
-
 .component-file-upload {
   .file-uploads.ui.button {
     display: block;
     padding: 2em 1em;
     width: 100%;
     box-shadow: none;
-    border-style: dashed !important;
-    border: 2px solid rgba(50, 50, 50, 0.5);
+    border: none !important;
     font-size: 1.5em;
   }
   .file-uploads.channels.ui.button {

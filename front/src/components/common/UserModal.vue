@@ -89,6 +89,7 @@ const locale = computed(() => SUPPORTED_LOCALES[i18nLocale.value as SupportedLan
     </div>
     <div class="content">
       <div class="ui one column unstackable grid">
+        <!-- Commenting out language selector for beta
         <div class="row">
           <div
             class="column"
@@ -106,6 +107,9 @@ const locale = computed(() => SUPPORTED_LOCALES[i18nLocale.value as SupportedLan
             </div>
           </div>
         </div>
+        -->
+
+        <!-- Commenting out theme selector for beta
         <div class="row">
           <div
             class="column"
@@ -124,7 +128,10 @@ const locale = computed(() => SUPPORTED_LOCALES[i18nLocale.value as SupportedLan
           </div>
         </div>
         <div class="ui divider" />
+        -->
+
         <template v-if="$store.state.auth.authenticated">
+          <!-- Commenting out profile, notifications, settings for beta
           <div class="row">
             <div
               class="column"
@@ -171,32 +178,55 @@ const locale = computed(() => SUPPORTED_LOCALES[i18nLocale.value as SupportedLan
             </router-link>
           </div>
           <div class="ui divider" />
-        </template>
-        <div class="row">
-          <a
-            class="column"
-            href="https://funkwhale.audio/help"
-            target="_blank"
-          >
-            <i class="user-modal list-icon life ring outline icon" />
-            <span class="user-modal list-item">{{ labels.help }}</span>
-          </a>
-        </div>
-        <div class="row">
-          <a
-            class="column"
-            href="https://docs.funkwhale.audio"
-            target="_blank"
-          >
-            <i class="user-modal list-icon book open icon" />
-            <span class="user-modal list-item">{{ labels.docs }}</span>
-          </a>
-        </div>
-        <div class="row">
+          -->
+
+          <!-- Commenting out help section for beta
+          <div class="row">
+            <a
+              class="column"
+              href="https://funkwhale.audio/help"
+              target="_blank"
+            >
+              <i class="user-modal list-icon life ring outline icon" />
+              <span class="user-modal list-item">{{ labels.help }}</span>
+            </a>
+          </div>
+          <div class="row">
+            <a
+              class="column"
+              href="https://docs.funkwhale.audio"
+              target="_blank"
+            >
+              <i class="user-modal list-icon book open icon" />
+              <span class="user-modal list-item">{{ labels.docs }}</span>
+            </a>
+          </div>
+          <div class="row">
+            <router-link
+              v-slot="{ navigate }"
+              custom
+              :to="{ name: 'about' }"
+            >
+              <div
+                class="column"
+                role="button"
+                @click="navigate"
+                @keypress.enter="navigate()"
+              >
+                <i class="user-modal list-icon question circle outline icon" />
+                <span class="user-modal list-item">{{ labels.about }}</span>
+              </div>
+            </router-link>
+          </div>
+          <div class="ui divider" />
+          -->
+
+          <!-- Only keeping logout for beta -->
           <router-link
+            v-if="$store.state.auth.authenticated"
             v-slot="{ navigate }"
             custom
-            :to="{ name: 'about' }"
+            :to="{ name: 'logout' }"
           >
             <div
               class="column"
@@ -204,29 +234,13 @@ const locale = computed(() => SUPPORTED_LOCALES[i18nLocale.value as SupportedLan
               @click="navigate"
               @keypress.enter="navigate()"
             >
-              <i class="user-modal list-icon question circle outline icon" />
-              <span class="user-modal list-item">{{ labels.about }}</span>
+              <i class="user-modal list-icon sign out alternate icon" />
+              <span class="user-modal list-item">{{ labels.logout }}</span>
             </div>
           </router-link>
-        </div>
-        <div class="ui divider" />
+        </template>
 
-        <router-link
-          v-if="$store.state.auth.authenticated"
-          v-slot="{ navigate }"
-          custom
-          :to="{ name: 'logout' }"
-        >
-          <div
-            class="column"
-            role="button"
-            @click="navigate"
-            @keypress.enter="navigate()"
-          >
-            <i class="user-modal list-icon sign out alternate icon" />
-            <span class="user-modal list-item">{{ labels.logout }}</span>
-          </div>
-        </router-link>
+        <!-- Commenting out login/signup for beta
         <router-link
           v-else
           v-slot="{ navigate }"
@@ -259,6 +273,7 @@ const locale = computed(() => SUPPORTED_LOCALES[i18nLocale.value as SupportedLan
             <span class="user-modal list-item">{{ labels.signup }}</span>
           </div>
         </router-link>
+        -->
       </div>
     </div>
   </semantic-modal>
