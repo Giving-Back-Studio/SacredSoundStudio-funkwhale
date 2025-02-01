@@ -167,6 +167,8 @@ Resources:
               Value: "apikey"
             - Name: FUNKWHALE_SENTRY_DSN
               Value: "https://76e86b1b6de843608e9ea47f25ccb643@app.glitchtip.com/10060"
+            - Name: FUNKWHALE_SENTRY_SR
+              Value: "0.1"
           Secrets:
             - Name: DB_USERNAME
               ValueFrom: !Sub "${RDSConnectionSecret}:username::"
