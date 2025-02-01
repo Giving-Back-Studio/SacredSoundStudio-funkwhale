@@ -862,6 +862,7 @@ class TrackCreateSerializer(serializers.ModelSerializer):
         upload.track = instance
         upload.import_status = "pending"
         upload.save()
+        common_utils.on_commit(tasks.process_upload.delay, upload_id=upload.pk)
         common_utils.attach_content(
             instance, "description", validated_data.get("description")
         )
