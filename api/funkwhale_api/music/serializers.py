@@ -830,6 +830,7 @@ class TrackCreateSerializer(serializers.ModelSerializer):
     upload = serializers.CharField(required=False, allow_blank=True, max_length=56)
     tagged_items = tags_serializers.TaggedItemSerializer(many=True)
     description = common_serializers.ContentSerializer(allow_null=True, required=False)
+    cover = COVER_WRITE_FIELD
 
     class Meta:
         model = models.Track
@@ -841,7 +842,8 @@ class TrackCreateSerializer(serializers.ModelSerializer):
             "release_date",
             "description",
             "tagged_items",
-            "upload"
+            "upload",
+            "cover"
         )
 
     def create(self, validated_data):
@@ -851,7 +853,8 @@ class TrackCreateSerializer(serializers.ModelSerializer):
             record_label=validated_data["record_label"],
             release_date=validated_data["release_date"],
             title=validated_data["title"],
-            album=validated_data["album"]
+            album=validated_data["album"],
+            attachment_cover=validated_data.get("cover"),
         )
         upload = models.Upload.objects.get(
             uuid=validated_data.pop("upload")

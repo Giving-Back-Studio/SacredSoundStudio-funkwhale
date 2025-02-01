@@ -56,7 +56,8 @@ const createTrackTemplate = (file) => ({
   }),
   recordLabel: '',
   releaseDate: '',
-  file: file
+  file: file,
+  cover: null
 })
 
 // Tracks metadata
@@ -209,6 +210,10 @@ const submitUpload = async () => {
       artist: artistId,
       upload: uploadedFiles.value[i].response.uuid
     };
+
+    if (uploadType.value !== 'album') {
+      trackData.cover = track.cover;
+    }
 
     const tags = [];
     for (const category in track.categoryTags) {
@@ -372,7 +377,7 @@ const goToMyContent = () => {
                 ></textarea>
               </div>
             </div>
-            
+
             <!-- Album Cover Upload -->
             <div class="mb-6">
               <label class="block mb-2">Album Cover*</label>
@@ -522,6 +527,24 @@ const goToMyContent = () => {
                 placeholder="Enter track description"
                 rows="3"
               ></textarea>
+            </div>
+
+            <div v-if="uploadType !== 'album'" class="col-span-2">
+              <label class="block mb-2">Track Cover</label>
+              <div
+                @dragover.prevent
+                class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors"
+                :class="{'border-white bg-gray-700': isDraggingCover}"
+                @dragenter="isDraggingCover = true"
+                @dragleave="isDraggingCover = false"
+              >
+                <attachment-input
+                  v-model="currentTrack.cover"
+                  name="cover"
+                  imageClass="podcast">
+                </attachment-input>
+              </div>
+              <label for="cover"></label>
             </div>
 
             <!-- Metadata -->

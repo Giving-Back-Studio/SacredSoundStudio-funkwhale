@@ -48,7 +48,7 @@ const categories = computed(() => {
       title: item.title,
       artist: item.artist.name,
       duration: item.uploads?.duration,
-      cover: item.cover || item.album.cover?.urls?.medium_square_crop || '/placeholder.svg?height=280&width=280'
+      cover: item.cover?.urls?.medium_square_crop || item.album?.cover?.urls?.medium_square_crop || '/placeholder.svg?height=280&width=280'
     }
 
     for (const tagIdx in item.tags) {
