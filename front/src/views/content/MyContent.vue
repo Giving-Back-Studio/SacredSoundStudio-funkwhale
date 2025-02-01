@@ -103,9 +103,9 @@ const deleteContent = (item) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F1F4F8]">
+  <div class="min-h-screen main with-background">
     <main class="container mx-auto px-4 py-8">
-      <h1 class="text-4xl font-bold text-[#434289] mb-8">My Content</h1>
+      <h1 class="text-4xl mb-8 font-serif">My Content</h1>
 
       <div v-if="content.length === 0">
         You haven't uploaded any content yet. <a href="/upload" class="text-blue-500 hover:underline">Upload now</a>.
@@ -113,7 +113,7 @@ const deleteContent = (item) => {
       
       <div v-for="([category, items]) in categories" :key="category" class="mb-12">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-[#434289]">{{ category }}</h2>
+          <h2 class="text-2xl font-serif">{{ category }}</h2>
           <div v-if="items.length > 4" class="flex items-center gap-4">
             <div class="flex gap-2">
               <button 
@@ -122,18 +122,18 @@ const deleteContent = (item) => {
                 :disabled="scrollPositions[category] <= 0"
                 :aria-label="`Scroll ${category} left`"
               >
-                <ChevronLeft class="h-5 w-5 text-[#434289]" />
+                <ChevronLeft class="h-5 w-5" />
               </button>
               <button 
                 @click="scroll(category, 'right')"
                 class="p-2 rounded-full bg-white shadow-sm hover:bg-gray-50 transition-colors"
                 :aria-label="`Scroll ${category} right`"
               >
-                <ChevronRight class="h-5 w-5 text-[#434289]" />
+                <ChevronRight class="h-5 w-5" />
               </button>
             </div>
             <button 
-              class="text-sm font-medium text-[#434289] hover:underline"
+              class="text-sm font-medium hover:underline"
               @click="viewMore(category)"
             >
               More
@@ -205,6 +205,15 @@ const deleteContent = (item) => {
   </div>
 </template>
 
+<style>
+/* Remove scoped to ensure these styles take precedence */
+.main.with-background {
+  background: var(--site-background) !important;
+}
+
+/* Rest of your styles can remain scoped */
+</style>
+
 <style scoped>
 .scrollbar-hide {
   -ms-overflow-style: none;
@@ -212,5 +221,30 @@ const deleteContent = (item) => {
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+:deep(h1), :deep(h2) {
+  color: var(--primary-color);
+}
+
+:deep(.text-primary) {
+  color: var(--primary-color);
+}
+
+:deep(button), :deep(.button) {
+  color: var(--primary-color);
+}
+
+:deep(.bg-primary) {
+  background-color: var(--primary-color);
+}
+
+:deep(.content-card) {
+  background: var(--form-background);
+}
+
+/* Add this new style to force white background on hover */
+button:hover {
+  background-color: white !important;
 }
 </style>

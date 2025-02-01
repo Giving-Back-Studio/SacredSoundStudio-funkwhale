@@ -37,133 +37,51 @@ const labels = computed(() => ({
 
 <template>
   <div class="ui menu">
+    <!-- Commenting out all menu items except logout for beta -->
+    <!--
     <div class="ui scrolling dropdown item">
       <i class="language icon" />
       {{ labels.language }}
       <i class="dropdown icon" />
-      <div
-        id="language-select"
-        class="menu"
-      >
-        <a
-          v-for="(language, key) in SUPPORTED_LOCALES"
-          :key="key"
-          :class="[{'active': $i18n.locale === key},'item']"
-          :value="key"
-          @click="setI18nLanguage(key)"
-        >{{ language }}</a>
+      <div id="language-select" class="menu">
+        <a v-for="(language, key) in SUPPORTED_LOCALES" :key="key" :class="[{'active': $i18n.locale === key},'item']" :value="key" @click="setI18nLanguage(key)">{{ language }}</a>
       </div>
     </div>
+
     <div class="ui dropdown item">
       <i class="palette icon" />
       {{ labels.theme }}
       <i class="dropdown icon" />
-      <div
-        id="theme-select"
-        class="menu"
-      >
-        <a
-          v-for="th in themes"
-          :key="th.key"
-          :class="[{'active': theme === th.key}, 'item']"
-          :value="th.key"
-          @click="theme = th.key"
-        >
+      <div id="theme-select" class="menu">
+        <a v-for="th in themes" :key="th.key" :class="[{'active': theme === th.key}, 'item']" :value="th.key" @click="theme = th.key">
           <i :class="th.icon" />
           {{ th.name }}
         </a>
       </div>
     </div>
+
     <template v-if="$store.state.auth.authenticated">
       <div class="divider" />
-      <router-link
-        class="item"
-        :to="{name: 'profile.overview', params: { username: $store.state.auth.username },}"
-      >
+      <router-link class="item" :to="{name: 'profile.overview', params: { username: $store.state.auth.username },}">
         <i class="user icon" />
         {{ labels.profile }}
       </router-link>
-      <router-link
-        v-if="$store.state.auth.authenticated"
-        class="item"
-        :to="{name: 'notifications'}"
-      >
+      <router-link v-if="$store.state.auth.authenticated" class="item" :to="{name: 'notifications'}">
         <i class="bell icon" />
-        <div
-          v-if="$store.state.ui.notifications.inbox > 0"
-          :title="labels.notifications"
-          :class="['ui', 'circular', 'mini', 'right floated', 'accent', 'label']"
-        >
+        <div v-if="$store.state.ui.notifications.inbox > 0" :title="labels.notifications" :class="['ui', 'circular', 'mini', 'right floated', 'accent', 'label']">
           {{ $store.state.ui.notifications.inbox }}
         </div>
         {{ labels.notifications }}
       </router-link>
-      <router-link
-        class="item"
-        :to="{ path: '/settings' }"
-      >
+      <router-link class="item" :to="{ path: '/settings' }">
         <i class="cog icon" />
         {{ labels.settings }}
       </router-link>
     </template>
-    <div class="divider" />
-    <div class="ui dropdown item">
-      <i class="life ring outline icon" />
-      {{ labels.support }}
-      <i class="dropdown icon" />
-      <div class="menu">
-        <a
-          href="https://forum.funkwhale.audio"
-          class="item"
-          target="_blank"
-        >
-          <i class="users icon" />
-          {{ labels.forum }}
-        </a>
-        <a
-          href="https://matrix.to/#/#funkwhale-support:matrix.org"
-          class="item"
-          target="_blank"
-        >
-          <i class="comment icon" />
-          {{ labels.chat }}
-        </a>
-        <a
-          href="https://dev.funkwhale.audio/funkwhale/funkwhale/issues"
-          class="item"
-          target="_blank"
-        >
-          <i class="gitlab icon" />
-          {{ labels.git }}
-        </a>
-      </div>
-    </div>
-    <a
-      href="https://docs.funkwhale.audio"
-      class="item"
-      target="_blank"
-    >
-      <i class="book open icon" />
-      {{ labels.docs }}
-    </a>
-    <a
-      href=""
-      class="item"
-      @click.prevent="emit('show:shortcuts-modal')"
-    >
-      <i class="keyboard icon" />
-      {{ labels.shortcuts }}
-    </a>
-    <router-link
-      v-if="$route.path != '/about'"
-      class="item"
-      :to="{ name: 'about' }"
-    >
-      <i class="question circle outline icon" />
-      {{ labels.about }}
-    </router-link>
-    <template v-if="$store.state.auth.authenticated && $route.path != '/logout'">
-      <div class="divider" />
+    -->
+
+    <!-- Only keeping logout functionality for beta -->
+    <template v-if="$store.state.auth.authenticated">
       <router-link
         class="item"
         style="color: var(--danger-color) !important;"
@@ -173,24 +91,50 @@ const labels = computed(() => ({
         {{ labels.logout }}
       </router-link>
     </template>
+
+    <!-- Commenting out remaining items
+    <div class="divider" />
+    <div class="ui dropdown item">
+      <i class="life ring outline icon" />
+      {{ labels.support }}
+      <i class="dropdown icon" />
+      <div class="menu">
+        <a href="https://forum.funkwhale.audio" class="item" target="_blank">
+          <i class="users icon" />
+          {{ labels.forum }}
+        </a>
+        <a href="https://matrix.to/#/#funkwhale-support:matrix.org" class="item" target="_blank">
+          <i class="comment icon" />
+          {{ labels.chat }}
+        </a>
+        <a href="https://dev.funkwhale.audio/funkwhale/funkwhale/issues" class="item" target="_blank">
+          <i class="gitlab icon" />
+          {{ labels.git }}
+        </a>
+      </div>
+    </div>
+    <a href="https://docs.funkwhale.audio" class="item" target="_blank">
+      <i class="book open icon" />
+      {{ labels.docs }}
+    </a>
+    <a href="" class="item" @click.prevent="emit('show:shortcuts-modal')">
+      <i class="keyboard icon" />
+      {{ labels.shortcuts }}
+    </a>
+
     <template v-if="!$store.state.auth.authenticated">
       <div class="divider" />
-      <router-link
-        class="item"
-        :to="{ name: 'login' }"
-      >
+      <router-link class="item" :to="{ name: 'login' }">
         <i class="sign in alternate icon" />
         {{ labels.login }}
       </router-link>
     </template>
     <template v-if="!$store.state.auth.authenticated && $store.state.instance.settings.users.registration_enabled.value">
-      <router-link
-        class="item"
-        :to="{ name: 'signup' }"
-      >
+      <router-link class="item" :to="{ name: 'signup' }">
         <i class="user icon" />
         {{ labels.signup }}
       </router-link>
     </template>
+    -->
   </div>
 </template>

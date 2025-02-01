@@ -61,13 +61,13 @@ const labels = computed(() => ({
           v-if="isLogin"
           button-classes="w-full bg-[#5850A9] hover:bg-[#4A4491] text-white py-3 rounded-md transition-colors"
           :show-signup="false"
-          next="/library"
+          next="/mycontent"
         />
         <SignupForm
           v-else
           button-classes="w-full bg-[#5850A9] hover:bg-[#4A4491] text-white py-3 rounded-md transition-colors"
           :show-login="false"
-          next="/library"
+          next="/mycontent"
         />
       </div>
 

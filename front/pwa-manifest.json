@@ -1,8 +1,8 @@
 {
-  "name": "Funkwhale",
+  "name": "Sacred Sound",
   "categories": ["music", "entertainment"],
-  "short_name": "Funkwhale",
-  "description": "Your free and federated audio platform",
+  "short_name": "Sacred Sound",
+  "description": "Music that heals, inspires, and awakens the soul.",
   "icons": [
     {
       "src": "android-chrome-192x192.png",

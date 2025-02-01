@@ -12,9 +12,9 @@ $success-hover-color: #3a9104 !default;
 $success-active-color: #198f35 !default;
 $success-focus-color: var(--success-hover-color) !default;
 
-$primary-color: #0050C6 !default;
-$primary-hover-color: #1678c2 !default;
-$primary-active-color: #1a69a4 !default;
+$primary-color: #434289 !default;
+$primary-hover-color: darken(#434289, 5%) !default;
+$primary-active-color: darken(#434289, 10%) !default;
 $primary-focus-color: var(--primary-hover-color) !default;
 
 $warning-color: #FBBD08 !default;
@@ -27,23 +27,22 @@ $danger-hover-color: #ff392b !default;
 $danger-active-color: #b21e1e !default;
 $danger-focus-color: var(--danger-hover-color) !default;
 
-$accent-color: #00B5AD !default;
-$accent-hover-color: #009c95 !default;
-$accent-active-color: #00827c !default;
-$accent-focus-color: var(--accent-hover-color) !default;
+$accent-color: var(--alternative-color) !default;
+$accent-hover-color: var(--alternative-hover-color) !default;
+$accent-active-color: var(--alternative-active-color) !default;
 
 $link-color: #0d52bf !default;
 $link-text-decoration: none !default;
 $link-hover-color: #002e99 !default;
 $link-hover-text-decoration: underline !default;
 
-$sidebar-background: #2D2F33 !default;
+$sidebar-background: #D9D9E7 !default;
 $sidebar-header-background: var(--sidebar-background) !default;
 $sidebar-header-color: var(--sidebar-color) !default;
 $sidebar-active-item-background: rgba(255, 255, 255, 0.15) !default;
 $sidebar-header-box-shadow: none !default;
 $sidebar-box-shadow: 0 0 20px rgba(34,36,38,.15) !default;
-$site-background: white !default;
+$site-background: #F1F4F8 !default;
 
 $text-color: rgba(0, 0, 0, 0.87) !default;
 $discrete-text-color: rgba(0, 0, 0, 0.72) !default;
@@ -119,3 +118,15 @@ $dimmer-background: rgba(255, 255, 255, 0.85) !default;
 $dimmer-color: var(--text-color) !default;
 
 $border-color: rgba(34, 36, 38, 0.15) !default;
+
+// Typography
+$heading-font: 'Playfair Display', serif !default;
+$body-font: 'Montserrat', sans-serif !default;
+$small-font-size: 0.875rem !default;  // 14px if base is 16px
+
+// Core theme colors
+$alternative-color: #A3C4A3 !default;
+$alternative-hover-color: darken(#A3C4A3, 5%) !default;
+$alternative-active-color: darken(#A3C4A3, 10%) !default;
+
+$form-background: #FFFFFF !default;

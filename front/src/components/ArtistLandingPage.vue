@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { UsersIcon, MusicIcon, HeartIcon, ChevronDownIcon } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { useStore } from '~/store'
@@ -11,9 +11,34 @@ const router = useRouter()
 const store = useStore()
 const logger = useLogger()
 
+// Set up meta information
+const pageTitle = 'Amplify Abundance - Sacred Sound Artist Platform'
+const pageDescription = 'Connect intimately with listeners that go deep. Join Sacred Sound to share your sacred music and receive support from listeners you inspire.'
+
+onMounted(() => {
+  // Update document title
+  document.title = pageTitle
+  
+  // Update meta tags programmatically
+  const updateMetaTag = (name: string, content: string) => {
+    let meta = document.querySelector(`meta[name="${name}"]`) ||
+               document.querySelector(`meta[property="${name}"]`)
+    if (!meta) {
+      meta = document.createElement('meta')
+      meta.setAttribute(name.includes('og:') ? 'property' : 'name', name)
+      document.head.appendChild(meta)
+    }
+    meta.setAttribute('content', content)
+  }
+
+  updateMetaTag('description', pageDescription)
+  updateMetaTag('og:title', pageTitle)
+  updateMetaTag('og:description', pageDescription)
+})
+
 whenever(() => store.state.auth.authenticated, () => {
-  logger.log('Authenticated, redirecting to /library…')
-  router.push('/library')
+  logger.log('Authenticated, redirecting to /mycontent')
+  router.push('/mycontent')
 })
 
 // FAQ functionality

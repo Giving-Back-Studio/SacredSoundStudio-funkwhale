@@ -254,3 +254,34 @@
         }
     }
 }
+.ui.dropdown.user-dropdown {
+    position: relative !important;
+    
+    .menu {
+        position: absolute !important;
+        top: 100% !important;
+        right: 0 !important;
+        width: 220px !important;  // Set fixed width
+        min-width: 220px !important;
+        max-width: 220px !important;
+        max-height: 500px !important;  // Limit maximum height
+        overflow-y: auto !important;
+        margin-top: 0.5rem !important;
+        transform: none !important;
+        
+        .item {
+            padding: 0.7rem 1rem !important;
+            font-size: 0.95rem !important;
+            
+            i.icon {
+                margin-right: 0.8rem !important;
+            }
+        }
+    }
+}
+
+// Ensure the dropdown container doesn't take full width
+.ui.menu .item .user-dropdown {
+    width: auto !important;
+    min-width: 0 !important;
+}

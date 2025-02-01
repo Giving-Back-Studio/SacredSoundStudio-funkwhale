@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { MusicIcon, UsersIcon, GraduationCapIcon } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { useStore } from '~/store'
@@ -11,9 +11,35 @@ const router = useRouter()
 const store = useStore()
 const logger = useLogger()
 
+// Set up meta information
+const pageTitle = 'Sacred Sound'
+const pageDescription = 'A space to resonate with higher vibrations. Receive sacred music through connecting with artists that inspire you.'
+
+
 whenever(() => store.state.auth.authenticated, () => {
-  logger.log('Authenticated, redirecting to /library…')
-  router.push('/library')
+  logger.log('Authenticated, redirecting to /mycontent')
+  router.push('/mycontent')
+})
+
+onMounted(() => {
+  // Update document title
+  document.title = pageTitle
+  
+  // Update meta tags programmatically
+  const updateMetaTag = (name: string, content: string) => {
+    let meta = document.querySelector(`meta[name="${name}"]`) ||
+               document.querySelector(`meta[property="${name}"]`)
+    if (!meta) {
+      meta = document.createElement('meta')
+      meta.setAttribute(name.includes('og:') ? 'property' : 'name', name)
+      document.head.appendChild(meta)
+    }
+    meta.setAttribute('content', content)
+  }
+
+  updateMetaTag('description', pageDescription)
+  updateMetaTag('og:title', pageTitle)
+  updateMetaTag('og:description', pageDescription)
 })
 
 // FAQ functionality
@@ -45,6 +71,12 @@ const navigateToAuth = () => {
 
 <template>
   <div class="min-h-screen bg-[#F1F4F8]">
+    <!-- Meta tags -->
+    <!-- <title>{{ pageTitle }}</title>
+    <meta name="description" :content="pageDescription">
+    <meta property="og:title" :content="pageTitle">
+    <meta property="og:description" :content="pageDescription"> -->
+    
     <!-- Hero Section -->
     <header class="relative h-screen min-h-[600px] overflow-hidden">
       <img 

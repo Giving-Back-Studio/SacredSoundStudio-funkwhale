@@ -16,16 +16,16 @@ const labels = computed(() => ({
     <section class="ui vertical stripe segment">
       <div
         v-if="$store.state.auth.authenticated"
-        class="ui small text container"
+        class="ui primary small text container"
       >
-        <h2>
+        <h2 class="ui primary header">
           {{ $t('components.auth.Logout.header.confirm') }}
         </h2>
-        <p>
+        <p class="text-primary">
           {{ $t('components.auth.Logout.message.loggedIn', { username: $store.state.auth.username }) }}
         </p>
         <button
-          class="ui button"
+          class="ui primary button"
           @click="$store.dispatch('auth/logout')"
         >
           {{ $t('components.auth.Logout.button.logout') }}
@@ -33,14 +33,14 @@ const labels = computed(() => ({
       </div>
       <div
         v-else
-        class="ui small text container"
+        class="ui primary small text container"
       >
-        <h2>
+        <h2 class="ui primary header">
           {{ $t('components.auth.Logout.header.unauthenticated') }}
         </h2>
         <router-link
-          to="/login"
-          class="ui button"
+          to="/auth"
+          class="ui primary button"
         >
           {{ $t('components.auth.Logout.link.login') }}
         </router-link>

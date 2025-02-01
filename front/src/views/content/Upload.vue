@@ -13,6 +13,7 @@ import TagCategorySelector from '~/components/library/TagCategorySelector.vue'
 import FileUploadWidget from '~/components/library/FileUploadWidget.vue'
 import SemanticModal from '~/components/semantic/Modal.vue'
 import content from '~/router/routes/content'
+import { Music4Icon, Music2Icon, UploadCloudIcon } from 'lucide-vue-next'
 
 
 const store = useStore();
@@ -283,7 +284,7 @@ const goToMyContent = () => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-6">
+    <div class="min-h-screen main with-background text-primary p-6">
       <div class="max-w-4xl mx-auto">
         <!-- Stepper -->
         <div class="mb-8">
@@ -294,14 +295,13 @@ const goToMyContent = () => {
                 :class="{'border-white': currentStep >= step.number}"
               >
                 <div 
-                  class="w-10 h-10 rounded-full flex items-center justify-center z-10"
-                  :class="currentStep >= step.number ? 'bg-white text-black' : 'border-2 border-gray-600'"
+                  class="w-10 h-10 rounded-full flex items-center justify-center z-10 step-circle"
+                  :class="currentStep >= step.number ? 'active' : 'border-2 border-gray-600'"
                 >
                   {{ step.number }}
                 </div>
                 <div 
                   class="absolute -bottom-6 w-full text-center text-sm"
-                  :class="currentStep >= step.number ? 'text-white' : 'text-gray-500'"
                 >
                   {{ step.title }}
                 </div>
@@ -309,7 +309,7 @@ const goToMyContent = () => {
               <div 
                 v-if="step.number < steps.length" 
                 class="absolute top-5 -right-1/2 w-full h-0.5 z-0"
-                :class="currentStep > step.number ? 'bg-white' : 'bg-gray-600'"
+                :class="currentStep > step.number ? 'bg-primary' : 'bg-white'"
               ></div>
             </div>
           </div>
@@ -321,19 +321,19 @@ const goToMyContent = () => {
           <div class="grid grid-cols-2 gap-6">
             <button 
               @click="selectUploadType('album')"
-              class="p-6 rounded-lg border-2 text-center transition-all"
-              :class="uploadType === 'album' ? 'border-white bg-gray-700' : 'border-gray-600 hover:border-gray-400'"
+              class="upload-type-button p-6 rounded-lg text-center"
+              :class="{ 'selected': uploadType === 'album' }"
             >
-              <i class="list icon" />
+              <Music4Icon class="w-8 h-8 mx-auto mb-2" />
               <h3 class="text-xl font-semibold">Album Upload</h3>
               <p class="text-gray-400 mt-2">Upload multiple tracks as an album</p>
             </button>
             <button 
               @click="selectUploadType('individual')"
-              class="p-6 rounded-lg border-2 text-center transition-all"
-              :class="uploadType === 'individual' ? 'border-white bg-gray-700' : 'border-gray-600 hover:border-gray-400'"
+              class="upload-type-button p-6 rounded-lg text-center"
+              :class="{ 'selected': uploadType === 'individual' }"
             >
-              <i class="music icon" />
+              <Music2Icon class="w-8 h-8 mx-auto mb-2" />
               <h3 class="text-xl font-semibold">Individual Upload</h3>
               <p class="text-gray-400 mt-2">Upload single or multiple tracks</p>
             </button>
@@ -366,7 +366,7 @@ const goToMyContent = () => {
                 <label class="block mb-2">Album Description</label>
                 <textarea
                   v-model="albumDetails.description.text"
-                  class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
+                  class="w-full rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
                   placeholder="Enter album description"
                   rows="3"
                 ></textarea>
@@ -378,7 +378,7 @@ const goToMyContent = () => {
               <label class="block mb-2">Album Cover*</label>
               <div 
                 @dragover.prevent
-                class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-white transition-colors"
+                class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors"
                 :class="{'border-white bg-gray-700': isDraggingCover}"
                 @dragenter="isDraggingCover = true"
                 @dragleave="isDraggingCover = false"
@@ -394,30 +394,29 @@ const goToMyContent = () => {
           </div>
   
           <!-- Content Upload -->
-          <div>
-            <label class="block mb-2">Upload Content*</label>
+          <div
+          @dragover.prevent
+          @drop.prevent="handleContentDrop"
+          class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
+          :class="{'border-white bg-gray-700': isDragging}"
+          @dragenter="isDragging = true"
+          @dragleave="isDragging = false"
+          >
             <form @submit.stop.prevent>
               <file-upload-widget
                 ref="upload"
                 v-model="uploadedFiles"
-                :class="['ui', 'icon', 'basic', 'button', 'w-full']"
+                :class="['ui', 'icon', 'basic', 'w-full']"
                 :data="uploadData"
                 accept=".wav,.flac,.aiff,.mp4"
                 @input-file="inputFile"
               >
-            <div 
-              @dragover.prevent
-              @drop.prevent="handleContentDrop"
-              class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-white transition-colors"
-              :class="{'border-white bg-gray-700': isDragging}"
-              @dragenter="isDragging = true"
-              @dragleave="isDragging = false"
-            >
+            <div>
               <div v-if="uploadedFiles.length === 0">
-                <i class="image icon" />
-                <div class="bg-gray-700 rounded-lg p-4 mb-4 mx-auto max-w-lg">
+                <UploadCloudIcon class="w-16 h-16 mx-auto mb-4" />
+                <div class="file-requirements rounded-lg p-4 mb-4 mx-auto max-w-lg">
                   <h4 class="font-semibold mb-2">File Requirements:</h4>
-                  <div class="text-sm text-gray-400 text-left">
+                  <div class="text-sm text-left">
                     <p class="mb-2">For audio:</p>
                     <ul class="list-disc list-inside mb-2">
                       <li>File type: WAV, FLAC, AIFF</li>
@@ -431,8 +430,7 @@ const goToMyContent = () => {
                   </div>
                 </div>
 
-                  <button
-                    class="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">
+                  <button class="ui primary button">
                     Browse Files
                   </button>
               </div>
@@ -440,10 +438,9 @@ const goToMyContent = () => {
                 <div 
                   v-for="(file, index) in uploadedFiles" 
                   :key="index"
-                  class="bg-gray-700 rounded-lg p-4 flex items-center justify-between"
+                  class="bg-gray-200 rounded-lg p-4 flex items-center justify-between"
                 >
                   <div class="flex items-center">
-                    <i class="music icon" />
                     <div>
                       <p class="font-medium">{{ file.name }}</p>
                       <p class="text-sm text-gray-400">{{ formatFileSize(file.size) }}</p>
@@ -466,7 +463,7 @@ const goToMyContent = () => {
                     </button>
                   </div>
                 </div>
-                <button class="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">
+                <button class="ui primary button">
                   Add More Files
                 </button>
               </div>
@@ -474,7 +471,7 @@ const goToMyContent = () => {
           </file-upload-widget>
           </form>
           </div>
-          <span class="text-gray-400 text-sm">
+          <span class="text-primary text-sm">
             We'll upload your magic while you tell us a little bit more about it.
             Click Next to describe and categorize your content.
           </span>
@@ -521,7 +518,7 @@ const goToMyContent = () => {
               <label class="block mb-2">Description</label>
               <textarea
                 v-model="currentTrack.description"
-                class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
+                class="w-full rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
                 placeholder="Enter track description"
                 rows="3"
               ></textarea>
@@ -561,18 +558,18 @@ const goToMyContent = () => {
         </div>
   
         <!-- Navigation Buttons -->
-        <div class="flex justify-between">
+        <div class="flex justify-end">
           <button 
             v-if="currentStep > 1"
             @click="previousStep"
-            class="px-6 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
+            class="ui button secondary px-6 mr-auto"
           >
             Previous
           </button>
           <button 
             v-if="currentStep < 3"
             @click="nextStep"
-            class="px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors ml-auto"
+            class="ui primary button px-6"
             :disabled="!canProceed"
           >
             Next
@@ -581,11 +578,17 @@ const goToMyContent = () => {
             <button
               v-if="isReadyToPublish"
               @click="submitUpload"
-              class="px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors ml-auto"
+              class="ui primary button px-6 ml-auto"
             >
               Publish
             </button>
-            <div v-else>Uploading...</div>
+            <button 
+              v-else 
+              class="ui primary button px-6 ml-auto" 
+              disabled
+            >
+              Uploading...
+            </button>
           </div>
         </div>
       </div>
@@ -599,3 +602,115 @@ const goToMyContent = () => {
       </section>
     </semantic-modal>
   </template>
+
+<style>
+/* Add these new styles */
+.i.music.icon::before {
+  content: "\f001"; /* Semantic UI music icon unicode */
+  font-family: Icons;
+  font-style: normal;
+}
+
+.i.album.icon::before {
+  content: "\f0c9"; /* Semantic UI list/album icon unicode */
+  font-family: Icons;
+  font-style: normal;
+}
+
+/* Add this to your existing styles */
+.step-circle.active {
+  background-color: var(--primary-color)!important;
+  color: white!important;
+}
+
+/* Keep existing styles */
+.main.with-background {
+  background: var(--site-background) !important;
+}
+
+.text-primary {
+  color: var(--primary-color) !important;
+}
+
+/* Update step circles styling */
+.rounded-full {
+  background: var(--form-background) !important;
+}
+
+/* Keep the active step (number 1) with its current styling */
+.step-1 .rounded-full {
+  background: var(--primary-color) !important;
+  color: white !important;
+}
+
+.upload-type-button {
+  /* Reset button styles */
+  background: transparent !important;
+  color: inherit !important;
+  border: 2px solid rgb(229, 231, 235) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Hover state */
+.upload-type-button:hover {
+  border-color: var(--primary-color) !important;
+}
+
+/* Selected state */
+.upload-type-button.selected {
+  border-color: var(--primary-color) !important;
+}
+
+.hover\:border-primary:hover {
+  border-color: var(--primary-color) !important;
+}
+
+.border-primary {
+  border-color: var(--primary-color) !important;
+}
+
+/* File upload container styles */
+.border-2.border-dashed{
+  background: transparent !important;
+  color: inherit !important;
+  border: 2px dashed rgb(229, 231, 235) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Hover state */
+.border-2.border-dashed:hover {
+  border-color: var(--primary-color) !important;
+}
+
+/* Selected/dragging state */
+.border-2.border-dashed.border-primary,
+.file-upload-widget .border-2.border-dashed.border-primary,
+.component-file-upload .border-2.border-dashed.border-primary,
+div[class*="border-2"][class*="border-dashed"].border-primary {
+  border-color: var(--primary-color) !important;
+}
+
+/* File requirements box */
+.file-requirements {
+  background-color: var(--alternative-color) !important;
+  color: white !important;
+}
+
+.file-requirements .text-gray-400 {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.upload-area {
+  /* Reset and set initial styles */
+  background: transparent !important;
+  color: inherit !important;
+  border: 2px dashed var(--primary-color) !important; 
+  transition: all 0.2s ease-in-out !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.bg-primary {
+  background-color: var(--primary-color) !important;
+}
+</style>
