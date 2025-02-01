@@ -110,8 +110,10 @@ onMounted(() => {
 })
 
 const shouldHideSidebar = computed(() => {
-  const hiddenRoutes = ['/', '/create', '/auth']
-  return hiddenRoutes.includes(route.path)
+  const hiddenRoutes = ['', '/', '/create', '/auth']
+  const shouldHide = hiddenRoutes.includes(route.path)
+  document.getElementById('main')?.classList.toggle('no-sidebar', shouldHide)
+  return shouldHide
 })
 
 // Add ref for tracking sidebar collapse state
@@ -475,6 +477,10 @@ const toggleSidebar = () => {
 
 #app > div > .main.pusher.sidebar-collapsed {
   margin-left: 60px !important;
+}
+
+#app > div > .main.pusher.no-sidebar {
+  margin-left: 0px !important;
 }
 
 /* Apply color to navigation items only, excluding top icons */
