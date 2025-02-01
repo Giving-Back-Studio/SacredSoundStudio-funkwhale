@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router'
 
 import { useStore } from '~/store'
 import useLogger from '~/composables/useLogger'
+import useErrorHandler from '~/composables/useErrorHandler'
 
 import AttachmentInput from '~/components/common/AttachmentInput.vue'
 import TagCategorySelector from '~/components/library/TagCategorySelector.vue'
@@ -266,7 +267,7 @@ fetchLibrary()
 
 const uploadData = computed(() => ({
   library: library.value ? library.value.uuid: null,
-  import_reference: 'draft'
+  import_status: 'draft'
   }
 ))
 
@@ -276,8 +277,8 @@ const inputFile = (newFile) => {
   tracksMetadata.value.push(createTrackTemplate(newFile))
 }
 
-const goToLibrary = () => {
-  router.push('/library');
+const goToMyContent = () => {
+  router.push('/mycontent');
 }
 
 </script>
@@ -592,7 +593,7 @@ const goToLibrary = () => {
         </div>
       </div>
     </div>
-    <semantic-modal v-model:show="showSuccessModal" @hide="goToLibrary">
+    <semantic-modal v-model:show="showSuccessModal" @hide="goToMyContent">
       <header class="header">
         Success!
       </header>

@@ -244,9 +244,10 @@ DJANGO_APPS = (
 )
 THIRD_PARTY_APPS = (
     # 'crispy_forms',  # Form layouts
+    "admin_sort",
     "allauth",  # registration
     "allauth.account",  # registration
-    "allauth.socialaccount",  # registration
+    "allauth.socialaccount",  # registration"
     "corsheaders",
     "oauth2_provider",
     "rest_framework",

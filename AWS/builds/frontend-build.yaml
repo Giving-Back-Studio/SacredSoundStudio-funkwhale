@@ -1,4 +1,8 @@
 version: 0.2
+
+env:
+  variables:
+    FUNKWHALE_SENTRY_DSN: "https://aab7ea1bce504031ba541a37fc03b1f5@app.glitchtip.com/10059"
         
 phases:
   install:

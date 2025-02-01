@@ -137,7 +137,6 @@ class TrackFilter(
     RelatedFilterSet,
     ChannelFilterSet,
     LibraryFilterSet,
-    audio_filters.IncludeChannelsFilterSet,
     moderation_filters.HiddenContentFilterSet,
 ):
     q = fields.SearchFilter(

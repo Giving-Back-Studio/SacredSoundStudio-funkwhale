@@ -52,8 +52,7 @@ def get_libraries(filter_uploads):
         uploads = filter_uploads(obj, uploads)
         uploads = uploads.playable_by(actor)
         qs = models.Library.objects.filter(
-            pk__in=uploads.values_list("library", flat=True),
-            channel=None,
+            pk__in=uploads.values_list("library", flat=True)
         ).annotate(_uploads_count=Count("uploads"))
         qs = qs.prefetch_related("actor")
         page = self.paginate_queryset(qs)
@@ -218,7 +217,7 @@ class AlbumViewSet(
     def get_queryset(self):
         queryset = super().get_queryset()
         if self.action in ["destroy"]:
-            queryset = queryset.exclude(artist__channel=None).filter(
+            queryset = queryset.filter(
                 artist__attributed_to=self.request.user.actor
             )
 
@@ -257,7 +256,6 @@ class LibraryViewSet(
     lookup_field = "uuid"
     queryset = (
         models.Library.objects.all()
-        .filter(channel=None)
         .select_related("actor")
         .order_by("-creation_date")
         .annotate(_uploads_count=Count("uploads"))
@@ -423,7 +421,7 @@ class TrackViewSet(
     def get_queryset(self):
         queryset = super().get_queryset()
         if self.action in ["destroy"]:
-            queryset = queryset.exclude(artist__channel=None).filter(
+            queryset = queryset.filter(
                 artist__attributed_to=self.request.user.actor
             )
         filter_favorites = self.request.GET.get("favorites", None)
