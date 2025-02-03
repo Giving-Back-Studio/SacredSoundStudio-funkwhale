@@ -581,37 +581,40 @@ const goToMyContent = () => {
         </div>
   
         <!-- Navigation Buttons -->
-        <div class="flex justify-end">
-          <button 
-            v-if="currentStep > 1"
-            @click="previousStep"
-            class="ui button secondary px-6 mr-auto"
-          >
-            Previous
-          </button>
-          <button 
-            v-if="currentStep < 3"
-            @click="nextStep"
-            class="ui primary button px-6"
-            :disabled="!canProceed"
-          >
-            Next
-          </button>
-          <div v-else>
-            <button
-              v-if="isReadyToPublish"
-              @click="submitUpload"
-              class="ui primary button px-6 ml-auto"
+        <div class="flex justify-end gap-4 mt-6">
+          <div class="flex gap-4 ml-auto">
+            <button 
+              v-if="currentStep > 1"
+              @click="previousStep"
+              class="ui button secondary px-6"
             >
-              Publish
+              Previous
             </button>
             <button 
-              v-else 
-              class="ui primary button px-6 ml-auto" 
-              disabled
+              v-if="currentStep < 3"
+              @click="nextStep"
+              class="ui button px-6"
+              style="background-color: #434289; color: white;"
+              :disabled="!canProceed"
             >
-              Uploading...
+              Next
             </button>
+            <div v-else>
+              <button
+                v-if="isReadyToPublish"
+                @click="submitUpload"
+                class="ui primary button px-6"
+              >
+                Publish
+              </button>
+              <button 
+                v-else 
+                class="ui primary button px-6" 
+                disabled
+              >
+                Uploading...
+              </button>
+            </div>
           </div>
         </div>
       </div>

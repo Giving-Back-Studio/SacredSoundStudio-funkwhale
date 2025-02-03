@@ -441,6 +441,8 @@ const toggleSidebar = () => {
   width: 60px !important;
   min-width: 60px !important;
   max-width: 60px !important;
+  background-color: #F1F4F8 !important; /* Match global background */
+  box-shadow: none !important; /* Remove shadow when collapsed */
 }
 
 /* Hide elements when collapsed */
@@ -522,7 +524,8 @@ const toggleSidebar = () => {
 }
 
 .ui.vertical.menu .item {
-  width: 80% !important;
+  width: 144px !important;
+  border-radius: 4px !important;
   justify-content: center !important;
   text-align: center !important;
 }
@@ -538,15 +541,15 @@ const toggleSidebar = () => {
 .ui.vertical.menu .item.router-link-exact-active[href="/mycontent"],
 .ui.vertical.menu a.item[href="/mycontent"] {
   background: transparent !important;
-  color: white !important;
+  color: #434289 !important;
 }
 
 /* Ensure hover state stays transparent */
 .ui.vertical.menu .item.active.router-link-exact-active[href="/mycontent"]:hover,
 .ui.vertical.menu .item.router-link-exact-active[href="/mycontent"]:hover,
 .ui.vertical.menu a.item[href="/mycontent"]:hover {
-  background: transparent !important;
-  color: #434289 !important;
+  background: rgb(202, 202, 221) !important;
+  border-radius: 4px !important;
 }
 
 .ui.dropdown.user-dropdown {
