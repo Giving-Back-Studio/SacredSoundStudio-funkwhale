@@ -441,17 +441,8 @@ const toggleSidebar = () => {
   width: 60px !important;
   min-width: 60px !important;
   max-width: 60px !important;
-  background-color: #F1F4F8 !important; /* Match global background */
-  box-shadow: none !important; /* Remove shadow when collapsed */
-}
-
-/* Hide elements when collapsed */
-.ui.vertical.left.visible.wide.sidebar.component-sidebar.collapsed .secondary,
-.ui.vertical.left.visible.wide.sidebar.component-sidebar.collapsed .search-wrapper,
-.ui.vertical.left.visible.wide.sidebar.component-sidebar.collapsed .signup,
-.ui.vertical.left.visible.wide.sidebar.component-sidebar.collapsed .right.menu,
-.ui.vertical.left.visible.wide.sidebar.component-sidebar.collapsed .spacer {
-  display: none !important;
+  background-color: #F1F4F8 !important;
+  box-shadow: none !important;
 }
 
 /* Adjust header when collapsed */
@@ -462,6 +453,16 @@ const toggleSidebar = () => {
   padding: 1rem 0 !important;
   display: flex !important;
   justify-content: center !important;
+  background-color: #F1F4F8 !important;
+}
+
+/* Hide elements when collapsed */
+.ui.vertical.left.visible.wide.sidebar.component-sidebar.collapsed .secondary,
+.ui.vertical.left.visible.wide.sidebar.component-sidebar.collapsed .search-wrapper,
+.ui.vertical.left.visible.wide.sidebar.component-sidebar.collapsed .signup,
+.ui.vertical.left.visible.wide.sidebar.component-sidebar.collapsed .right.menu,
+.ui.vertical.left.visible.wide.sidebar.component-sidebar.collapsed .spacer {
+  display: none !important;
 }
 
 /* Keep menu icon visible when collapsed */
