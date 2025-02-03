@@ -95,6 +95,9 @@ $bottom-player-height: 4rem;
   --form-background: #{$form-background};
   
   --fw-track-progress: 0;
+  
+  --muted: #{$muted};
+  --muted-foreground: #{$muted-foreground};
 }
 
 // Override all default font families
