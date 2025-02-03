@@ -83,12 +83,9 @@ You need to create some local data to mimic a production environment.
    funkwhale-manage fw users create --superuser
    ```
 
-2. Add some fake data to populate the database. The following command creates 25 artists with random albums, tracks, and metadata.
-
+2. Populate the tags from fixtures:
    ```sh
-   artists=25 # Adds 25 fake artists
-   command="from funkwhale_api.music import fake_data; fake_data.create_data($artists)"
-   echo $command | sudo docker compose -f dev.yml run --rm -T api funkwhale-manage shell -i python
+   funkwhale-manage loaddata funkwhale_api/tags/fixtures/tags.json
    ```
 
 ## Manage services
