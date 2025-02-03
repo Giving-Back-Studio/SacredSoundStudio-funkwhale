@@ -249,3 +249,13 @@
     }
   }
 }
+
+.ui.table {
+  tr {
+    color: var(--table-text-color);
+  }
+  
+  th {
+    color: var(--table-header-color);
+  }
+}
