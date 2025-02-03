@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { ChevronLeft, ChevronRight, UploadCloud, Edit2, Trash2, Clock } from 'lucide-vue-next'
 
@@ -38,6 +38,9 @@ const fetchContent = async () => {
   }
 }
 fetchContent()
+
+// Just in case the /me endpoint responds later
+watch(() => store.state.auth.profile.artist, fetchContent)
 
 const categories = computed(() => {
   const cats = {}
