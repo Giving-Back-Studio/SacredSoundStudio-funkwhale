@@ -57,7 +57,8 @@ Resources:
             AllowedMethods:
               - GET
             AllowedOrigins:
-              - 'https://staging.sacredsound.app'
+              - 'https://sacredsound.app'
+              - 'https://beta.sacredsound.app'
             ExposedHeaders: []
             Id: allow
             MaxAge: 3000

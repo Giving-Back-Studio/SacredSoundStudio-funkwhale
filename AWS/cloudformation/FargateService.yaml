@@ -154,15 +154,15 @@ Resources:
             - Name: MUSIC_DIRECTORY_PATH
               Value: ''
             - Name: FUNKWHALE_HOSTNAME
-              Value: 'staging.sacredsound.app'
+              Value: 'beta.sacredsound.app'
             - Name: FUNKWHALE_HOSTNAME_SUFFIX
               Value: 'sacredsound.app'
             - Name: FUNKWHALE_HOSTNAME_PREFIX
-              Value: 'staging'
+              Value: 'beta'
             - Name: FUNKWHALE_PROTOCOL
               Value: 'https'
             - Name: FUNKWHALE_URL
-              Value: 'https://staging.sacredsound.app'
+              Value: 'https://beta.sacredsound.app'
             - Name: TYPESENSE_API_KEY
               Value: "apikey"
             - Name: FUNKWHALE_SENTRY_DSN
@@ -207,7 +207,7 @@ Resources:
                 - Name: MUSIC_DIRECTORY_PATH
                   Value: '/data/music'
                 - Name: FUNKWHALE_HOSTNAME
-                  Value: 'staging.sacredsound.app'
+                  Value: 'beta.sacredsound.app'
               DependsOn:
                 - ContainerName: !Ref ServiceName
                   Condition: START
