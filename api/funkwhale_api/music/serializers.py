@@ -1,3 +1,4 @@
+from collections import defaultdict
 import urllib.parse
 
 from django import urls
@@ -289,10 +290,13 @@ class TrackSerializer(OptionalDescriptionMixin, serializers.Serializer):
         uploads = sorted(uploads, key=lambda u: u["is_local"], reverse=True)
         return list(uploads)
 
-    @extend_schema_field({"type": "array", "items": {"type": "string"}})
+    @extend_schema_field({"type": "object"})
     def get_tags(self, obj):
         tagged_items = getattr(obj, "_prefetched_tagged_items", [])
-        return [ti.tag.name for ti in tagged_items]
+        tag_categories = defaultdict(list)
+        for ti in tagged_items:
+            tag_categories[ti.tag_category.name].append(ti.tag.name)
+        return tag_categories
 
     def get_license(self, o) -> str:
         return o.license_id
