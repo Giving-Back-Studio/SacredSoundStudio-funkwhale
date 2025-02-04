@@ -7,7 +7,7 @@ export default [
     children: [
       {
         path: '',
-        component: () => import('~/components/library/Home.vue'),
+        component: () => import('~/components/library/LibraryPage.vue'),
         name: 'library.index'
       },
       {
