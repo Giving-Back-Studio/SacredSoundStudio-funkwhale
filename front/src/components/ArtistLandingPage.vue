@@ -37,9 +37,10 @@ onMounted(() => {
 })
 
 whenever(() => store.state.auth.authenticated, () => {
-  logger.log('Authenticated, redirecting to /mycontent')
-  router.push('/mycontent')
+  logger.log('Authenticated, redirecting to /library')
+  router.push('/library')
 })
+
 
 // FAQ functionality
 const openFaq = ref(null)

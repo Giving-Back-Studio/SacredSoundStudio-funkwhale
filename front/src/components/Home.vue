@@ -17,9 +17,10 @@ const pageDescription = 'A space to resonate with higher vibrations. Receive sac
 
 
 whenever(() => store.state.auth.authenticated, () => {
-  logger.log('Authenticated, redirecting to /mycontent')
-  router.push('/mycontent')
+  logger.log('Authenticated, redirecting to /library')
+  router.push('/library')
 })
+
 
 onMounted(() => {
   // Update document title
