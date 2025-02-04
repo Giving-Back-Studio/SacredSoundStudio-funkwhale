@@ -44,42 +44,42 @@ $sidebar-header-box-shadow: none !default;
 $sidebar-box-shadow: 0 0 20px rgba(34,36,38,.15) !default;
 $site-background: #F1F4F8 !default;
 
-$text-color: rgba(0, 0, 0, 0.87) !default;
-$discrete-text-color: rgba(0, 0, 0, 0.72) !default;
-$really-discrete-text-color: rgba(0, 0, 0, 0.57) !default;
+$text-color: var(--primary-color) !default;
+$discrete-text-color: var(--primary-color) !default;
+$really-discrete-text-color: var(--primary-color) !default;
 $text-selection-background: #CCE2FF !default;
 $text-selection-color: rgba(0, 0, 0, 0.87) !default;
 
-$header-color: var(--text-color) !default;
+$header-color: var(--primary-color) !default;
 
-$main-color: var(--text-color) !default;
+$main-color: var(--primary-color) !default;
 $main-background: var(--site-background) !default;
 
-$menu-item-color: var(--text-color) !default;
+$menu-item-color: var(--primary-color) !default;
 $secondary-menu-background: var(--site-background) !default;
 $secondary-menu-box-shadow: inset 0px -2px 0px 0px rgba(34, 36, 38, 0.15) !default;
 $secondary-menu-active-item-box-shadow: inset 0 -2px 0 0 #000 !default;
-$secondary-menu-active-item-color: rgba(0, 0, 0, 0.95) !default;
+$secondary-menu-active-item-color: var(--primary-color) !default;
 $secondary-menu-hover-item-color: var(--secondary-menu-active-item-color) !default;
-$inverted-menu-item-color: hsla(0,0%,100%,.75) !default;
-$inverted-menu-item-header-color: hsla(0,0%,100%,.95) !default;
-$menu-inverted-active-item-color: white !default;
+$inverted-menu-item-color: var(--primary-color) !default;
+$inverted-menu-item-header-color: var(--primary-color) !default;
+$menu-inverted-active-item-color:var(--primary-color) !default;
 
 $button-basic-background: transparent !default;
 $button-basic-color: rgba(0, 0, 0, 0.6) !default;
 $button-basic-box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.15) inset !default;
 $button-basic-hover-background: var(--site-background) !default;
-$button-basic-hover-color: var(--text-color) !default;
+$button-basic-hover-color: var(--primary-color) !default;
 $button-basic-hover-box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.35) inset, 0 0 0 0 rgba(34, 36, 38, 0.15) inset !default;
 
 $button-orange-background: var(--vibrant-color) !default;
 
-$form-label-color: var(--text-color) !default;
+$form-label-color: var(--primary-color) !default;
 $input-selection-background: rgba(100, 100, 100, 0.4) !default;
 $input-selection-color: var(--text-selection-color) !default;
 $input-background: white !default;
-$input-color: var(--text-color) !default;
-$input-focus-color: var(--input-color) !default;
+$input-color: var(--primary-color) !default;
+$input-focus-color: var(--primary-color) !default;
 $input-focus-background: var(--input-background) !default;
 $input-placeholder-color: var(--really-discrete-text-color) !default;
 $input-focus-placeholder-color: var(--discrete-text-color) !default;
@@ -98,7 +98,7 @@ $dropdown-item-hover-background: rgba(0, 0, 0, 0.05) !default;
 $dropdown-item-selected-color: var(--dropdown-item-hover-color) !default;
 $dropdown-item-selected-background: var(--dropdown-item-hover-background) !default;
 
-$segment-color: var(--text-color) !default;
+$segment-color: var(--primary-color) !default;
 $segment-background: var(--site-background) !default;
 
 $player-color: rgba(255, 255, 255, 0.9) !default;
@@ -106,16 +106,18 @@ $player-background: #1B1C1D !default;
 
 $table-background: transparent !default;
 $table-border: var(--divider) !default;
+$table-text-color: var(--color-primary) !default;
+$table-header-color: var(--color-primary) !default;
 
 $tooltip-background: var(--site-background) !default;
-$tooltip-color: var(--text-color) !default;
+$tooltip-color: var(--primary-color) !default;
 
 $card-background: var(--site-background) !default;
-$card-text-color: var(--text-color) !default;
+$card-text-color: var(--primary-color) !default;
 $card-box-shadow: 0 1px 3px 0 #D4D4D5, 0 0 0 1px #D4D4D5 !default;
 
-$dimmer-background: rgba(255, 255, 255, 0.85) !default;
-$dimmer-color: var(--text-color) !default;
+$dimmer-background: var(--color-primary) !default;
+$dimmer-color: var(--color-primary) !default;
 
 $border-color: rgba(34, 36, 38, 0.15) !default;
 
