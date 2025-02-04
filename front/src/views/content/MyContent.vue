@@ -11,6 +11,7 @@ const logger = useLogger();
 
 const scrollContainers = ref({})
 const scrollPositions = ref({})
+const selectedCategory = ref("Category")
 
 const content = ref([])
 
@@ -42,8 +43,34 @@ fetchContent()
 // Just in case the /me endpoint responds later
 watch(() => store.state.auth.profile.artist, fetchContent)
 
+const trackCategories = ref([])
+
+const fetchTrackCategories = async () => {
+  const params = {
+    content_type__model: 'track'
+  }
+
+  const measureLoading = logger.time('Fetching track categories')
+  try {
+    const response = await axios.get('tag-categories/', {
+      params,
+      paramsSerializer: {
+        indexes: null
+      }
+    })
+
+    trackCategories.value = response.data.results
+  } catch (error) {
+    useErrorHandler(error)
+    trackCategories.value = undefined
+  } finally {
+    measureLoading()
+  }
+}
+fetchTrackCategories()
+
 const categories = computed(() => {
-  const cats = {}
+  const cats = {"None": []}
 
   for (const item of content.value) {
     const slimItem = {
@@ -54,13 +81,22 @@ const categories = computed(() => {
       cover: item.cover?.urls?.medium_square_crop || item.album?.cover?.urls?.medium_square_crop || '/placeholder.svg?height=280&width=280'
     }
 
-    for (const tagIdx in item.tags) {
-      const tag = item.tags[tagIdx]
-      if (cats[tag] && !cats[tag].includes(slimItem)) {
-        cats[tag].push(slimItem)
-      } else {
-        cats[tag] = [slimItem]
-        scrollPositions.value[tag] = 0
+    for (const tagCategoryIdx in trackCategories.value) {
+      const tagCategory = trackCategories.value[tagCategoryIdx].name
+      if (tagCategory == selectedCategory.value) {
+        const tag = item.tags[tagCategory]
+        if (!tag) {
+          cats["None"].push(slimItem)
+          scrollPositions.value["None"] = 0
+          continue
+        }
+
+        if (cats[tag] && !cats[tag].includes(slimItem)) {
+          cats[tag].push(slimItem)
+        } else {
+          cats[tag] = [slimItem]
+          scrollPositions.value[tag] = 0
+        }
       }
     }
   }
@@ -112,6 +148,23 @@ const deleteContent = (item) => {
 
       <div v-if="content.length === 0">
         You haven't uploaded any content yet. <a href="/upload" class="text-blue-500 hover:underline">Upload now</a>.
+      </div>
+
+      <div>
+        <label for="category">Explore By:</label>
+        <select
+          id="category"
+          v-model="selectedCategory"
+          class="ui selection dropdown"
+        >
+          <option
+            v-for="category in trackCategories"
+            :key="category.id"
+            :value="category.name"
+          >
+          {{ category.name }}
+          </option>
+        </select>
       </div>
       
       <div v-for="([category, items]) in categories" :key="category" class="mb-12">
