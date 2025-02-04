@@ -70,7 +70,8 @@ const fetchTrackCategories = async () => {
 fetchTrackCategories()
 
 const categories = computed(() => {
-  const cats = {"None": []}
+  const NONE = "None"
+  const cats = {}
 
   for (const item of content.value) {
     const slimItem = {
@@ -86,8 +87,9 @@ const categories = computed(() => {
       if (tagCategory == selectedCategory.value) {
         const tag = item.tags[tagCategory]
         if (!tag) {
-          cats["None"].push(slimItem)
-          scrollPositions.value["None"] = 0
+          if (!cats[NONE]) cats[NONE] = []
+          cats[NONE].push(slimItem)
+          scrollPositions.value[NONE] = 0
           continue
         }
 
