@@ -52,7 +52,7 @@ server {
     # end of compression settings
 
     # headers
-    add_header Content-Security-Policy "default-src 'self'; connect-src https: wss: http: ws: 'self' 'unsafe-eval'; script-src 'self' 'wasm-unsafe-eval'; style-src https: http: 'self' 'unsafe-inline'; img-src https: http: 'self' data:; font-src https: http: 'self' data:; media-src https: http: 'self' data:; object-src 'none'; manifest-src https: http: 'self';";
+    add_header Content-Security-Policy "default-src 'self'; connect-src https: wss: http: ws: 'self' 'unsafe-eval'; script-src 'self' 'wasm-unsafe-eval'; style-src https: http: https://fonts.googleapis.com 'self' 'unsafe-inline'; img-src https: http: 'self' data:; font-src https: http: 'self' data:; media-src https: http: 'self' data:; object-src 'none'; manifest-src https: http: 'self';";
     add_header Referrer-Policy "strict-origin-when-cross-origin";
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header Service-Worker-Allowed "/";
