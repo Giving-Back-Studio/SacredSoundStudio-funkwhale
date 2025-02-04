@@ -1,5 +1,8 @@
 from django.conf.urls import include, url
 
+from django_ses.views import SESEventWebhookView
+from django.views.decorators.csrf import csrf_exempt
+
 from funkwhale_api.activity import views as activity_views
 from funkwhale_api.audio import views as audio_views
 from funkwhale_api.common import routers as common_routers
@@ -84,6 +87,7 @@ v1_patterns += [
     url(
         r"^text-preview/?$", common_views.TextPreviewView.as_view(), name="text-preview"
     ),
+    url(r'^ses/event-webhook/$', csrf_exempt(SESEventWebhookView.as_view()), name='handle-ses-event-webhook')
 ]
 
 urlpatterns = [url("", include((v1_patterns, "v1"), namespace="v1"))]

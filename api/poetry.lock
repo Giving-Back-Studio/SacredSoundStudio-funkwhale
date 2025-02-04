@@ -807,7 +807,9 @@ python-versions = "<4.0,>=3.8"
 [package.dependencies]
 backports-zoneinfo = {version = ">=0.2.1", markers = "python_version < \"3.9\""}
 boto3 = ">=1.0.0"
+cryptography = {version = ">=36.0.2", optional = true, markers = "extra == \"bounce\" or extra == \"events\""}
 django = ">=3.2"
+requests = {version = ">=2.32.1", optional = true, markers = "extra == \"bounce\" or extra == \"events\""}
 
 [package.extras]
 bounce = ["cryptography (>=36.0.2)", "requests (>=2.32.1)"]
@@ -1926,17 +1928,17 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "requests"
-version = "2.28.2"
+version = "2.32.3"
 description = "Python HTTP for Humans."
 category = "main"
 optional = false
-python-versions = ">=3.7, <4"
+python-versions = ">=3.8"
 
 [package.dependencies]
 certifi = ">=2017.4.17"
 charset-normalizer = ">=2,<4"
 idna = ">=2.5,<4"
-urllib3 = ">=1.21.1,<1.27"
+urllib3 = ">=1.21.1,<3"
 
 [package.extras]
 socks = ["PySocks (>=1.5.6,!=1.5.7)"]
@@ -2467,7 +2469,7 @@ typesense = ["typesense"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8,<3.12"
-content-hash = "27bfa82b42d6645178ec53e570d43d5f36a187a57049134620eb32eb82b189b7"
+content-hash = "0adb30e796a7260f3bd74e781a717f30c247389b4348a23ba824782db8c2c19e"
 
 [metadata.files]
 aiohttp = [
@@ -4068,8 +4070,8 @@ regex = [
     {file = "regex-2023.10.3.tar.gz", hash = "sha256:3fef4f844d2290ee0ba57addcec17eec9e3df73f10a2748485dfd6a3a188cc0f"},
 ]
 requests = [
-    {file = "requests-2.28.2-py3-none-any.whl", hash = "sha256:64299f4909223da747622c030b781c0d7811e359c37124b4bd368fb8c6518baa"},
-    {file = "requests-2.28.2.tar.gz", hash = "sha256:98b1b2782e3c6c4904938b84c0eb932721069dfdb9134313beff7c83c2df24bf"},
+    {file = "requests-2.32.3-py3-none-any.whl", hash = "sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6"},
+    {file = "requests-2.32.3.tar.gz", hash = "sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760"},
 ]
 requests-http-message-signatures = [
     {file = "requests-http-message-signatures-0.3.1.tar.gz", hash = "sha256:0235bb5cd3f4a7d659645e2ac937da72791321434e77570f7e21042e510820da"},
