@@ -269,7 +269,7 @@ Resources:
                   }
               InputArtifacts:
                 - Name: App
-        - Name: BuildDockerImages
+        - Name: BuildArtifacts
           Actions:
             - Name: BuildBase
               ActionTypeId:
@@ -310,7 +310,7 @@ Resources:
                 - Name: App
               OutputArtifacts:
                 - Name: NginxImageJSON
-              RunOrder: 1
+              RunOrder: 2
             - Name: BuildFrontend
               ActionTypeId:
                 Category: Build
