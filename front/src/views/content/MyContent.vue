@@ -157,7 +157,7 @@ const deleteContent = (item) => {
         <select
           id="category"
           v-model="selectedCategory"
-          class="ui selection dropdown"
+          class="ui dropdown"
         >
           <option
             v-for="category in trackCategories"

@@ -101,9 +101,9 @@ $bottom-player-height: 4rem;
 }
 
 // Override all default font families
-*, 
-*::before, 
-*::after {
+*:not(.icon), 
+*:not(.icon)::before, 
+*:not(.icon)::after {
   font-family: var(--body-font), -apple-system, system-ui, sans-serif !important;
 }
 
@@ -149,7 +149,7 @@ p {
   .text,
   .button,
   .input,
-  .dropdown,
+  .dropdown:not(.icon),
   .menu,
   .item,
   .label,
