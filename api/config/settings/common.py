@@ -893,21 +893,21 @@ Example:
 CELERY_TASK_DEFAULT_RATE_LIMIT = 1
 CELERY_TASK_TIME_LIMIT = 300
 CELERY_BEAT_SCHEDULE = {
-    "audio.fetch_rss_feeds": {
-        "task": "audio.fetch_rss_feeds",
-        "schedule": crontab(minute="0", hour="*"),
-        "options": {"expires": 60 * 60},
-    },
+    #"audio.fetch_rss_feeds": {
+    #    "task": "audio.fetch_rss_feeds",
+    #    "schedule": crontab(minute="0", hour="*"),
+    #    "options": {"expires": 60 * 60},
+    #},
     "common.prune_unattached_attachments": {
         "task": "common.prune_unattached_attachments",
         "schedule": crontab(minute="0", hour="*"),
         "options": {"expires": 60 * 60},
     },
-    "federation.clean_music_cache": {
-        "task": "federation.clean_music_cache",
-        "schedule": crontab(minute="0", hour="*/2"),
-        "options": {"expires": 60 * 2},
-    },
+    #"federation.clean_music_cache": {
+    #    "task": "federation.clean_music_cache",
+    #    "schedule": crontab(minute="0", hour="*/2"),
+    #    "options": {"expires": 60 * 2},
+    #},
     "music.clean_transcoding_cache": {
         "task": "music.clean_transcoding_cache",
         "schedule": crontab(minute="0", hour="*"),
@@ -918,31 +918,31 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(minute="0", hour="0"),
         "options": {"expires": 60 * 60 * 24},
     },
-    "federation.refresh_nodeinfo_known_nodes": {
-        "task": "federation.refresh_nodeinfo_known_nodes",
-        "schedule": crontab(
-            **env.dict(
-                "SCHEDULE_FEDERATION_REFRESH_NODEINFO_KNOWN_NODES",
-                default={"minute": "0", "hour": "*"},
-            )
-        ),
-        "options": {"expires": 60 * 60},
-    },
+    # "federation.refresh_nodeinfo_known_nodes": {
+    #     "task": "federation.refresh_nodeinfo_known_nodes",
+    #     "schedule": crontab(
+    #         **env.dict(
+    #             "SCHEDULE_FEDERATION_REFRESH_NODEINFO_KNOWN_NODES",
+    #             default={"minute": "0", "hour": "*"},
+    #         )
+    #     ),
+    #     "options": {"expires": 60 * 60},
+    # },
     "music.library.schedule_remote_scan": {
         "task": "music.library.schedule_scan",
         "schedule": crontab(day_of_week="1", minute="0", hour="2"),
         "options": {"expires": 60 * 60 * 24},
     },
-    "federation.check_all_remote_instance_availability": {
-        "task": "federation.check_all_remote_instance_availability",
-        "schedule": crontab(
-            **env.dict(
-                "SCHEDULE_FEDERATION_CHECK_INTANCES_AVAILABILITY",
-                default={"minute": "0", "hour": "*"},
-            )
-        ),
-        "options": {"expires": 60 * 60},
-    },
+    # "federation.check_all_remote_instance_availability": {
+    #     "task": "federation.check_all_remote_instance_availability",
+    #     "schedule": crontab(
+    #         **env.dict(
+    #             "SCHEDULE_FEDERATION_CHECK_INTANCES_AVAILABILITY",
+    #             default={"minute": "0", "hour": "*"},
+    #         )
+    #     ),
+    #     "options": {"expires": 60 * 60},
+    # },
     "typesense.build_canonical_index": {
         "task": "typesense.build_canonical_index",
         "schedule": crontab(day_of_week="*/2", minute="0", hour="3"),
