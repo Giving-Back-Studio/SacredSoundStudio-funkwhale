@@ -137,7 +137,7 @@ p {
 }
 
 // Override Semantic UI specific elements
-.ui {
+.ui:not(.icon) {
   font-family: var(--body-font), -apple-system, system-ui, sans-serif !important;
   
   .header,
