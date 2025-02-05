@@ -140,7 +140,7 @@ services:
       - ./deploy/funkwhale_proxy.conf:/etc/nginx/funkwhale_proxy.conf:ro
       - "./front:/frontend:ro"
       - "./data/staticfiles:/usr/share/nginx/html/staticfiles/:ro"
-      - "./data/media:/protected/media:ro"
+      - "./data/media:/data/media:ro"
     networks:
       - federation
       - internal
