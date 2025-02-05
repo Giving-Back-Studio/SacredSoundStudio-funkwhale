@@ -3,6 +3,8 @@ import { computed, ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { ChevronLeft, ChevronRight, UploadCloud, Edit2, Trash2, Clock } from 'lucide-vue-next'
 
+import PlayButton from '~/components/audio/PlayButton.vue'
+
 import store from '~/store'
 import useLogger from '~/composables/useLogger'
 import useErrorHandler from '~/composables/useErrorHandler'
@@ -79,6 +81,7 @@ const categories = computed(() => {
       title: item.title,
       artist: item.artist.name,
       duration: item.uploads?.duration,
+      is_playable: item.is_playable,
       cover: item.cover?.urls?.medium_square_crop || item.album?.cover?.urls?.medium_square_crop || '/placeholder.svg?height=280&width=280'
     }
 
@@ -250,6 +253,12 @@ const deleteContent = (item) => {
                   <h3 class="font-semibold text-[#434289] mb-1">{{ item.title }}</h3>
                   <p class="text-sm text-gray-600">{{ item.artist }}</p>
                   <div class="flex items-center gap-2 mt-2">
+                    <play-button
+                      class="primary"
+                      :track="item"
+                      :is-playable="item.is_playable"
+                      :discrete="true"
+                    />
                     <Clock class="h-4 w-4 text-gray-400" />
                     <span class="text-sm text-gray-500">{{ item.duration }}</span>
                   </div>
