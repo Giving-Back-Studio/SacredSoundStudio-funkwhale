@@ -11,10 +11,6 @@ const props = defineProps({
   artistFilter: {
     type: String,
     default: null
-  },
-  title: {
-    type: String,
-    default: ''
   }
 })
 
