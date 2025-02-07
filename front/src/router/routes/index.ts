@@ -9,30 +9,36 @@ import auth from './auth'
 import user from './user'
 import { requireLoggedIn } from '~/router/guards'
 
+const routeToIndex = (to: any, from: any, next: any) => {
+  if (store.state.auth.authenticated) {
+    if (store.state.auth.profile?.is_artist) return next('/mycontent')
+    return next('/explore')
+  }
+  return next()
+}
+
 export default [
   {
     path: '/',
     name: 'index',
     component: () => import('~/components/Home.vue'),
-    beforeEnter(to, from, next) {
-      if (store.state.auth.authenticated) return next('/library')
-      return next()
-    }
+    beforeEnter: routeToIndex
   },
   {
     path: '/create',
     name: 'artistLandingPage',
     component: () => import('~/components/ArtistLandingPage.vue'),
-    beforeEnter (to, from, next) {
-      if (store.state.auth.authenticated) return next('/library')
-      return next()
-    }
+    beforeEnter: routeToIndex
   },
-  // Add this to your existing routes
   {
     path: '/auth',
     name: 'auth',
     component: () => import('~/components/auth/AuthForm.vue')
+  },
+  {
+    path: '/explore',
+    name: 'explore',
+    component: () => import('~/views/content/AllContent.vue')
   },
   {
     path: '/index.html',
