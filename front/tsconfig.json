@@ -2,29 +2,52 @@
   "extends": "@vue/tsconfig/tsconfig.web.json",
   "compilerOptions": {
     "baseUrl": ".",
+    "target": "esnext",
+    "module": "esnext",
+    "strict": true,
+    "jsx": "preserve",
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "noUnusedLocals": true,
     "experimentalDecorators": true,
-    "typeRoots": ["node_modules/@types"],
+    "typeRoots": [
+      "node_modules/@types",
+      "src/types"
+    ],
     "types": [
       "vitest/globals",
       "vite/client",
       "vue/ref-macros",
       "vite-plugin-pwa/client",
-      "unplugin-vue-macros/macros-global"
+      "unplugin-vue-macros/macros-global",
+      "vuex",
+      "vue-router",
+      "node"
     ],
     "paths": {
       "#/*": ["src/worker/*"],
       "?/*": ["test/*"],
       "~/*": ["src/*"]
-    }
+    },
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
   "include": [
-    "src/**/*.d.ts",
     "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
     "src/**/*.vue",
     "vite.config.ts",
-    "test/**/*.ts"
+    "test/**/*.ts",
+    "node_modules/vuex/types/**.d.ts",
+    "node_modules/@vue/runtime-core/dist/runtime-core.d.ts"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
   ],
   "vueCompilerOptions": {
     "plugins": [
