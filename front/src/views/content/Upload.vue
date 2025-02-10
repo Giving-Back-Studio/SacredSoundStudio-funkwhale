@@ -10,6 +10,7 @@ import useErrorHandler from '~/composables/useErrorHandler'
 
 import AttachmentInput from '~/components/common/AttachmentInput.vue'
 import TagCategorySelector from '~/components/library/TagCategorySelector.vue'
+import TrackCategoryTags from '~/components/content/TrackCategoryTags.vue'
 import FileUploadWidget from '~/components/library/FileUploadWidget.vue'
 import SemanticModal from '~/components/semantic/Modal.vue'
 import content from '~/router/routes/content'
@@ -228,32 +229,6 @@ const submitUpload = async () => {
     showSuccessModal.value = true;
   });
 }
-
-const trackCategories = ref([])
-
-const fetchTrackCategories = async () => {
-  const params = {
-    content_type__model: 'track'
-  }
-
-  const measureLoading = logger.time('Fetching track categories')
-  try {
-    const response = await axios.get('tag-categories/', {
-      params,
-      paramsSerializer: {
-        indexes: null
-      }
-    })
-
-    trackCategories.value = response.data.results
-  } catch (error) {
-    useErrorHandler(error)
-    trackCategories.value = undefined
-  } finally {
-    measureLoading()
-  }
-}
-fetchTrackCategories()
 
 const library = ref()
 const fetchLibrary = async () => {
@@ -547,16 +522,11 @@ const goToMyContent = () => {
               <label for="cover"></label>
             </div>
 
-            <!-- Metadata -->
-            <div
-              v-for="category in trackCategories">
-              <label class="block mb-2">{{ category.name }}{{ category.required ? ' *' : '' }}</label>
-              <tag-category-selector
-                v-model="currentTrack.categoryTags[category.name]"
-                :category="category.name"
-                :maxTags="category.max_tags"
-                class="w-full" />
-            </div>
+            <!-- Category Tags -->
+            <track-category-tags
+              v-model="currentTrack.categoryTags"
+              class="col-span-2"
+            />
 
             <!-- Additional Details -->
             <div>
