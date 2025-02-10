@@ -88,6 +88,7 @@ const categories = computed(() => {
       id: item.id,
       title: item.title,
       track_url: `library/tracks/${item.id}`,
+      edit_url: `library/tracks/${item.id}/edit`,
       artist_name: item.artist.name,
       artist_url: `channels/${item.artist.channel.actor.preferred_username}`,
       album_name: item.album?.title,
@@ -142,10 +143,6 @@ const updateScrollPosition = (categoryId, event) => {
 
 const viewMore = (categoryId) => {
   console.log(`View more for ${categoryId}`)
-}
-
-const editContent = (item) => {
-  console.log('Edit content:', item)
 }
 
 const deleteContent = (item) => {
@@ -229,12 +226,9 @@ const deleteContent = (item) => {
                   class="w-full h-full object-cover"
                 />
                 <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                  <button 
-                    class="p-2 rounded-full bg-white text-[#434289] hover:bg-gray-100"
-                    @click.stop="editContent(item)"
-                  >
+                  <a :href="item.edit_url" class="p-2 rounded-full bg-white text-[#434289] hover:bg-gray-100">
                     <Edit2 class="h-5 w-5" />
-                  </button>
+                  </a>
                   <dangerous-button @confirm="deleteContent(item)" :class="['p-2', 'rounded-full', 'bg-white', 'text-red-500', 'hover:bg-gray-100']">
                     <Trash2 class="h-5 w-5 text-red-500" />
                     <template #modal-header>
