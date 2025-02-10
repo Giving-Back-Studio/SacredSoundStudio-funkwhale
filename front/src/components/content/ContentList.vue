@@ -9,7 +9,7 @@ import useErrorHandler from '~/composables/useErrorHandler'
 
 const props = defineProps({
   artistFilter: {
-    type: String,
+    type: Number,
     default: null
   }
 })
@@ -87,7 +87,11 @@ const categories = computed(() => {
     const slimItem = {
       id: item.id,
       title: item.title,
-      artist: item.artist.name,
+      track_url: `library/tracks/${item.id}`,
+      artist_name: item.artist.name,
+      artist_url: `channels/${item.artist.channel.actor.preferred_username}`,
+      album_name: item.album?.title,
+      album_url: `library/albums/${item.album?.id}`,
       duration: item.uploads?.duration,
       is_playable: item.is_playable,
       cover: item.cover?.urls?.medium_square_crop || item.album?.cover?.urls?.medium_square_crop || '/placeholder.svg?height=280&width=280'
@@ -250,8 +254,15 @@ const deleteContent = (item) => {
                 </div>
               </div>
               <div class="p-4">
-                <h3 class="font-semibold text-[#434289] mb-1">{{ item.title }}</h3>
-                <p class="text-sm text-gray-600">{{ item.artist }}</p>
+                <a :href="item.track_url">
+                    <h3 class="font-semibold text-[#434289] mb-1">{{ item.title }}</h3>
+                </a>
+                <a :href="item.artist_url" class="text-sm text-gray-600">
+                    {{ item.artist_name }}
+                </a>
+                <a v-if="item.album_name" :href="item.album_url" class="text-sm text-gray-600 block">
+                  {{ item.album_name }}
+                </a>
                 <div class="flex items-center gap-2 mt-2">
                   <play-button
                     class="primary"

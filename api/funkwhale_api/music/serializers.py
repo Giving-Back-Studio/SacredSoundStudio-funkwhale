@@ -141,7 +141,7 @@ class ArtistWithAlbumsSerializer(OptionalDescriptionMixin, serializers.Serialize
 class SimpleArtistSerializer(serializers.ModelSerializer):
     attachment_cover = CoverField(allow_null=True, required=False)
     description = common_serializers.ContentSerializer(allow_null=True, required=False)
-    channel = serializers.UUIDField(allow_null=True, required=False)
+    channel = ArtistWithAlbumsInlineChannelSerializer(allow_null=True)
 
     class Meta:
         model = models.Artist
