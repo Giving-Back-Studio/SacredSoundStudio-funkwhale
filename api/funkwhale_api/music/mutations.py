@@ -25,20 +25,26 @@ def can_approve(obj, actor):
 
 
 class TagMutation(mutations.UpdateMutationSerializer):
-    tags = tags_serializers.TagsListField()
+    tags = tags_serializers.CategorizedTagsField()
 
     def get_previous_state_handlers(self):
         handlers = super().get_previous_state_handlers()
-        handlers["tags"] = lambda obj: list(
-            sorted(obj.tagged_items.values_list("tag__name", flat=True))
-        )
+        handlers["tags"] = lambda obj: {
+            category: list(sorted(
+                obj.tagged_items.filter(tag_category__name=category)
+                .values_list("tag__name", flat=True)
+            ))
+            for category in obj.tagged_items.values_list(
+                "tag_category__name", flat=True
+            ).distinct()
+        }
         return handlers
 
     def update(self, instance, validated_data):
         tags = validated_data.pop("tags", NOOP)
         r = super().update(instance, validated_data)
         if tags != NOOP:
-            tags_models.set_tags(instance, *tags)
+            tags_models.set_categorized_tags(instance, tags)
         return r
 
 
