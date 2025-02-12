@@ -3,9 +3,12 @@ import { computed, ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { ChevronLeft, ChevronRight, Edit2, Trash2, Clock } from 'lucide-vue-next'
 
+import { useStore } from '~/store'
 import PlayButton from '~/components/audio/PlayButton.vue'
 import useLogger from '~/composables/useLogger'
 import useErrorHandler from '~/composables/useErrorHandler'
+
+const store = useStore()
 
 const props = defineProps({
   artistFilter: {
@@ -90,6 +93,7 @@ const categories = computed(() => {
       track_url: `library/tracks/${item.id}`,
       edit_url: `library/tracks/${item.id}/edit`,
       artist_name: item.artist.name,
+      artist_id: item.artist.id,
       artist_url: `channels/${item.artist.channel.actor.preferred_username}`,
       album_name: item.album?.title,
       album_url: `library/albums/${item.album?.id}`,
@@ -101,19 +105,21 @@ const categories = computed(() => {
     for (const tagCategoryIdx in trackCategories.value) {
       const tagCategory = trackCategories.value[tagCategoryIdx].name
       if (tagCategory == selectedCategory.value) {
-        const tag = item.tags[tagCategory]
-        if (!tag) {
+        const tags = item.tags[tagCategory]
+        if (!tags) {
           if (!cats[NONE]) cats[NONE] = []
           cats[NONE].push(slimItem)
           scrollPositions.value[NONE] = 0
           continue
         }
 
-        if (cats[tag] && !cats[tag].includes(slimItem)) {
-          cats[tag].push(slimItem)
-        } else {
-          cats[tag] = [slimItem]
-          scrollPositions.value[tag] = 0
+        for (const tag of tags) {
+          if (cats[tag] && !cats[tag].includes(slimItem)) {
+            cats[tag].push(slimItem)
+          } else {
+            cats[tag] = [slimItem]
+            scrollPositions.value[tag] = 0
+          }
         }
       }
     }
@@ -225,7 +231,7 @@ const deleteContent = (item) => {
                   :alt="item.title"
                   class="w-full h-full object-cover"
                 />
-                <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                <div v-if="$store.state.auth.profile.artist == item.artist_id" class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
                   <a :href="item.edit_url" class="p-2 rounded-full bg-white text-[#434289] hover:bg-gray-100">
                     <Edit2 class="h-5 w-5" />
                   </a>
