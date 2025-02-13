@@ -124,11 +124,13 @@ def set_categorized_tags(obj, tagged_items):
 
     # Create any missing tags
     tag_names = {item['tag'] for item in tagged_items}
-    tag_objs = [Tag(name=name) for name in tag_names]
-    Tag.objects.bulk_create(tag_objs, ignore_conflicts=True)
+    tag_objs = []
+    for tag_name in tag_names:
+        tag_obj, _created = Tag.objects.get_or_create(name=tag_name)
+        tag_objs.append(tag_obj)
 
     # Get tag and category mappings
-    tags = {t.name: t for t in Tag.objects.filter(name__in=tag_names)}
+    tags = {t.name: t for t in tag_objs}
     categories = {
         c.name: c for c in TagCategory.objects.filter(
             name__in={item['tag_category'] for item in tagged_items}
