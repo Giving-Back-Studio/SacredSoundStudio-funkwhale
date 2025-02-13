@@ -263,6 +263,7 @@ const deleteContent = (item) => {
                 <a v-if="item.album_name" :href="item.album_url" class="text-sm text-gray-600 block">
                   {{ item.album_name }}
                 </a>
+                <span v-else class="text-sm text-gray-600 block">Single</span>
                 <div class="flex items-center gap-2 mt-2">
                   <play-button
                     class="primary"
