@@ -92,7 +92,8 @@ onMounted(async () => {
 <template>
   <div
     ref="dropdown"
-    class="ui multiple search selection dropdown"
+    class="ui search selection dropdown"
+    :class="{ multiple: props.maxTags > 1 }"
   >
     <input type="hidden">
     <i class="dropdown icon" />
