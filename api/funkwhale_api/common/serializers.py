@@ -290,7 +290,7 @@ class AttachmentSerializer(serializers.Serializer):
     size = serializers.IntegerField(read_only=True)
     mimetype = serializers.CharField(read_only=True)
     creation_date = serializers.DateTimeField(read_only=True)
-    file = StripExifImageField(write_only=True)
+    file = serializers.ImageField(write_only=True)
     urls = serializers.SerializerMethodField()
 
     @extend_schema_field(OpenApiTypes.OBJECT)
