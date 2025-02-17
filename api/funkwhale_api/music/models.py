@@ -7,6 +7,7 @@ import uuid
 
 import arrow
 import pydub
+import ffmpeg
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.indexes import GinIndex
@@ -484,6 +485,12 @@ def get_artist(release_list):
 class Track(APIModelMixin):
     mbid = models.UUIDField(db_index=True, null=True, blank=True)
     title = models.TextField()
+    media_type = models.CharField(
+        max_length=10,
+        choices=[("audio", "Audio"), ("video", "Video")],
+        default="audio"
+    )
+    resolution = models.CharField(max_length=20, blank=True, null=True)
     artist = models.ForeignKey(Artist, related_name="tracks", on_delete=models.CASCADE)
     disc_number = models.PositiveIntegerField(null=True, blank=True)
     position = models.PositiveIntegerField(null=True, blank=True)
@@ -740,6 +747,26 @@ class Upload(models.Model):
         related_name="uploads",
         on_delete=models.CASCADE,
     )
+    # Add media_type field
+    MEDIA_TYPE_CHOICES = [
+        ("audio", "Audio"),
+        ("video", "Video")
+    ]
+    media_type = models.CharField(
+        max_length=10,
+        choices=MEDIA_TYPE_CHOICES,
+        default="audio"
+    )
+    # Add video-specific fields
+    video_file = models.FileField(
+        upload_to=get_file_path,
+        max_length=255,
+        null=True,
+        blank=True
+    )
+    width = models.PositiveIntegerField(null=True, blank=True)
+    height = models.PositiveIntegerField(null=True, blank=True)
+    video_codec = models.CharField(max_length=50, null=True, blank=True)
 
     # metadata from federation
     metadata = JSONField(
@@ -840,10 +867,11 @@ class Upload(models.Model):
             return os.path.splitext(self.in_place_path)[-1].replace(".", "", 1)
 
     def get_file_size(self):
-        if self.audio_file:
+        if self.media_type == "audio" and self.audio_file:
             return self.audio_file.size
-
-        if self.source.startswith("file://"):
+        elif self.media_type == "video" and self.video_file:
+            return self.video_file.size
+        elif self.source.startswith("file://"):
             return os.path.getsize(self.source.replace("file://", "", 1))
 
     def get_audio_file(self):
@@ -874,25 +902,46 @@ class Upload(models.Model):
         return audio
 
     def save(self, **kwargs):
+        # Update mimetype detection
         if not self.mimetype:
             if self.audio_file:
                 self.mimetype = utils.guess_mimetype(self.audio_file)
+            elif self.video_file:
+                self.mimetype = utils.guess_mimetype(self.video_file)
             elif self.source and self.source.startswith("file://"):
                 self.mimetype = utils.guess_mimetype_from_name(self.source)
-        if not self.size and self.audio_file:
-            self.size = self.audio_file.size
-        if not self.checksum:
-            try:
-                audio_file = self.get_audio_file()
-            except FileNotFoundError:
-                pass
-            else:
-                if audio_file:
-                    self.checksum = common_utils.get_file_hash(audio_file)
 
-        if not self.pk and not self.fid and self.library.actor.get_user():
-            self.fid = self.get_federation_id()
+        # Set media_type based on mimetype
+        if self.mimetype.startswith('video/'):
+            self.media_type = "video"
+        else:
+            self.media_type = "audio"
+
+        # Handle video-specific metadata
+        if self.media_type == "video" and not self.duration:
+            self.extract_video_metadata()
+
         return super().save(**kwargs)
+
+    def extract_video_metadata(self):
+        """Extract video metadata using ffprobe"""
+        try:
+            file_path = self.video_file.path if self.video_file else self.source
+            probe = ffmpeg.probe(file_path)
+            video_stream = next(
+                (s for s in probe['streams'] if s['codec_type'] == 'video'),
+                None
+            )
+
+            if video_stream:
+                self.width = video_stream.get('width')
+                self.height = video_stream.get('height')
+                self.video_codec = video_stream.get('codec_name')
+                self.duration = int(float(probe['format']['duration']))
+                self.bitrate = int(probe['format'].get('bit_rate', 0)) // 1000
+
+        except Exception as e:
+            logger.error(f"Error extracting video metadata: {str(e)}")
 
     def get_metadata(self):
         audio_file = self.get_audio_file()
