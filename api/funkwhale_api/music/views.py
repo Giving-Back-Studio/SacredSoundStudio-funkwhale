@@ -1,3 +1,10 @@
+# At the top with other imports
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    extend_schema,
+    extend_schema_view,
+)
 import base64
 import datetime
 import logging
@@ -10,7 +17,6 @@ from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Count, F, Prefetch, Q, Sum
 from django.utils import timezone
-from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import mixins, renderers
 from rest_framework import settings as rest_settings
 from rest_framework import views, viewsets
@@ -34,6 +40,7 @@ from funkwhale_api.users.authentication import ScopedTokenAuthentication
 from funkwhale_api.users.oauth import permissions as oauth_permissions
 
 from . import filters, licenses, models, serializers, tasks, utils
+from .serializers import TrackSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +49,117 @@ TAG_PREFETCH = Prefetch(
     queryset=TaggedItem.objects.all().select_related().order_by("tag__name"),
     to_attr="_prefetched_tagged_items",
 )
+
+
+class TrackViewSet(
+    common_views.SkipFilterForGetObject,
+    mixins.DestroyModelMixin,
+    viewsets.ReadOnlyModelViewSet,
+    mixins.CreateModelMixin,
+):
+    queryset = (
+        models.Track.objects.all()
+        .for_nested_serialization()
+        .prefetch_related("attributed_to", "attachment_cover")
+        .order_by("-creation_date")
+    )
+    serializer_class = serializers.TrackSerializer
+    permission_classes = [oauth_permissions.ScopePermission]
+    required_scope = "libraries"
+    anonymous_policy = "setting"
+    filterset_class = filters.TrackFilter
+    fetches = federation_decorators.fetches_route()
+    mutations = common_decorators.mutations_route(types=["update"])
+    renderer_classes = list(viewsets.ModelViewSet.renderer_classes) + [renderers.MultiPartRenderer]
+
+    @extend_schema(
+        request=serializers.TrackCreateSerializer,
+        responses=serializers.TrackSerializer,
+        parameters=[
+            OpenApiParameter(
+                name='video_file',
+                type=OpenApiTypes.BYTE,
+                location=OpenApiParameter.FORM,
+                description='Video file upload (MP4, WebM)'
+            ),
+            OpenApiParameter(
+                name='resolution',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.FORM,
+                description='Video resolution (auto-detected if not provided)'
+            )
+        ]
+    )
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            with transaction.atomic():
+                track = serializer.save()
+
+                upload = track.uploads.first()
+                if upload and upload.media_type == 'video':
+                    # Initiate video processing tasks
+                    tasks.process_video_upload.delay(upload_id=upload.id)
+
+                headers = self.get_success_headers(serializer.data)
+                return Response(
+                    serializers.TrackSerializer(track, context=self.get_serializer_context()).data,
+                    status=201,
+                    headers=headers
+                )
+
+        except Exception as e:
+            logger.error(f"Error creating track: {str(e)}")
+            return Response({"detail": "Error processing media file"}, status=500)
+
+    def get_object(self):
+        obj = super().get_object()
+        if (
+                self.action == "retrieve"
+                and self.request.GET.get("refresh", "").lower() == "true"
+        ):
+            obj = refetch_obj(obj, self.get_queryset())
+        return obj
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.action in ["destroy"]:
+            queryset = queryset.filter(
+                artist__attributed_to=self.request.user.actor
+            )
+        filter_favorites = self.request.GET.get("favorites", None)
+        user = self.request.user
+        if user.is_authenticated and filter_favorites == "true":
+            queryset = queryset.filter(track_favorites__user=user)
+
+        queryset = queryset.with_playable_uploads(
+            utils.get_actor_from_request(self.request)
+        )
+        return queryset.prefetch_related(TAG_PREFETCH)
+
+    libraries = get_libraries(lambda o, uploads: uploads.filter(track=o))
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["description"] = self.action in ["retrieve", "create", "update"]
+        context["user"] = self.request.user
+        return context
+
+    @transaction.atomic
+    def perform_destroy(self, instance):
+        uploads = instance.uploads.order_by("id")
+        routes.outbox.dispatch(
+            {"type": "Delete", "object": {"type": "Audio"}},
+            context={"uploads": list(uploads)},
+        )
+        instance.delete()
+
+    def get_serializer_class(self):
+        if self.action in ["create"]:
+            return serializers.TrackCreateSerializer
+        return super().get_serializer_class()
 
 
 def get_libraries(filter_uploads):

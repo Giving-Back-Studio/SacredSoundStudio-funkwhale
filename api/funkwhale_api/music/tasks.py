@@ -2,6 +2,7 @@ import collections
 import datetime
 import logging
 import os
+import subprocess
 
 from django.conf import settings
 from django.core.cache import cache
@@ -24,6 +25,7 @@ from funkwhale_api.tags import tasks as tags_tasks
 from funkwhale_api.taskapp import celery
 
 from . import licenses, metadata, models, signals
+from .models import Upload
 
 logger = logging.getLogger(__name__)
 
@@ -856,3 +858,31 @@ def fs_import(library, path, import_reference):
         "broadcast": False,
     }
     command.handle(**options)
+
+@celery.app.task(name="music.transcode_video")
+def transcode_video(upload_id):
+    try:
+        upload = Upload.objects.get(pk=upload_id)
+        input_path = upload.file.path
+        output_path = f"{input_path.rsplit('.', 1)[0]}_transcoded.mp4"
+
+        command = [
+            "ffmpeg",
+            "-i", input_path,
+            "-c:v", "libx264",
+            "-preset", "fast",
+            "-crf", "22",
+            "-c:a", "aac",
+            "-b:a", "128k",
+            output_path
+        ]
+
+        subprocess.run(command, check=True)
+
+        upload.transcoded_file = output_path
+        upload.save(update_fields=["transcoded_file"])
+
+    except Upload.DoesNotExist:
+        raise ValueError(f"Upload with id {upload_id} does not exist")
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"Error during transcoding: {e}")
