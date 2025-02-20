@@ -294,6 +294,7 @@ class TrackSerializer(OptionalDescriptionMixin, serializers.Serializer):
     fid = serializers.URLField()
     mbid = serializers.UUIDField()
     title = serializers.CharField()
+    media_type = serializers.CharField()
     creation_date = serializers.DateTimeField()
     is_local = serializers.BooleanField()
     position = serializers.IntegerField()
@@ -922,7 +923,9 @@ class TrackCreateSerializer(serializers.ModelSerializer):
             "description",
             "tagged_items",
             "upload",
-            "cover"
+            "cover",
+            "media_type",
+            "resolution"
         )
 
     def create(self, validated_data):

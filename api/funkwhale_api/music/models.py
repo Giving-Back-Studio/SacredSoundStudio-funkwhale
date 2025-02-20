@@ -43,6 +43,11 @@ ARTIST_CONTENT_CATEGORY_CHOICES = [
     ("other", "other"),
 ]
 
+MEDIA_TYPE_CHOICES = [
+    ("audio", "Audio"),
+    ("video", "Video")
+]
+
 
 def empty_dict():
     return {}
@@ -487,7 +492,7 @@ class Track(APIModelMixin):
     title = models.TextField()
     media_type = models.CharField(
         max_length=10,
-        choices=[("audio", "Audio"), ("video", "Video")],
+        choices=MEDIA_TYPE_CHOICES,
         default="audio"
     )
     resolution = models.CharField(max_length=20, blank=True, null=True)
@@ -747,11 +752,7 @@ class Upload(models.Model):
         related_name="uploads",
         on_delete=models.CASCADE,
     )
-    # Add media_type field
-    MEDIA_TYPE_CHOICES = [
-        ("audio", "Audio"),
-        ("video", "Video")
-    ]
+
     media_type = models.CharField(
         max_length=10,
         choices=MEDIA_TYPE_CHOICES,
