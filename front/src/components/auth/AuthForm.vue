@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useStore } from '~/store'
 import { useI18n } from 'vue-i18n'
 import { whenever } from '@vueuse/core'
@@ -9,9 +9,17 @@ import LoginForm from '~/components/auth/LoginForm.vue'
 import useLogger from '~/composables/useLogger'
 
 const router = useRouter()
+const route = useRoute()
 const store = useStore()
 const logger = useLogger()
 const { t } = useI18n()
+
+// Read isArtist from URL query on mount
+onMounted(() => {
+  const isArtist = route.query.isArtist === 'true'
+  logger.log('Setting isArtist from URL query:', isArtist)
+  store.commit('ui/setIsArtist', isArtist)
+})
 
 // Authentication redirect
 whenever(() => store.state.auth.authenticated, () => {
@@ -96,4 +104,4 @@ const labels = computed(() => ({
 .font-serif {
   font-family: "Playfair Display", serif;
 }
-</style> 
+</style>
