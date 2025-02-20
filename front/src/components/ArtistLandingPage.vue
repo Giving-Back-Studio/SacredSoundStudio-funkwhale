@@ -73,6 +73,7 @@ const navigateToAuth = () => {
     setTimeout(() => {
       router.push({ 
         path: '/auth',
+        query: { isArtist: 'true' },
         replace: true
       }).catch(error => {
         logger.error('Navigation error:', error)
