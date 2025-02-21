@@ -32,7 +32,7 @@ class TagCategory(models.Model):
 
 
 class Tag(models.Model):
-    name = CICharField(max_length=100)
+    name = CICharField(max_length=100, unique=True)
     creation_date = models.DateTimeField(default=timezone.now)
     categories = models.ManyToManyField(TagCategory, related_name="tags", blank=True)
 
