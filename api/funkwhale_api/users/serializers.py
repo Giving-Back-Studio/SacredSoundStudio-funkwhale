@@ -33,10 +33,11 @@ from . import models
 
 @deconstructible
 class ASCIIUsernameValidator(validators.RegexValidator):
-    regex = r"^[\w]+$"
+    regex = r"^[\w.@+\- ]+$"
+
     message = _(
         "Enter a valid username. This value may contain only English letters, "
-        "numbers, and _ characters."
+        "numbers, spaces, and _ characters."
     )
     flags = re.ASCII
 
