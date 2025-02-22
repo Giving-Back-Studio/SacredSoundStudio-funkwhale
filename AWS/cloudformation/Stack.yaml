@@ -342,7 +342,7 @@ Resources:
             TaskCount: 1
             LaunchType: FARGATE
             NetworkConfiguration:
-              AwsvpcConfiguration:
+              AwsVpcConfiguration:
                 Subnets:
                   - !GetAtt VPC.Outputs.PrivateSubnet0
                   - !GetAtt VPC.Outputs.PrivateSubnet1
