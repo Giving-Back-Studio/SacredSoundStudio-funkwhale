@@ -400,9 +400,15 @@ Resources:
           LogConfiguration:
             LogDriver: awslogs
             Options:
-              awslogs-group: !Sub "/ecs/${ClusterName}"
+              awslogs-group: !Ref TranscoderLogGroup
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: transcoder
+
+  TranscoderLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    Properties:
+      LogGroupName: !Join ['', [/ecs/, !Ref ClusterName, /Transcoder]]
 
   TaskRole:
     Type: AWS::IAM::Role
