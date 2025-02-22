@@ -333,9 +333,13 @@ Resources:
           object:
             key:
               - suffix: ".mp4"
+                prefix: "tracks/"
               - suffix: ".MP4"
+                prefix: "tracks/"
               - suffix: ".mov"
+                prefix: "tracks/"
               - suffix: ".MOV"
+                prefix: "tracks/"
       State: "ENABLED"
       Targets:
         - Arn: !Sub "arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:cluster/${Cluster}"
