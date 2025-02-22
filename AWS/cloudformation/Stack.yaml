@@ -19,6 +19,10 @@ Parameters:
     Type: String
     Description: ECR Image URI for the nginx container
 
+  TranscoderImage:
+    Type: String
+    Description: ECR Image URI for the transcoder container
+
   ContainerPort:
     Type: Number
     Default: 5000
@@ -292,6 +296,117 @@ Resources:
                 Resource:
                   - !GetAtt RDSCluster.Outputs.ConnectionSecret
                   - !Ref DjangoSecretKey
+
+  TranscoderTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: AllowS3Access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Resource:
+                  - !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
+                  - !Sub "arn:aws:s3:::${StaticSiteBucket}"
+                Action:
+                  - "s3:GetObject"
+                  - "s3:PutObject"
+                  - "s3:ListBucket"
+
+  VideoUploadTrigger:
+    Type: AWS::S3::BucketNotification
+    Properties:
+      Bucket: !Ref StaticSiteBucket
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true
+
+  TranscoderRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: "Rule to trigger transcoder on video upload"
+      EventPattern:
+        source: ["aws.s3"]
+        detail-type: ["Object Created"]
+        detail:
+          bucket:
+            name: [!Ref StaticSiteBucket]
+          object:
+            key: [{suffix: [".mp4", ".MP4", ".mov", ".MOV"]}]
+      State: "ENABLED"
+      Targets:
+        - Arn: !Sub "arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:cluster/${Cluster}"
+          Id: "TranscoderTask"
+          RoleArn: !GetAtt EventsRole.Arn
+          EcsParameters:
+            TaskDefinitionArn: !Ref TranscoderTaskDefinition
+            TaskCount: 1
+            LaunchType: FARGATE
+            NetworkConfiguration:
+              AwsvpcConfiguration:
+                Subnets:
+                  - !GetAtt VPC.Outputs.PrivateSubnet0
+                  - !GetAtt VPC.Outputs.PrivateSubnet1
+                SecurityGroups:
+                  - !GetAtt VPC.Outputs.ContainerSecurityGroup
+          InputTransformer:
+            InputPathsMap:
+              bucket: "$.detail.bucket.name"
+              key: "$.detail.object.key"
+            InputTemplate: '{"containerOverrides":[{"name":"transcoder","command":["$(bucket)","$(key)"]}]}'
+
+  EventsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AllowECSTaskRun
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: "ecs:RunTask"
+                Resource: !Ref TranscoderTaskDefinition
+              - Effect: Allow
+                Action: "iam:PassRole"
+                Resource: 
+                  - !GetAtt TranscoderTaskRole.Arn
+                  - !GetAtt ExecutionRole.Arn
+
+  TranscoderTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub "${ClusterName}-transcoder"
+      RequiresCompatibilities:
+        - FARGATE
+      NetworkMode: awsvpc
+      Cpu: 1024
+      Memory: 2048
+      ExecutionRoleArn: !Ref ExecutionRole
+      TaskRoleArn: !Ref TranscoderTaskRole
+      ContainerDefinitions:
+        - Name: transcoder
+          Image: !Ref TranscoderImage
+          Essential: true
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Sub "/ecs/${ClusterName}"
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: transcoder
 
   TaskRole:
     Type: AWS::IAM::Role
