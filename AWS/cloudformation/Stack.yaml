@@ -356,7 +356,7 @@ Resources:
             InputPathsMap:
               bucket: "$.detail.bucket.name"
               key: "$.detail.object.key"
-            InputTemplate: '{"containerOverrides":[{"name":"transcoder","command":["$(bucket)","$(key)"]}]}'
+            InputTemplate: '{"containerOverrides":[{"name":"transcoder","command":["<bucket>","<key>"]}]}'
 
   EventsRole:
     Type: AWS::IAM::Role
