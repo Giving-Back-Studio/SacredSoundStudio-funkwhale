@@ -320,14 +320,6 @@ Resources:
                   - "s3:PutObject"
                   - "s3:ListBucket"
 
-  VideoUploadTrigger:
-    Type: AWS::S3::BucketNotification
-    Properties:
-      Bucket: !Ref StaticSiteBucket
-      NotificationConfiguration:
-        EventBridgeConfiguration:
-          EventBridgeEnabled: true
-
   TranscoderRule:
     Type: AWS::Events::Rule
     Properties:

@@ -55,6 +55,9 @@ Resources:
     Properties:
       BucketName: !Sub 'sacredsound-funkwhale-frontend-${GitBranch}'
       AccessControl: Private
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true
       CorsConfiguration:
         CorsRules:
           - AllowedHeaders:
