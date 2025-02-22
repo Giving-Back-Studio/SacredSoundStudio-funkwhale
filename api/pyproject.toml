@@ -90,6 +90,7 @@ troi = { git = "https://github.com/metabrainz/troi-recommendation-playground.git
 lb-matching-tools = { git = "https://github.com/metabrainz/listenbrainz-matching-tools.git", branch = "main"}
 unidecode = "==1.3.8"
 pycountry = "22.3.5"
+ffmpeg = "==1.4"
 
 # Typesense
 typesense = { version = "==0.15.1", optional = true }
@@ -125,7 +126,6 @@ requests-mock = "==1.10.0"
 pylint = "==2.17.7"
 pylint-django = "==2.5.5"
 django-extensions = "==3.2.3"
-ffmpeg = "==1.4"
 
 [tool.poetry.extras]
 typesense = ["typesense"]

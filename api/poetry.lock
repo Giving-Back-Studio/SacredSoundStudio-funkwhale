@@ -918,7 +918,7 @@ sgmllib3k = "*"
 name = "ffmpeg"
 version = "1.4"
 description = "ffmpeg python package url [https://github.com/jiashaokun/ffmpeg]"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
