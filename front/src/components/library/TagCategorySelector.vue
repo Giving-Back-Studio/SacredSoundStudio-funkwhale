@@ -32,7 +32,11 @@ watch(() => props.modelValue, (value) => {
 })
 
 const handleUpdate = () => {
-  const value = $(dropdown.value).dropdown('get value').split(',')
+  let value = $(dropdown.value).dropdown('get value').split(',')
+
+  if (props.category === 'Vocals' && value.includes('Instrumental')) {
+    value = ['Instrumental'];
+  }
   emit('update:modelValue', value)
   return value
 }
