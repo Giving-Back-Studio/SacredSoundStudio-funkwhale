@@ -331,7 +331,11 @@ Resources:
           bucket:
             name: [!Ref StaticSiteBucket]
           object:
-            key: [{suffix: [".mp4", ".MP4", ".mov", ".MOV"]}]
+            key:
+              - suffix: ".mp4"
+              - suffix: ".MP4"
+              - suffix: ".mov"
+              - suffix: ".MOV"
       State: "ENABLED"
       Targets:
         - Arn: !Sub "arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:cluster/${Cluster}"
