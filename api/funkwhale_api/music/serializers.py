@@ -540,15 +540,6 @@ class UploadForOwnerSerializer(UploadSerializer):
             file = validated_data['audio_file']
             mimetype = utils.guess_mimetype(file)
 
-            # Allow video MIME types
-            valid_mimetypes = [
-                'audio/mpeg', 'audio/ogg', 'audio/flac',
-                'video/mp4', 'video/webm', 'video/quicktime'
-            ]
-
-            if mimetype not in valid_mimetypes:
-                raise serializers.ValidationError("Unsupported file type")
-
             # Handle audio/video metadata extraction
             if mimetype.startswith('audio/'):
                 audio_data = utils.get_audio_file_data(file)
