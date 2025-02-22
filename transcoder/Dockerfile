@@ -4,9 +4,7 @@ FROM alpine:latest
 RUN apk update && \
     apk add --no-cache \
     ffmpeg \
-    python3 \
-    py3-pip \
-    && pip3 install --no-cache-dir awscli
+    aws-cli
 
 # Create working directory
 WORKDIR /app
