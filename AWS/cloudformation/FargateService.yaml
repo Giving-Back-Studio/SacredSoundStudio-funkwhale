@@ -161,11 +161,11 @@ Resources:
             - Name: MUSIC_DIRECTORY_PATH
               Value: ''
             - Name: FUNKWHALE_HOSTNAME
-              Value: 'beta.sacredsound.app'
+              Value: 'staging.sacredsound.app'
             - Name: FUNKWHALE_HOSTNAME_SUFFIX
               Value: 'sacredsound.app'
             - Name: FUNKWHALE_HOSTNAME_PREFIX
-              Value: 'beta'
+              Value: 'staging'
             - Name: FUNKWHALE_PROTOCOL
               Value: 'https'
             - Name: FUNKWHALE_URL
@@ -216,7 +216,7 @@ Resources:
                 - Name: MUSIC_DIRECTORY_PATH
                   Value: '/data/music'
                 - Name: FUNKWHALE_HOSTNAME
-                  Value: 'beta.sacredsound.app'
+                  Value: 'staging.sacredsound.app'
               DependsOn:
                 - ContainerName: !Ref ServiceName
                   Condition: START

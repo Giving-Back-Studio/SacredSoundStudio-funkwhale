@@ -55,8 +55,7 @@ Resources:
               - OPTIONS
           AccessControlAllowOrigins:
             Items:
-              - 'https://beta.sacredsound.app'
-              - 'https://sacredsound.app'
+              - 'https://staging.sacredsound.app'
           OriginOverride: true
 
   BucketPolicy:
@@ -137,9 +136,8 @@ Resources:
     Properties:
       DistributionConfig:
         Aliases:
-          - sacredsound.app
-          - beta.sacredsound.app
-        Comment: Production CloudFront Distribution
+          - staging.sacredsound.app
+        Comment: Staging CloudFront Distribution
         CustomErrorResponses:
           - ErrorCode: 404
             ResponseCode: 200
