@@ -714,6 +714,9 @@ def get_file_path(instance, filename):
         return common_utils.ChunkedPath("transcoded")(instance, filename)
 
     if instance.library.actor.get_user():
+        if isinstance(instance, Upload) and instance.media_type == "video":
+            return common_utils.ChunkedPath("videos")(instance, filename)
+
         return common_utils.ChunkedPath("tracks")(instance, filename)
     else:
         # we cache remote tracks in a different directory
