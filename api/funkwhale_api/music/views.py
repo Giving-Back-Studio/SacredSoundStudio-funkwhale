@@ -1,10 +1,3 @@
-# At the top with other imports
-from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import (
-    OpenApiParameter,
-    extend_schema,
-    extend_schema_view,
-)
 import base64
 import datetime
 import logging
@@ -17,6 +10,7 @@ from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Count, F, Prefetch, Q, Sum
 from django.utils import timezone
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import mixins, renderers
 from rest_framework import settings as rest_settings
 from rest_framework import views, viewsets
@@ -40,7 +34,6 @@ from funkwhale_api.users.authentication import ScopedTokenAuthentication
 from funkwhale_api.users.oauth import permissions as oauth_permissions
 
 from . import filters, licenses, models, serializers, tasks, utils
-from .serializers import TrackSerializer
 
 logger = logging.getLogger(__name__)
 
