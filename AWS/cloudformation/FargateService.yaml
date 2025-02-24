@@ -15,6 +15,7 @@ Parameters:
     Type: String
   AutoScalingRole:
     Type: String
+    Default: ""
   LoadBalancer:
     Type: String
     Default: ""
@@ -74,7 +75,7 @@ Parameters:
   Memory:
     Type: String
     Default: 0.5GB
-    AllowedValues: [0.5GB, 1GB, 2GB]
+    AllowedValues: [0.5GB, 1GB, 2GB, 4GB]
   EfsFileSystemId:
     Type: String
   Namespace:
@@ -89,6 +90,10 @@ Conditions:
     - !Equals
       - !Ref NginxImage
       - ""
+  UseService: !Not 
+    - !Equals
+      - !Ref MaxContainers
+      - 0
     
 Resources:
   TaskDefinition:
@@ -245,6 +250,7 @@ Resources:
 
   Service:
     Type: AWS::ECS::Service
+    Condition: UseService
     # This dependency is needed so that the load balancer is setup correctly in time
     DependsOn:
       - WaitCondition
@@ -342,6 +348,7 @@ Resources:
 
   AutoScalingTarget:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Condition: UseService
     Properties:
       MinCapacity: !Ref MinContainers
       MaxCapacity: !Ref MaxContainers
@@ -352,6 +359,7 @@ Resources:
 
   CPUAutoScalingPolicy:
     Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Condition: UseService
     Properties:
       PolicyName: !Join ['', [!Ref ServiceName, CPUAutoScalingPolicy]]
       PolicyType: TargetTrackingScaling
@@ -365,6 +373,7 @@ Resources:
 
   MemAutoScalingPolicy:
     Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Condition: UseService
     Properties:
       PolicyName: !Join ['', [!Ref ServiceName, MemoryAutoScalingPolicy]]
       PolicyType: TargetTrackingScaling
