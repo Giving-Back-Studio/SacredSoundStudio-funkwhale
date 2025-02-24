@@ -711,7 +711,7 @@ def get_file_path(instance, filename):
 
     if instance.library.actor.get_user():
         if isinstance(instance, Upload) and instance.media_type == MEDIA_TYPE_VIDEO:
-            return common_utils.ChunkedPath("videos")(instance, filename)
+            return os.path.join("videos", str(instance.uuid), filename.replace("/", "-"))
 
         return common_utils.ChunkedPath("tracks")(instance, filename)
     else:
@@ -1052,6 +1052,7 @@ class UploadVersion(models.Model):
     creation_date = models.DateTimeField(default=timezone.now)
     accessed_date = models.DateTimeField(null=True, blank=True)
     audio_file = models.FileField(upload_to=get_file_path, max_length=255)
+    video_file = models.FileField(upload_to=get_file_path, max_length=255, null=True, blank=True)
     bitrate = models.PositiveIntegerField()
     size = models.IntegerField()
 
@@ -1078,6 +1079,16 @@ class UploadVersion(models.Model):
         except NotImplementedError:
             # external storage
             return self.audio_file.name
+
+    @property
+    def video_file_path(self):
+        if not self.video_file:
+            return None
+        try:
+            return self.video_file.path
+        except NotImplementedError:
+            # external storage
+            return self.video_file.name
 
 
 IMPORT_STATUS_CHOICES = (

@@ -40,11 +40,6 @@ Resources:
     Properties:
       RepositoryName: !Sub "nginx-${GitBranch}"
 
-  TranscoderImageEcrRepository:
-    Type: AWS::ECR::Repository
-    Properties:
-      RepositoryName: !Sub "transcoder-${GitBranch}"
-
   CodePipelineArtifactBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
@@ -149,7 +144,6 @@ Resources:
              - Resource:
                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${BaseImageEcrRepository}
                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${NginxImageEcrRepository}
-                 - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${TranscoderImageEcrRepository}
                Effect: Allow
                Action:
                  - ecr:GetDownloadUrlForLayer
@@ -321,26 +315,6 @@ Resources:
               OutputArtifacts:
                 - Name: NginxImageJSON
               RunOrder: 2
-            - Name: BuildTranscoder
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Version: 1
-                Provider: CodeBuild
-              Configuration:
-                ProjectName: !Ref DockerBuild
-                EnvironmentVariables: !Sub |
-                  [
-                    {"name": "REPOSITORY_URI", "value": "${TranscoderImageEcrRepository.RepositoryUri}"},
-                    {"name": "DOCKER_FILE", "value": "transcoder/Dockerfile"},
-                    {"name": "CONTEXT_DIR", "value": "transcoder"},
-                    {"name": "DOCKER_BUILDKIT", "value": "1"}
-                  ]
-              InputArtifacts:
-                - Name: App
-              OutputArtifacts:
-                - Name: TranscoderImageJSON
-              RunOrder: 2
             - Name: BuildFrontend
               ActionTypeId:
                 Category: Build
@@ -366,7 +340,6 @@ Resources:
                 - Name: PackagedStack
                 - Name: BaseImageJSON
                 - Name: NginxImageJSON
-                - Name: TranscoderImageJSON
               Configuration:
                 ActionMode: REPLACE_ON_FAILURE
                 StackName: !Sub "${GitSourceRepo}-${GitBranch}-app"
@@ -378,7 +351,6 @@ Resources:
                     "ClusterName": "${GitSourceRepo}-${GitBranch}",
                     "BaseImage": { "Fn::GetParam" : [ "BaseImageJSON", "imagedefinitions.json", "imageUri" ] },
                     "NginxImage": { "Fn::GetParam" : [ "NginxImageJSON", "imagedefinitions.json", "imageUri" ] },
-                    "TranscoderImage": { "Fn::GetParam" : [ "TranscoderImageJSON", "imagedefinitions.json", "imageUri" ] },
                     "StaticSiteBucket": "${StaticSiteBucket}"
                   }
         - Name: DeployFrontend
