@@ -2,6 +2,7 @@
 import { computed, ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { ChevronLeft, ChevronRight, Edit2, Trash2, Clock } from 'lucide-vue-next'
+import moment from 'moment'
 
 import { useStore } from '~/store'
 import PlayButton from '~/components/audio/PlayButton.vue'
@@ -87,6 +88,10 @@ const categories = computed(() => {
   const cats = {}
 
   for (const item of content.value) {
+    let duration = 0;
+    if (item.uploads.length > 0) {
+      duration = item.uploads[0].duration
+    }
     const slimItem = {
       id: item.id,
       title: item.title,
@@ -97,7 +102,7 @@ const categories = computed(() => {
       artist_url: `channels/${item.artist.channel.actor.preferred_username}`,
       album_name: item.album?.title,
       album_url: `library/albums/${item.album?.id}`,
-      duration: item.uploads?.duration,
+      duration: moment.duration(duration, 'seconds'),
       is_playable: item.is_playable,
       cover: item.cover?.urls?.medium_square_crop || item.album?.cover?.urls?.medium_square_crop || '/placeholder.svg?height=280&width=280'
     }
@@ -272,7 +277,9 @@ const deleteContent = (item) => {
                     :discrete="true"
                   />
                   <Clock class="h-4 w-4 text-gray-400" />
-                  <span class="text-sm text-gray-500">{{ item.duration }}</span>
+                  <span class="text-sm text-gray-500">
+                    {{ item.duration.humanize() }}
+                  </span>
                 </div>
               </div>
             </div>
