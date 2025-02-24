@@ -405,7 +405,8 @@ const goToMyContent = () => {
                     </ul>
                     <p class="mb-2">For video:</p>
                     <ul class="list-disc list-inside">
-                      <li>Coming Soon!</li>
+                      <li>File type: MP4</li>
+                      <li>Highest resolution :)</li>
                     </ul>
                   </div>
                 </div>
