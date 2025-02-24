@@ -293,29 +293,6 @@ Resources:
                   - !GetAtt RDSCluster.Outputs.ConnectionSecret
                   - !Ref DjangoSecretKey
 
-  TranscoderTaskRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: ecs-tasks.amazonaws.com
-            Action: 'sts:AssumeRole'
-      Policies:
-        - PolicyName: AllowS3Access
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Resource:
-                  - !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
-                  - !Sub "arn:aws:s3:::${StaticSiteBucket}"
-                Action:
-                  - "s3:GetObject"
-                  - "s3:PutObject"
-                  - "s3:ListBucket"
-
   TranscoderRule:
     Type: AWS::Events::Rule
     Properties:
@@ -335,7 +312,7 @@ Resources:
           Id: "TranscoderTask"
           RoleArn: !GetAtt EventsRole.Arn
           EcsParameters:
-            TaskDefinitionArn: !Ref TranscoderTaskDefinition
+            TaskDefinitionArn: !GetAtt Transcoder.Outputs.TaskDefinition
             TaskCount: 1
             LaunchType: FARGATE
             NetworkConfiguration:
@@ -374,33 +351,31 @@ Resources:
                   - !GetAtt TranscoderTaskRole.Arn
                   - !GetAtt ExecutionRole.Arn
 
-  TranscoderTaskDefinition:
-    Type: AWS::ECS::TaskDefinition
+  Transcoder:
+    Type: AWS::CloudFormation::Stack
     Properties:
-      Family: !Sub "${ClusterName}-transcoder"
-      RequiresCompatibilities:
-        - FARGATE
-      NetworkMode: awsvpc
-      Cpu: 1024
-      Memory: 2048
-      ExecutionRoleArn: !Ref ExecutionRole
-      TaskRoleArn: !Ref TranscoderTaskRole
-      ContainerDefinitions:
-        - Name: transcoder
-          Image: !Ref BaseImage
-          Essential: true
-          LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-group: !Ref TranscoderLogGroup
-              awslogs-region: !Ref AWS::Region
-              awslogs-stream-prefix: transcoder
-
-  TranscoderLogGroup:
-    Type: AWS::Logs::LogGroup
-    DeletionPolicy: Retain
-    Properties:
-      LogGroupName: !Join ['', [/ecs/, !Ref ClusterName, /Transcoder]]
+      Parameters:
+        ServiceName: transcoder
+        Cpu: 2048
+        Memory: 2GB
+        Cluster: !Ref Cluster
+        Namespace: !GetAtt Namespace.Arn
+        Command: 'funkwhale-manage transcode_video'
+        VPC: !GetAtt VPC.Outputs.VPCId
+        SubnetA: !GetAtt VPC.Outputs.PrivateSubnet0
+        SubnetB: !GetAtt VPC.Outputs.PrivateSubnet1
+        ExecutionRole: !Ref ExecutionRole
+        TaskRole: !Ref TaskRole
+        ContainerSecurityGroup: !GetAtt VPC.Outputs.ContainerSecurityGroup
+        Image: !Ref BaseImage
+        MaxContainers: 0
+        RDSConnectionSecret: !GetAtt RDSCluster.Outputs.ConnectionSecret
+        RedisUrl: !GetAtt RedisUrl.Value
+        S3Bucket: !GetAtt CDN.Outputs.Bucket
+        CdnId: !GetAtt CDN.Outputs.DistributionId
+        DjangoSecretKey: !Ref DjangoSecretKey
+        EfsFileSystemId: !Ref EFS
+      TemplateURL: FargateService.yaml
 
   TaskRole:
     Type: AWS::IAM::Role
