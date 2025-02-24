@@ -1,7 +1,9 @@
 import mimetypes
 import os
 import pathlib
+import logging
 
+import ffmpeg
 import magic
 import mutagen
 import pydub
@@ -14,6 +16,7 @@ from funkwhale_api.common.search import get_fts_query  # noqa
 from funkwhale_api.common.search import get_query  # noqa
 from funkwhale_api.common.search import normalize_query  # noqa
 
+logger = logging.getLogger(__name__)
 
 def guess_mimetype(f):
     b = min(1000000, f.size)
@@ -90,6 +93,28 @@ def get_audio_file_data(f):
     d["length"] = data.info.length
 
     return d
+
+
+def get_video_file_data(file_path):
+    """Extract video metadata using ffprobe"""
+    try:
+        probe = ffmpeg.probe(file_path)
+        video_stream = next(
+            (s for s in probe['streams'] if s['codec_type'] == 'video'),
+            None
+        )
+        format_info = probe.get('format', {})
+
+        return {
+            'duration': int(float(format_info.get('duration', 0))),
+            'bitrate': int(format_info.get('bit_rate', 0)) // 1000,
+            'width': video_stream.get('width') if video_stream else None,
+            'height': video_stream.get('height') if video_stream else None,
+            'codec': video_stream.get('codec_name') if video_stream else None,
+        }
+    except Exception as e:
+        logger.error(f"Error extracting video metadata: {str(e)}")
+        return None
 
 
 def get_actor_from_request(request):

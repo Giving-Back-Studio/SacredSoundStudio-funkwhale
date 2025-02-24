@@ -18,7 +18,6 @@ from funkwhale_api.federation.serializers import APIActorSerializer
 from funkwhale_api.playlists import models as playlists_models
 from funkwhale_api.tags import models as tag_models
 from funkwhale_api.tags import serializers as tags_serializers
-import ffmpeg
 import logging
 
 from . import filters, models, tasks, utils
@@ -42,29 +41,6 @@ class CoverField(common_serializers.AttachmentSerializer):
 
 
 cover_field = CoverField()
-
-
-def get_video_file_data(file):
-    """Extract video metadata using ffprobe"""
-    try:
-        file_path = file.temporary_file_path()
-        probe = ffmpeg.probe(file_path)
-        video_stream = next(
-            (s for s in probe['streams'] if s['codec_type'] == 'video'),
-            None
-        )
-        format_info = probe.get('format', {})
-
-        return {
-            'duration': int(float(format_info.get('duration', 0))),
-            'bitrate': int(format_info.get('bit_rate', 0)) // 1000,
-            'width': video_stream.get('width') if video_stream else None,
-            'height': video_stream.get('height') if video_stream else None,
-            'codec': video_stream.get('codec_name') if video_stream else None,
-        }
-    except Exception as e:
-        logger.error(f"Error extracting video metadata: {str(e)}")
-        return None
 
 
 class OptionalDescriptionMixin:
@@ -294,7 +270,6 @@ class TrackSerializer(OptionalDescriptionMixin, serializers.Serializer):
     fid = serializers.URLField()
     mbid = serializers.UUIDField()
     title = serializers.CharField()
-    media_type = serializers.CharField()
     creation_date = serializers.DateTimeField()
     is_local = serializers.BooleanField()
     position = serializers.IntegerField()
@@ -521,8 +496,6 @@ class UploadForOwnerSerializer(UploadSerializer):
             raise serializers.ValidationError(
                 "You may specify a channel or a library, not both"
             )
-        if "audio_file" in validated_data:
-            self.validate_upload_quota(validated_data["audio_file"])
 
         if "channel" in validated_data:
             validated_data["library"] = validated_data.pop("channel").library
@@ -539,6 +512,7 @@ class UploadForOwnerSerializer(UploadSerializer):
         if 'audio_file' in validated_data:
             file = validated_data['audio_file']
             mimetype = utils.guess_mimetype(file)
+            validated_data['mimetype'] = mimetype
 
             # Handle audio/video metadata extraction
             if mimetype.startswith('audio/'):
@@ -546,23 +520,11 @@ class UploadForOwnerSerializer(UploadSerializer):
                 if audio_data:
                     validated_data.update({
                         'duration': audio_data.get('length'),
-                        'bitrate': audio_data.get('bitrate'),
-                        'mimetype': mimetype,
+                        'bitrate': audio_data.get('bitrate')
                     })
             elif mimetype.startswith('video/'):
-                video_data = get_video_file_data(file)
-                if video_data:
-                    validated_data.update({
-                        'duration': video_data.get('duration'),
-                        'bitrate': video_data.get('bitrate'),
-                        'width': video_data.get('width'),
-                        'height': video_data.get('height'),
-                        'video_codec': video_data.get('codec'),
-                        'mimetype': mimetype,
-                        # Move to video_file field
-                        'video_file': file,
-                    })
-                    del validated_data['audio_file']
+                del validated_data['audio_file']
+                validated_data['video_file'] = file
 
             # Quota check for video files
             if 'video_file' in validated_data:
@@ -900,8 +862,6 @@ class TrackCreateSerializer(serializers.ModelSerializer):
     tagged_items = tags_serializers.TaggedItemSerializer(many=True)
     description = common_serializers.ContentSerializer(allow_null=True, required=False)
     cover = COVER_WRITE_FIELD
-    media_type = serializers.CharField(required=False)
-    resolution = serializers.CharField(required=False)
 
     class Meta:
         model = models.Track
@@ -914,9 +874,7 @@ class TrackCreateSerializer(serializers.ModelSerializer):
             "description",
             "tagged_items",
             "upload",
-            "cover",
-            "media_type",
-            "resolution"
+            "cover"
         )
 
     def create(self, validated_data):
@@ -948,11 +906,6 @@ class TrackCreateSerializer(serializers.ModelSerializer):
                 tag_category=tag_category
             )
             obj_tag.save()
-
-        if upload.video_file:
-            instance.media_type = 'video'
-            instance.resolution = f"{upload.width}x{upload.height}"
-            instance.save()
 
         return instance
 

@@ -579,6 +579,8 @@ def handle_serve(
     f = upload
     if f.audio_file:
         file_path = get_file_path(f.audio_file)
+    elif f.video_file:
+        file_path = get_file_path(f.video_file)
 
     elif f.source and (
         f.source.startswith("http://") or f.source.startswith("https://")
