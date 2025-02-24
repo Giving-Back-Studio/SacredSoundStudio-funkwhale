@@ -607,7 +607,7 @@ def handle_serve(
             f.size = data["size"]
             f.bitrate = data["bitrate"]
             f.save(update_fields=["bitrate", "duration", "size"])
-        file_path = get_file_path(f.audio_file)
+        file_path = get_file_path(f.audio_file or f.video_file)
     elif f.source and f.source.startswith("file://"):
         file_path = get_file_path(f.source.replace("file://", "", 1))
     mt = f.mimetype
@@ -619,10 +619,13 @@ def handle_serve(
         f = transcoded_version
         file_path = get_file_path(f.audio_file)
         mt = f.mimetype
-    if not proxy_media and f.audio_file:
+    if not proxy_media and (f.audio_file or f.video_file):
         # we simply issue a 302 redirect to the real URL
         response = Response(status=302)
-        response["Location"] = f.audio_file.url
+        if f.audio_file:
+            response["Location"] = f.audio_file.url
+        if f.video_file:
+            response["Location"] = f.video_file.url
         return response
     if mt:
         response = Response(content_type=mt)
