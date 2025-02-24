@@ -628,11 +628,6 @@ const goToMyContent = () => {
   color: var(--primary-color) !important;
 }
 
-/* Update step circles styling */
-.rounded-full {
-  background: var(--form-background) !important;
-}
-
 /* Keep the active step (number 1) with its current styling */
 .step-1 .rounded-full {
   background: var(--primary-color) !important;
