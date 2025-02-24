@@ -138,6 +138,77 @@ def transcode_audio(audio, output, output_format, **kwargs):
         return audio.export(output, format=output_format, **kwargs)
 
 
+def transcode_video(input_path, output_path, resolution, video_bitrate, maxrate, bufsize, audio_bitrate):
+    """
+    Transcode a video file using ffmpeg with the specified parameters.
+    
+    Args:
+        input_path: Path to input video file
+        output_path: Path where transcoded video will be saved
+        resolution: Tuple of (width, height) for output resolution
+        video_bitrate: Video bitrate (e.g. '5000k')
+        maxrate: Maximum bitrate (e.g. '5350k')
+        bufsize: Buffer size (e.g. '7000k')
+        audio_bitrate: Audio bitrate (e.g. '192k')
+    """
+    try:
+        width, height = resolution
+        stream = ffmpeg.input(input_path)
+        stream = ffmpeg.output(
+            stream,
+            output_path,
+            vcodec='libx264',
+            acodec='aac',
+            preset='medium',
+            **{
+                'b:v': video_bitrate,
+                'maxrate': maxrate,
+                'bufsize': bufsize,
+                'b:a': audio_bitrate,
+                'vf': f'scale={width}:{height}'
+            }
+        )
+        ffmpeg.run(stream, overwrite_output=True, capture_stdout=True, capture_stderr=True)
+    except ffmpeg.Error as e:
+        logger.error(f"FFmpeg error: {e.stderr.decode()}")
+        raise
+
+TRANSCODE_SETTINGS = [
+    {
+        'resolution': (1920, 1080),
+        'video_bitrate': '5000k',
+        'maxrate': '5350k',
+        'bufsize': '7000k',
+        'audio_bitrate': '192k',
+        'suffix': '1080p'
+    },
+    {
+        'resolution': (1280, 720),
+        'video_bitrate': '2800k',
+        'maxrate': '2996k',
+        'bufsize': '4200k',
+        'audio_bitrate': '128k',
+        'suffix': '720p'
+    },
+    {
+        'resolution': (854, 480),
+        'video_bitrate': '1400k',
+        'maxrate': '1498k',
+        'bufsize': '2100k',
+        'audio_bitrate': '96k',
+        'suffix': '480p'
+    },
+    {
+        'resolution': (640, 360),
+        'video_bitrate': '800k',
+        'maxrate': '856k',
+        'bufsize': '1200k',
+        'audio_bitrate': '96k',
+        'suffix': '360p'
+    }
+]
+
+
 def increment_downloads_count(upload, user, wsgi_request):
     ident = throttling.get_ident(user=user, request=wsgi_request)
     cache_key = "downloads_count:upload-{}:{}-{}".format(

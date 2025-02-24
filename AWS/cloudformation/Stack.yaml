@@ -19,10 +19,6 @@ Parameters:
     Type: String
     Description: ECR Image URI for the nginx container
 
-  TranscoderImage:
-    Type: String
-    Description: ECR Image URI for the transcoder container
-
   ContainerPort:
     Type: Number
     Default: 5000
@@ -351,9 +347,8 @@ Resources:
                   - !GetAtt VPC.Outputs.ContainerSecurityGroup
           InputTransformer:
             InputPathsMap:
-              bucket: "$.detail.bucket.name"
               key: "$.detail.object.key"
-            InputTemplate: '{"containerOverrides":[{"name":"transcoder","command":["<bucket>","<key>"]}]}'
+            InputTemplate: '{"containerOverrides":[{"name":"transcoder","command":["funkwhale-manage","transcode_video","<key>"]}]}'
 
   EventsRole:
     Type: AWS::IAM::Role
@@ -392,7 +387,7 @@ Resources:
       TaskRoleArn: !Ref TranscoderTaskRole
       ContainerDefinitions:
         - Name: transcoder
-          Image: !Ref TranscoderImage
+          Image: !Ref BaseImage
           Essential: true
           LogConfiguration:
             LogDriver: awslogs
