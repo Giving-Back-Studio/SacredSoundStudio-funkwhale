@@ -919,18 +919,6 @@ class Upload(models.Model):
         else:
             self.media_type = MEDIA_TYPE_AUDIO
 
-        # Possibly discard if celery task is working
-        if self.media_type == MEDIA_TYPE_VIDEO and not self.duration:
-            file_path = self.video_file.path if self.video_file else self.source
-            video_metadata = utils.get_video_file_data(file_path)
-
-            if video_metadata:
-                self.width = video_metadata.get('width')
-                self.height = video_metadata.get('height')
-                self.video_codec = video_metadata.get('codec')
-                self.duration = video_metadata.get('duration')
-                self.bitrate = video_metadata.get('bitrate')
-
         return super().save(**kwargs)
 
     def get_metadata(self):

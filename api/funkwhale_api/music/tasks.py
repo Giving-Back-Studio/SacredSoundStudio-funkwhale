@@ -207,8 +207,6 @@ def process_upload(upload, update_denormalization=True):
     elif upload.media_type == MEDIA_TYPE_VIDEO:
         video_data = utils.get_video_file_data(upload.video_file_path)
         if video_data:
-            print('got video data')
-            print(video_data)
             upload.duration = video_data["duration"]
             upload.size = upload.get_file_size()
             upload.bitrate = video_data["bitrate"]
@@ -872,31 +870,3 @@ def fs_import(library, path, import_reference):
         "broadcast": False,
     }
     command.handle(**options)
-
-@celery.app.task(name="music.transcode_video")
-def transcode_video(upload_id):
-    try:
-        upload = Upload.objects.get(pk=upload_id)
-        input_path = upload.file.path
-        output_path = f"{input_path.rsplit('.', 1)[0]}_transcoded.mp4"
-
-        command = [
-            "ffmpeg",
-            "-i", input_path,
-            "-c:v", "libx264",
-            "-preset", "fast",
-            "-crf", "22",
-            "-c:a", "aac",
-            "-b:a", "128k",
-            output_path
-        ]
-
-        subprocess.run(command, check=True)
-
-        upload.transcoded_file = output_path
-        upload.save(update_fields=["transcoded_file"])
-
-    except Upload.DoesNotExist:
-        raise ValueError(f"Upload with id {upload_id} does not exist")
-    except subprocess.CalledProcessError as e:
-        raise RuntimeError(f"Error during transcoding: {e}")
