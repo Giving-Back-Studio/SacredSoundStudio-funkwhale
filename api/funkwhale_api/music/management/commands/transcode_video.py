@@ -27,6 +27,12 @@ class Command(BaseCommand):
         
         # Create temporary directory for processing
         with tempfile.TemporaryDirectory() as temp_dir:
+            # Download source file
+            input_file = os.path.join(temp_dir, "input.mp4")
+            self.stdout.write("Downloading source video file...")
+            with open(input_file, 'wb') as f:
+                f.write(upload.video_file.read())
+
             # Transcode to each resolution
             for settings in utils.TRANSCODE_SETTINGS:
                 output_file = os.path.join(temp_dir, f"output_{settings['suffix']}.mp4")
@@ -34,7 +40,7 @@ class Command(BaseCommand):
 
                 try:
                     utils.transcode_video(
-                        input_path=upload.video_file.path,
+                        input_path=input_file,
                         output_path=output_file,
                         resolution=settings['resolution'],
                         video_bitrate=settings['video_bitrate'],
