@@ -407,7 +407,7 @@ const toggleSidebar = () => {
           </router-link> -->
 
           <router-link
-            v-if="$store.state.auth.authenticated"
+            v-if="$store.state.auth.authenticated && $store.state.auth.profile.is_artist"
             class="ui primary button"
             :to="{ path: '/upload' }"
           >
