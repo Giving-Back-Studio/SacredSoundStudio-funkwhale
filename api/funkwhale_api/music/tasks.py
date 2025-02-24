@@ -671,6 +671,7 @@ def clean_transcoding_cache():
         models.UploadVersion.objects.filter(
             Q(accessed_date__lt=limit) | Q(accessed_date=None)
         )
+        .filter(video_file=None)  # Don't delete video transcoded files
         .only("audio_file", "id")
         .order_by("id")
     )
