@@ -357,7 +357,7 @@ Resources:
       Parameters:
         ServiceName: transcoder
         Cpu: 2048
-        Memory: 2GB
+        Memory: 4GB
         Cluster: !Ref Cluster
         Namespace: !GetAtt Namespace.Arn
         Command: 'funkwhale-manage transcode_video'
