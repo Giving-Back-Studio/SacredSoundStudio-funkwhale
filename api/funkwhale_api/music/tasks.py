@@ -24,8 +24,8 @@ from funkwhale_api.tags import models as tags_models
 from funkwhale_api.tags import tasks as tags_tasks
 from funkwhale_api.taskapp import celery
 
-from . import licenses, metadata, models, signals
-from .models import Upload
+from . import licenses, metadata, models, signals, utils
+from .models import MEDIA_TYPE_AUDIO, MEDIA_TYPE_VIDEO, Upload
 
 logger = logging.getLogger(__name__)
 
@@ -198,11 +198,24 @@ def process_upload(upload, update_denormalization=True):
     Main handler to process uploads submitted by user and create the corresponding
     metadata (tracks/artists/albums) in our DB.
     """
-    audio_data = upload.get_audio_data()
-    if audio_data:
-        upload.duration = audio_data["duration"]
-        upload.size = audio_data["size"]
-        upload.bitrate = audio_data["bitrate"]
+    if upload.media_type == MEDIA_TYPE_AUDIO:
+        audio_data = upload.get_audio_data()
+        if audio_data:
+            upload.duration = audio_data["duration"]
+            upload.size = audio_data["size"]
+            upload.bitrate = audio_data["bitrate"]
+    elif upload.media_type == MEDIA_TYPE_VIDEO:
+        video_data = utils.get_video_file_data(upload.video_file_path)
+        if video_data:
+            print('got video data')
+            print(video_data)
+            upload.duration = video_data["duration"]
+            upload.size = upload.get_file_size()
+            upload.bitrate = video_data["bitrate"]
+            upload.width = video_data["width"]
+            upload.height = video_data["height"]
+            upload.video_codec = video_data["codec"]
+
     upload.import_status = "finished"
     upload.import_date = timezone.now()
     upload.save(

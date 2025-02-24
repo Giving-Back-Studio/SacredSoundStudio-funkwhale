@@ -43,9 +43,11 @@ ARTIST_CONTENT_CATEGORY_CHOICES = [
     ("other", "other"),
 ]
 
+MEDIA_TYPE_AUDIO = "audio"
+MEDIA_TYPE_VIDEO = "video"
 MEDIA_TYPE_CHOICES = [
-    ("audio", "Audio"),
-    ("video", "Video")
+    (MEDIA_TYPE_AUDIO, "Audio"),
+    (MEDIA_TYPE_VIDEO, "Video")
 ]
 
 
@@ -490,12 +492,6 @@ def get_artist(release_list):
 class Track(APIModelMixin):
     mbid = models.UUIDField(db_index=True, null=True, blank=True)
     title = models.TextField()
-    media_type = models.CharField(
-        max_length=10,
-        choices=MEDIA_TYPE_CHOICES,
-        default="audio"
-    )
-    resolution = models.CharField(max_length=20, blank=True, null=True)
     artist = models.ForeignKey(Artist, related_name="tracks", on_delete=models.CASCADE)
     disc_number = models.PositiveIntegerField(null=True, blank=True)
     position = models.PositiveIntegerField(null=True, blank=True)
@@ -714,7 +710,7 @@ def get_file_path(instance, filename):
         return common_utils.ChunkedPath("transcoded")(instance, filename)
 
     if instance.library.actor.get_user():
-        if isinstance(instance, Upload) and instance.media_type == "video":
+        if isinstance(instance, Upload) and instance.media_type == MEDIA_TYPE_VIDEO:
             return common_utils.ChunkedPath("videos")(instance, filename)
 
         return common_utils.ChunkedPath("tracks")(instance, filename)
@@ -759,7 +755,7 @@ class Upload(models.Model):
     media_type = models.CharField(
         max_length=10,
         choices=MEDIA_TYPE_CHOICES,
-        default="audio"
+        default=MEDIA_TYPE_AUDIO
     )
     # Add video-specific fields
     video_file = models.FileField(
@@ -867,13 +863,15 @@ class Upload(models.Model):
             pass
         if self.audio_file:
             return os.path.splitext(self.audio_file.name)[-1].replace(".", "", 1)
+        if self.video_file:
+            return os.path.splitext(self.video_file.name)[-1].replace(".", "", 1)
         if self.in_place_path:
             return os.path.splitext(self.in_place_path)[-1].replace(".", "", 1)
 
     def get_file_size(self):
-        if self.media_type == "audio" and self.audio_file:
+        if self.media_type == MEDIA_TYPE_AUDIO and self.audio_file:
             return self.audio_file.size
-        elif self.media_type == "video" and self.video_file:
+        elif self.media_type == MEDIA_TYPE_VIDEO and self.video_file:
             return self.video_file.size
         elif self.source.startswith("file://"):
             return os.path.getsize(self.source.replace("file://", "", 1))
@@ -917,35 +915,23 @@ class Upload(models.Model):
 
         # Set media_type based on mimetype
         if self.mimetype.startswith('video/'):
-            self.media_type = "video"
+            self.media_type = MEDIA_TYPE_VIDEO
         else:
-            self.media_type = "audio"
+            self.media_type = MEDIA_TYPE_AUDIO
 
-        # Handle video-specific metadata
-        if self.media_type == "video" and not self.duration:
-            self.extract_video_metadata()
+        # Possibly discard if celery task is working
+        if self.media_type == MEDIA_TYPE_VIDEO and not self.duration:
+            file_path = self.video_file.path if self.video_file else self.source
+            video_metadata = utils.get_video_file_data(file_path)
+
+            if video_metadata:
+                self.width = video_metadata.get('width')
+                self.height = video_metadata.get('height')
+                self.video_codec = video_metadata.get('codec')
+                self.duration = video_metadata.get('duration')
+                self.bitrate = video_metadata.get('bitrate')
 
         return super().save(**kwargs)
-
-    def extract_video_metadata(self):
-        """Extract video metadata using ffprobe"""
-        try:
-            file_path = self.video_file.path if self.video_file else self.source
-            probe = ffmpeg.probe(file_path)
-            video_stream = next(
-                (s for s in probe['streams'] if s['codec_type'] == 'video'),
-                None
-            )
-
-            if video_stream:
-                self.width = video_stream.get('width')
-                self.height = video_stream.get('height')
-                self.video_codec = video_stream.get('codec_name')
-                self.duration = int(float(probe['format']['duration']))
-                self.bitrate = int(probe['format'].get('bit_rate', 0)) // 1000
-
-        except Exception as e:
-            logger.error(f"Error extracting video metadata: {str(e)}")
 
     def get_metadata(self):
         audio_file = self.get_audio_file()
@@ -1031,6 +1017,16 @@ class Upload(models.Model):
         except NotImplementedError:
             # external storage
             return self.audio_file.name
+
+    @property
+    def video_file_path(self):
+        if not self.video_file:
+            return None
+        try:
+            return self.video_file.path
+        except NotImplementedError:
+            # external storage
+            return self.video_file.name
 
     def get_all_tagged_items(self):
         track_tags = self.track.tagged_items.all()
