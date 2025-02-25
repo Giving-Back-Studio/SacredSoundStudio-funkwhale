@@ -32,12 +32,17 @@ watch(() => props.modelValue, (value) => {
 })
 
 const handleUpdate = () => {
-  let value = $(dropdown.value).dropdown('get value').split(',')
+  const $dropdown = $(dropdown.value);
+  let value = $dropdown.dropdown('get value').split(',')
 
   if (props.category === 'Vocals' && value.includes('Instrumental')) {
     value = ['Instrumental'];
   }
   emit('update:modelValue', value)
+
+  if (!$dropdown.hasClass('multiple')) {
+    $dropdown.dropdown('hide')
+  }
   return value
 }
 
