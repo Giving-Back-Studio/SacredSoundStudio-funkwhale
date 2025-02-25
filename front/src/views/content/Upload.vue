@@ -83,11 +83,13 @@ const albumValid = computed(() => {
 
 const canProceed = computed(() => {
   if (currentStep.value === 1) return !!uploadType.value
-  if (currentStep.value === 2) return albumValid.value
+  if (currentStep.value === 2 && uploadType.value == 'album') return albumValid.value
+  if (currentStep.value === 2 && uploadType.value == 'individual') return uploadedFiles.value.length > 0
   return true
 })
 
 const uploadsComplete = computed(() => {
+  if (uploadedFiles.value.length === 0) return false
   for (let i = 0; i < uploadedFiles.value.length; i++) {
     if (!uploadedFiles.value[i].response.uuid) {
       return false
@@ -140,8 +142,10 @@ const trackDetailsComplete = computed(() => {
 })
 
 const isReadyToPublish = computed(() => {
+  if (uploadType.value == 'album') {
+    if (!albumValid.value) return false
+  }
   return (
-    albumValid.value &&
     uploadsComplete.value &&
     trackDetailsComplete.value
   )
