@@ -173,14 +173,7 @@ const handleFiles = (files) => {
   )
 
   validFiles.forEach(file => {
-    uploadedFiles.value.push({
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      progress: 0,
-      file
-    })
-    tracks.value.push(createTrackTemplate())
+    tracks.value.push(createTrackTemplate(file))
   })
 }
 
@@ -278,7 +271,11 @@ const submitUpload = async () => {
       }
     }
     trackData.tagged_items = tags;
-    uploadPromises.push(axios.post('tracks', trackData));
+    const trackPromise = axios.post('tracks', trackData);
+    uploadPromises.push(trackPromise);
+    trackPromise.catch(error => {
+      errors.value = error.backendErrors
+    });
   }
   Promise.all(uploadPromises).then(responses => {
     showSuccessModal.value = true;
@@ -308,11 +305,13 @@ const uploadData = computed(() => ({
 
 const inputFiles = {}
 
-const inputFile = (newFile) => {
-  if (!newFile || inputFiles[newFile.id]) return
-  inputFiles[newFile.id] = true
+const inputFile = (newFile, oldFile) => {
+  if (!newFile) return
   newFile.active = true
-  tracks.value.push(createTrackTemplate(newFile))
+  if (!inputFiles[newFile.id]) {
+    tracks.value.push(createTrackTemplate(newFile))
+  }
+  inputFiles[newFile.id] = newFile
 }
 
 const goToMyContent = () => {
@@ -626,6 +625,11 @@ const goToMyContent = () => {
             {{ error }}
             </li>
           </ul>
+        </div>
+        <div v-for="file in uploadedFiles">
+          <div v-if="file.errors">
+            {{ file.errors }}
+          </div>
         </div>
         <!-- Navigation Buttons -->
         <div class="flex justify-end gap-4 mt-6">
