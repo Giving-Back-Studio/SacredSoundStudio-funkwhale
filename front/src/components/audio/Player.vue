@@ -364,6 +364,6 @@ const hideArtist = () => {
         </div>
       </div>
     </div>
-    <div id="video-delivery" class="fixed bottom-20 right-0 w-full max-w-[640px] h-auto z-50" v-drag></div>
+    <div id="video-delivery" class="fixed bottom-20 right-0 w-full max-w-[640px] h-auto z-50"></div>
   </section>
 </template>
