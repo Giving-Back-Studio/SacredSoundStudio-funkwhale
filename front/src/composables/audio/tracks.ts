@@ -1,6 +1,7 @@
 import type { QueueTrack, QueueTrackSource } from '~/composables/audio/queue'
 import type { Track, Upload } from '~/types'
 import type { Sound } from '~/api/player'
+import type { Video } from '~/api/video-player'
 
 import { createGlobalState, syncRef, useTimeoutFn, whenever } from '@vueuse/core'
 import { computed, ref, watchEffect } from 'vue'
@@ -15,14 +16,16 @@ import useLogger from '~/composables/useLogger'
 import store from '~/store'
 
 import axios from 'axios'
+import { videoImplementation } from "~/api/video-player";
 
 const ALLOWED_PLAY_TYPES: (CanPlayTypeResult | undefined)[] = ['maybe', 'probably']
 const AUDIO_ELEMENT = document.createElement('audio')
+const VIDEO_ELEMENT = document.createElement('video')
 
 const logger = useLogger()
 
-const soundPromises = new Map<number, Promise<Sound>>()
-const soundCache = useLRUCache<number, Sound>({
+const soundPromises = new Map<number, Promise<Sound | Video>>()
+const soundCache = useLRUCache<number, Sound|Video>({
   max: 3,
   dispose: (sound) => sound.dispose()
 })
@@ -59,7 +62,8 @@ const getTrackSources = async (track: QueueTrack): Promise<QueueTrackSource[]> =
   const sources: QueueTrackSource[] = track.sources
     .map((source) => ({
       ...source,
-      url: appendToken(store.getters['instance/absoluteUrl'](source.url))
+      url: appendToken(store.getters['instance/absoluteUrl'](source.url)),
+      type: source.mimetype.startsWith('video/') ? 'video' : 'audio'
     }))
 
   // NOTE: Add a transcoded MP3 src at the end for browsers
@@ -67,16 +71,19 @@ const getTrackSources = async (track: QueueTrack): Promise<QueueTrackSource[]> =
   if (sources.length > 0) {
     const original = sources[0]
     const url = new URL(original.url)
-    url.searchParams.set('to', 'mp3')
+    url.searchParams.set('to', original.mimetype.startsWith('video/') ? 'mp4' : 'mp3')
 
     const bitrate = Math.min(320000, original.bitrate ?? Infinity)
-    sources.push({ uuid: 'transcoded', mimetype: 'audio/mpeg', url: url.toString(), bitrate })
+    sources.push({ uuid: 'transcoded', mimetype: original.mimetype.startsWith('video/') ? 'video/mp4' : 'audio/mpeg', url: url.toString(), bitrate, type: original.mimetype.startsWith('video/') ? 'video' : 'audio' })
   }
 
   return sources
     // NOTE: Filter out repeating and unplayable media types
     .filter(({ mimetype, bitrate }, index, array) => array.findIndex((upload) => upload.mimetype + upload.bitrate === mimetype + bitrate) === index)
-    .filter(({ mimetype }) => ALLOWED_PLAY_TYPES.includes(AUDIO_ELEMENT.canPlayType(`${mimetype}`)))
+    .filter(({ mimetype }) => {
+      const element = mimetype.startsWith('video/') ? VIDEO_ELEMENT : AUDIO_ELEMENT
+      return ALLOWED_PLAY_TYPES.includes(element.canPlayType(`${mimetype}`))
+    })
 }
 
 // Use Tracks
@@ -149,6 +156,47 @@ export const useTracks = createGlobalState(() => {
     return soundPromise
   }
 
+  const createVideoSound = async (track: QueueTrack): Promise<Sound> => {
+    if (soundCache.has(track.id)) {
+      return soundCache.get(track.id) as Video
+    }
+
+    if (soundPromises.has(track.id)) {
+      return soundPromises.get(track.id) as Promise<Video>
+    }
+
+    const createVideoSoundPromise = async () => {
+      const sources = await getTrackSources(track)
+      const { playNext } = useQueue()
+
+      const VideoSoundImplementation = videoImplementation.value
+      const videoSound = new VideoSoundImplementation(sources)
+
+      videoSound.onVideoEnd(() => {
+        logger.log('VIDEO TRACK ENDED, PLAYING NEXT')
+        setTimeout(() => playNext(), 0)
+      })
+
+      whenever(videoSound.isDisposed, () => {
+        soundCache.delete(track.id)
+      })
+
+      if (currentTrack.value) {
+        soundCache.get(currentTrack.value.id)
+      }
+
+      soundCache.set(track.id, videoSound)
+      soundPromises.delete(track.id)
+
+      return videoSound
+    }
+
+    logger.log('NO TRACK IN CACHE, CREATING', track)
+    const soundPromise = createVideoSoundPromise()
+    soundPromises.set(track.id, soundPromise)
+    return soundPromise
+  }
+
   // Skip when errored
   const { start: soundUnplayable, stop: abortSoundUnplayableTimeout } = useTimeoutFn(() => {
     const { isPlaying, looping, LoopingMode, pauseReason, PauseReason } = usePlayer()
@@ -164,7 +212,7 @@ export const useTracks = createGlobalState(() => {
 
   // Preload next track
   const { start: preload, stop: abortPreload } = useTimeoutFn(async (track: QueueTrack) => {
-    const sound = await createSound(track)
+    const sound = track.sources[0].mimetype.startsWith('video/') ? await createVideoSound(track) : await createSound(track)
     await sound.preload()
   }, 100, { immediate: false })
 
@@ -177,7 +225,7 @@ export const useTracks = createGlobalState(() => {
     logger.log('LOADING TRACK', index)
 
     const track = queue.value[index]
-    const sound = await createSound(track)
+    const sound = track.sources[0].mimetype.startsWith('video/') ? await createVideoSound(track) : await createSound(track)
 
     if (!sound.playable) {
       soundUnplayable()
@@ -186,9 +234,10 @@ export const useTracks = createGlobalState(() => {
 
     logger.log('CONNECTING NODE', sound)
 
-    sound.audioNode.disconnect()
-    connectAudioSource(sound.audioNode)
-
+    if (track.sources[0].mimetype.startsWith('audio/')) {
+      sound.audioNode.disconnect()
+      connectAudioSource(sound.audioNode)
+    }
     const { isPlaying } = usePlayer()
     if (isPlaying.value && index === currentIndex.value) {
       await sound.play()

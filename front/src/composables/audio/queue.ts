@@ -21,6 +21,7 @@ export interface QueueTrackSource {
   bitrate?: number
   url: string
   duration?: number
+  type: 'audio' | 'video'
 }
 
 export interface QueueTrack {
