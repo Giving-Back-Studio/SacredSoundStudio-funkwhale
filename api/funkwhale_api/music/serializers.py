@@ -18,9 +18,11 @@ from funkwhale_api.federation.serializers import APIActorSerializer
 from funkwhale_api.playlists import models as playlists_models
 from funkwhale_api.tags import models as tag_models
 from funkwhale_api.tags import serializers as tags_serializers
+import logging
 
 from . import filters, models, tasks, utils
 
+logger = logging.getLogger(__name__)
 NOOP = object()
 
 COVER_WRITE_FIELD = common_serializers.RelatedField(
@@ -141,7 +143,7 @@ class ArtistWithAlbumsSerializer(OptionalDescriptionMixin, serializers.Serialize
 class SimpleArtistSerializer(serializers.ModelSerializer):
     attachment_cover = CoverField(allow_null=True, required=False)
     description = common_serializers.ContentSerializer(allow_null=True, required=False)
-    channel = serializers.UUIDField(allow_null=True, required=False)
+    channel = ArtistWithAlbumsInlineChannelSerializer(allow_null=True)
 
     class Meta:
         model = models.Artist
@@ -494,8 +496,6 @@ class UploadForOwnerSerializer(UploadSerializer):
             raise serializers.ValidationError(
                 "You may specify a channel or a library, not both"
             )
-        if "audio_file" in validated_data:
-            self.validate_upload_quota(validated_data["audio_file"])
 
         if "channel" in validated_data:
             validated_data["library"] = validated_data.pop("channel").library
@@ -506,7 +506,34 @@ class UploadForOwnerSerializer(UploadSerializer):
             raise serializers.ValidationError(
                 "Newly created Uploads need to have import_status of draft or pending"
             )
-        return super().validate(validated_data)
+
+        validated_data = super().validate(validated_data)
+
+        if 'audio_file' in validated_data:
+            file = validated_data['audio_file']
+            mimetype = utils.guess_mimetype(file)
+            validated_data['mimetype'] = mimetype
+
+            # Handle audio/video metadata extraction
+            if mimetype.startswith('audio/'):
+                audio_data = utils.get_audio_file_data(file)
+                if audio_data:
+                    validated_data.update({
+                        'duration': audio_data.get('length'),
+                        'bitrate': audio_data.get('bitrate')
+                    })
+            elif mimetype.startswith('video/'):
+                del validated_data['audio_file']
+                validated_data['video_file'] = file
+
+            # Quota check for video files
+            if 'video_file' in validated_data:
+                self.validate_upload_quota(validated_data['video_file'])
+            else:
+                self.validate_upload_quota(validated_data['audio_file'])
+
+        return validated_data
+        # return super().validate(validated_data)
 
     def validate_upload_quota(self, f):
         quota_status = self.context["user"].get_quota_status()
@@ -879,6 +906,7 @@ class TrackCreateSerializer(serializers.ModelSerializer):
                 tag_category=tag_category
             )
             obj_tag.save()
+
         return instance
 
 

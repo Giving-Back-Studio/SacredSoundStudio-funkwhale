@@ -12,7 +12,7 @@ import $ from 'jquery'
 
 import AttachmentInput from '~/components/common/AttachmentInput.vue'
 import useEditConfigs from '~/composables/moderation/useEditConfigs'
-import TagsSelector from '~/components/library/TagsSelector.vue'
+import TrackCategoryTags from '~/components/content/TrackCategoryTags.vue'
 import EditList from '~/components/library/EditList.vue'
 import EditCard from '~/components/library/EditCard.vue'
 
@@ -291,20 +291,11 @@ const resetField = (fieldId: string) => {
           </template>
           <template v-else-if="fieldConfig.type === 'tags'">
             <label :for="fieldConfig.id">{{ fieldConfig.label }}</label>
-            <tags-selector
+            <track-category-tags
               :id="fieldConfig.id"
-              ref="tags"
               v-model="values[fieldConfig.id]"
-              required="fieldConfig.required"
+              :required="fieldConfig.required"
             />
-            <button
-              class="ui tiny basic left floated button"
-              form="noop"
-              @click.prevent="values[fieldConfig.id] = []"
-            >
-              <i class="x icon" />
-              {{ $t('components.library.EditForm.button.clear') }}
-            </button>
           </template>
           <div v-if="fieldValuesChanged(fieldConfig.id)">
             <button

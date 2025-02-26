@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { useCookies } from '@vueuse/integrations/useCookies'
 import { useRouter } from 'vue-router'
@@ -10,6 +10,7 @@ import useErrorHandler from '~/composables/useErrorHandler'
 
 import AttachmentInput from '~/components/common/AttachmentInput.vue'
 import TagCategorySelector from '~/components/library/TagCategorySelector.vue'
+import TrackCategoryTags from '~/components/content/TrackCategoryTags.vue'
 import FileUploadWidget from '~/components/library/FileUploadWidget.vue'
 import SemanticModal from '~/components/semantic/Modal.vue'
 import content from '~/router/routes/content'
@@ -36,7 +37,8 @@ const isDraggingCover = ref(false)
 const uploadedFiles = ref([])
 const currentTrackIndex = ref(0)
 const upload = ref()
-const showSuccessModal = ref(false);
+const showSuccessModal = ref(false)
+const errors = ref([])
 
 console.log(store.state.auth.user);
 
@@ -60,40 +62,96 @@ const createTrackTemplate = (file) => ({
   cover: null
 })
 
-// Tracks metadata
-const tracksMetadata = ref([])
+const tracks = ref([])
 
 // Computed
 const currentTrack = computed({
-  get: () => tracksMetadata.value[currentTrackIndex.value] || createTrackTemplate(),
+  get: () => tracks.value[currentTrackIndex.value] || createTrackTemplate(),
   set: (value) => {
-    tracksMetadata.value[currentTrackIndex.value] = value
+    tracks.value[currentTrackIndex.value] = value
   }
+})
+
+const albumValid = computed(() => {
+  return (
+    albumDetails.value.title &&
+    albumDetails.value.description &&
+    albumDetails.value.cover &&
+    uploadedFiles.value.length > 0
+  )
 })
 
 const canProceed = computed(() => {
   if (currentStep.value === 1) return !!uploadType.value
-  if (currentStep.value === 2) {
-    if (uploadType.value === 'album') {
-      return !!albumDetails.value.title && !!albumDetails.value.cover && uploadedFiles.value.length > 0
+  if (currentStep.value === 2 && uploadType.value == 'album') return albumValid.value
+  if (currentStep.value === 2 && uploadType.value == 'individual') return uploadedFiles.value.length > 0
+  return true
+})
+
+const uploadsComplete = computed(() => {
+  if (uploadedFiles.value.length === 0) return false
+  for (let i = 0; i < uploadedFiles.value.length; i++) {
+    if (!uploadedFiles.value[i].response.uuid) {
+      return false
     }
-    return uploadedFiles.value.length > 0
+  }
+  return true
+})
+
+const trackCategories = ref([])
+
+const fetchTrackCategories = async () => {
+  const params = {
+    content_type__model: 'track'
+  }
+
+  try {
+    const response = await axios.get('tag-categories/', {
+      params,
+      paramsSerializer: {
+        indexes: null
+      }
+    })
+
+    trackCategories.value = response.data.results
+  } catch (error) {
+    useErrorHandler(error)
+    trackCategories.value = []
+  }
+}
+
+onMounted(() => {
+  fetchTrackCategories()
+})
+
+const trackDetailsComplete = computed(() => {
+  for (const track of tracks.value) {
+    if (!track.title || !track.description) {
+      return false;
+    }
+    if (uploadType.value == 'individual' && !track.cover) {
+      return false;
+    }
+    for (const category of trackCategories.value) {
+      if (category.required) {
+        const catTags = track.categoryTags[category.name]
+        if (!catTags || catTags.length === 0) {
+          return false;
+        }
+      }
+    }
   }
   return true
 })
 
 const isReadyToPublish = computed(() => {
-  for (let i = 0; i < uploadedFiles.value.length; i++) {
-    if (!uploadedFiles.value[i].response.uuid) {
-      return false;
-    }
-    const track = tracksMetadata.value[i];
-    if (!track.title) {
-      return false;
-    }
+  if (uploadType.value == 'album') {
+    if (!albumValid.value) return false
   }
-
-  return true;
+  return (
+    uploadsComplete.value &&
+    trackDetailsComplete.value
+  )
 })
 
 // Methods
@@ -118,20 +176,13 @@ const handleFiles = (files) => {
   )
 
   validFiles.forEach(file => {
-    uploadedFiles.value.push({
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      progress: 0,
-      file
-    })
-    tracksMetadata.value.push(createTrackTemplate())
+    tracks.value.push(createTrackTemplate(file))
   })
 }
 
 const removeFile = (index) => {
   uploadedFiles.value.splice(index, 1)
-  tracksMetadata.value.splice(index, 1)
+  tracks.value.splice(index, 1)
   if (currentTrackIndex.value >= uploadedFiles.value.length) {
     currentTrackIndex.value = Math.max(0, uploadedFiles.value.length - 1)
   }
@@ -145,16 +196,6 @@ const formatFileSize = (size) => {
     i++
   }
   return `${size.toFixed(1)} ${units[i]}`
-}
-
-const handleVocalChange = (key) => {
-  if (key === 'instrumental' && currentTrack.value.vocals.instrumental) {
-    Object.keys(currentTrack.value.vocals).forEach(k => {
-      if (k !== 'instrumental') currentTrack.value.vocals[k] = false
-    })
-  } else if (key !== 'instrumental' && currentTrack.value.vocals[key]) {
-    currentTrack.value.vocals.instrumental = false
-  }
 }
 
 const previousTrack = () => {
@@ -177,7 +218,7 @@ const submitUpload = async () => {
   console.log('Submitting upload:', {
     uploadType: uploadType.value,
     albumDetails: uploadType.value === 'album' ? albumDetails.value : null,
-    tracks: tracksMetadata.value
+    tracks: tracks.value
   });
 
   const artistId = store.state.auth.profile.artist;
@@ -190,14 +231,15 @@ const submitUpload = async () => {
 
       albumId = response.data.id;
     } catch (error) {
-      //errors.value = (error as BackendError).backendErrors
-      console.log(error)
+      errors.value = error.backendErrors
+      return;
     }
+    errors.value = []
   }
   
   let uploadPromises = [];
   for (let i = 0; i < uploadedFiles.value.length; i++) {
-    const track = tracksMetadata.value[i];
+    const track = tracks.value[i];
     const trackData = {
       title: track.title,
       description: {
@@ -222,38 +264,16 @@ const submitUpload = async () => {
       }
     }
     trackData.tagged_items = tags;
-    uploadPromises.push(axios.post('tracks', trackData));
+    const trackPromise = axios.post('tracks', trackData);
+    uploadPromises.push(trackPromise);
+    trackPromise.catch(error => {
+      errors.value = error.backendErrors
+    });
   }
   Promise.all(uploadPromises).then(responses => {
     showSuccessModal.value = true;
   });
 }
-
-const trackCategories = ref([])
-
-const fetchTrackCategories = async () => {
-  const params = {
-    content_type__model: 'track'
-  }
-
-  const measureLoading = logger.time('Fetching track categories')
-  try {
-    const response = await axios.get('tag-categories/', {
-      params,
-      paramsSerializer: {
-        indexes: null
-      }
-    })
-
-    trackCategories.value = response.data.results
-  } catch (error) {
-    useErrorHandler(error)
-    trackCategories.value = undefined
-  } finally {
-    measureLoading()
-  }
-}
-fetchTrackCategories()
 
 const library = ref()
 const fetchLibrary = async () => {
@@ -276,10 +296,15 @@ const uploadData = computed(() => ({
   }
 ))
 
-const inputFile = (newFile) => {
+const inputFiles = {}
+
+const inputFile = (newFile, oldFile) => {
   if (!newFile) return
   newFile.active = true
-  tracksMetadata.value.push(createTrackTemplate(newFile))
+  if (!inputFiles[newFile.id]) {
+    tracks.value.push(createTrackTemplate(newFile))
+  }
+  inputFiles[newFile.id] = newFile
 }
 
 const goToMyContent = () => {
@@ -368,7 +393,7 @@ const goToMyContent = () => {
                 />
               </div>
               <div>
-                <label class="block mb-2">Album Description</label>
+                <label class="block mb-2">Album Description *</label>
                 <textarea
                   v-model="albumDetails.description.text"
                   class="w-full rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
@@ -380,7 +405,7 @@ const goToMyContent = () => {
 
             <!-- Album Cover Upload -->
             <div class="mb-6">
-              <label class="block mb-2">Album Cover*</label>
+              <label class="block mb-2">Album Cover *</label>
               <div 
                 @dragover.prevent
                 class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors"
@@ -430,7 +455,8 @@ const goToMyContent = () => {
                     </ul>
                     <p class="mb-2">For video:</p>
                     <ul class="list-disc list-inside">
-                      <li>Coming Soon!</li>
+                      <li>File type: MP4</li>
+                      <li>Highest resolution :)</li>
                     </ul>
                   </div>
                 </div>
@@ -459,6 +485,9 @@ const goToMyContent = () => {
                           :style="{ width: `${file.progress}%` }"
                         ></div>
                       </div>
+                    </div>
+                    <div v-else>
+                      <i class="check circle icon" />
                     </div>
                     <button 
                       @click="removeFile(index)"
@@ -507,89 +536,128 @@ const goToMyContent = () => {
           </div>
   
           <!-- Track Form -->
-          <div class="grid grid-cols-2 gap-6">
-            <!-- Basic Info -->
-            <div>
-              <label class="block mb-2">Track Title *</label>
-              <input 
-                v-model="currentTrack.title"
-                type="text"
-                class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-                placeholder="Enter track title"
-              />
-            </div>
-
-            <div>
-              <label class="block mb-2">Description</label>
-              <textarea
-                v-model="currentTrack.description"
-                class="w-full rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-                placeholder="Enter track description"
-                rows="3"
-              ></textarea>
-            </div>
-
-            <div v-if="uploadType !== 'album'" class="col-span-2">
-              <label class="block mb-2">Track Cover</label>
-              <div
-                @dragover.prevent
-                class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors"
-                :class="{'border-white bg-gray-700': isDraggingCover}"
-                @dragenter="isDraggingCover = true"
-                @dragleave="isDraggingCover = false"
-              >
-                <attachment-input
-                  v-model="currentTrack.cover"
-                  name="cover"
-                  imageClass="podcast">
-                </attachment-input>
+          <div v-for="(track, index) in tracks">
+            <div v-show="index === currentTrackIndex" class="grid grid-cols-2 gap-6">
+              <!-- Basic Info -->
+              <div>
+                <label class="block mb-2">Track Title *</label>
+                <input 
+                  v-model="track.title"
+                  type="text"
+                  class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
+                  placeholder="Enter track title"
+                />
               </div>
-              <label for="cover"></label>
-            </div>
 
-            <!-- Metadata -->
-            <div
-              v-for="category in trackCategories">
-              <label class="block mb-2">{{ category.name }}{{ category.required ? ' *' : '' }}</label>
-              <tag-category-selector
-                v-model="currentTrack.categoryTags[category.name]"
-                :category="category.name"
-                :maxTags="category.max_tags"
-                class="w-full" />
-            </div>
+              <div>
+                <label class="block mb-2">Description *</label>
+                <textarea
+                  v-model="track.description"
+                  class="w-full rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
+                  placeholder="Enter track description"
+                  rows="3"
+                ></textarea>
+              </div>
 
-            <!-- Additional Details -->
-            <div>
-              <label class="block mb-2">Record Label</label>
-              <input 
-                v-model="currentTrack.recordLabel"
-                type="text"
-                class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-                placeholder="Enter record label"
+              <div v-if="uploadType !== 'album'" class="col-span-2">
+                <label class="block mb-2">Track Cover *</label>
+                <div
+                  @dragover.prevent
+                  class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors"
+                  :class="{'border-white bg-gray-700': isDraggingCover}"
+                  @dragenter="isDraggingCover = true"
+                  @dragleave="isDraggingCover = false"
+                >
+                  <attachment-input
+                    v-model="track.cover"
+                    name="cover"
+                    imageClass="podcast">
+                  </attachment-input>
+                </div>
+                <label for="cover"></label>
+              </div>
+
+              <!-- Category Tags -->
+              <track-category-tags
+                v-model="track.categoryTags"
+                class="col-span-2"
               />
-            </div>
-            <div>
-              <label class="block mb-2">Release Date</label>
-              <input 
-                v-model="currentTrack.releaseDate"
-                type="text"
-                class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-                placeholder="Enter release date"
-              />
+
+              <!-- Additional Details -->
+              <div>
+                <label class="block mb-2">Record Label</label>
+                <input 
+                  v-model="track.recordLabel"
+                  type="text"
+                  class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
+                  placeholder="Enter record label"
+                />
+              </div>
+              <div>
+                <label class="block mb-2">Release Date</label>
+                <input 
+                  v-model="track.releaseDate"
+                  type="text"
+                  class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
+                  placeholder="Enter release date"
+                />
+              </div>
             </div>
           </div>
         </div>
   
+        <div
+          v-if="errors.length > 0"
+          role="alert"
+          class="ui negative message"
+        >
+          <h4 class="header">Error</h4>
+          <ul class="list">
+            <li
+              v-for="(error, key) in errors"
+              :key="key"
+            >
+            {{ error }}
+            </li>
+          </ul>
+        </div>
+        <div v-for="file in uploadedFiles">
+          <div v-if="file.errors">
+            {{ file.errors }}
+          </div>
+        </div>
         <!-- Navigation Buttons -->
         <div class="flex justify-end gap-4 mt-6">
           <div class="flex gap-4 ml-auto">
-            <button 
+            <span v-if="currentStep == 3 && uploadsComplete">Files Uploaded <i class="check icon"/></span>
+            <span v-if="currentStep == 3 && !uploadsComplete">Uploading...</span>
+
+            <span v-if="currentStep == 3 && trackDetailsComplete">Tracks Described <i class="check icon"/></span>
+            <span v-if="currentStep == 3 && !trackDetailsComplete">Describing Tracks...</span>
+            <button
               v-if="currentStep > 1"
               @click="previousStep"
               class="ui button secondary px-6"
             >
               Previous
             </button>
+            <div v-if="currentStep == 3 && uploadedFiles.length > 1" class="flex items-center space-x-4">
+              <button 
+                @click="previousTrack"
+                :disabled="currentTrackIndex === 0"
+                class="p-2 rounded-lg hover:bg-gray-700 disabled:opacity-50"
+              >
+                <i class="left arrow icon" />
+              </button>
+              <span>Track {{ currentTrackIndex + 1 }} of {{ uploadedFiles.length }}</span>
+              <button 
+                @click="nextTrack"
+                :disabled="currentTrackIndex === uploadedFiles.length - 1"
+                class="p-2 rounded-lg hover:bg-gray-700 disabled:opacity-50"
+              >
+                <i class="right arrow icon" />
+              </button>
+            </div>
             <button 
               v-if="currentStep < 3"
               @click="nextStep"
@@ -599,22 +667,13 @@ const goToMyContent = () => {
             >
               Next
             </button>
-            <div v-else>
-              <button
-                v-if="isReadyToPublish"
-                @click="submitUpload"
-                class="ui primary button px-6"
-              >
-                Publish
-              </button>
-              <button 
-                v-else 
-                class="ui primary button px-6" 
-                disabled
-              >
-                Uploading...
-              </button>
-            </div>
+            <button
+              v-if="isReadyToPublish"
+              @click="submitUpload"
+              class="ui primary button px-6"
+            >
+              Publish
+            </button>
           </div>
         </div>
       </div>
@@ -656,11 +715,6 @@ const goToMyContent = () => {
 
 .text-primary {
   color: var(--primary-color) !important;
-}
-
-/* Update step circles styling */
-.rounded-full {
-  background: var(--form-background) !important;
 }
 
 /* Keep the active step (number 1) with its current styling */

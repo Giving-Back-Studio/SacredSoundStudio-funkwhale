@@ -32,8 +32,17 @@ watch(() => props.modelValue, (value) => {
 })
 
 const handleUpdate = () => {
-  const value = $(dropdown.value).dropdown('get value').split(',')
+  const $dropdown = $(dropdown.value);
+  let value = $dropdown.dropdown('get value').split(',')
+
+  if (props.category === 'Vocals' && value.includes('Instrumental')) {
+    value = ['Instrumental'];
+  }
   emit('update:modelValue', value)
+
+  if (!$dropdown.hasClass('multiple')) {
+    $dropdown.dropdown('hide')
+  }
   return value
 }
 
@@ -92,7 +101,8 @@ onMounted(async () => {
 <template>
   <div
     ref="dropdown"
-    class="ui multiple search selection dropdown"
+    class="ui search selection dropdown"
+    :class="{ multiple: props.maxTags > 1 }"
   >
     <input type="hidden">
     <i class="dropdown icon" />

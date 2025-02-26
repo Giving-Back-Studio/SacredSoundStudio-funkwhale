@@ -8,7 +8,7 @@ from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-TAG_REGEX = re.compile(r"^((\w+)([\d_]*))$")
+TAG_REGEX = re.compile(r"^([\w\s()/]+)$")
 
 
 class TagCategory(models.Model):
@@ -32,7 +32,7 @@ class TagCategory(models.Model):
 
 
 class Tag(models.Model):
-    name = CICharField(max_length=100)
+    name = CICharField(max_length=100, unique=True)
     creation_date = models.DateTimeField(default=timezone.now)
     categories = models.ManyToManyField(TagCategory, related_name="tags", blank=True)
 
@@ -106,3 +106,50 @@ def remove_tags(obj, *tags):
     if not tags:
         return
     TaggedItem.objects.for_content_object(obj).filter(tag__name__in=tags).delete()
+
+
+@transaction.atomic
+def set_categorized_tags(obj, tagged_items):
+    """
+    Set tags with their categories for an object.
+    
+    Args:
+        obj: The object to tag
+        tagged_items: List of dicts with 'tag' and 'tag_category' keys
+    """
+    if not tagged_items:
+        # Remove all existing tags if no new tags provided
+        TaggedItem.objects.for_content_object(obj).delete()
+        return
+
+    # Create any missing tags
+    tag_names = {item['tag'] for item in tagged_items}
+    tag_objs = []
+    for tag_name in tag_names:
+        tag_obj, _created = Tag.objects.get_or_create(name=tag_name)
+        tag_objs.append(tag_obj)
+
+    # Get tag and category mappings
+    tags = {t.name: t for t in tag_objs}
+    categories = {
+        c.name: c for c in TagCategory.objects.filter(
+            name__in={item['tag_category'] for item in tagged_items}
+        )
+    }
+
+    # Prepare new tagged items
+    new_items = []
+    for item in tagged_items:
+        tag = tags[item['tag']]
+        category = categories[item['tag_category']]
+        new_items.append(
+            TaggedItem(
+                tag=tag,
+                tag_category=category,
+                content_object=obj
+            )
+        )
+
+    # Remove existing tags and add new ones
+    TaggedItem.objects.for_content_object(obj).delete()
+    TaggedItem.objects.bulk_create(new_items, ignore_conflicts=True)

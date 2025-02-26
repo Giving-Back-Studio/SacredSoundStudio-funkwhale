@@ -7,6 +7,7 @@ import uuid
 
 import arrow
 import pydub
+import ffmpeg
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.indexes import GinIndex
@@ -40,6 +41,13 @@ ARTIST_CONTENT_CATEGORY_CHOICES = [
     ("music", "music"),
     ("podcast", "podcast"),
     ("other", "other"),
+]
+
+MEDIA_TYPE_AUDIO = "audio"
+MEDIA_TYPE_VIDEO = "video"
+MEDIA_TYPE_CHOICES = [
+    (MEDIA_TYPE_AUDIO, "Audio"),
+    (MEDIA_TYPE_VIDEO, "Video")
 ]
 
 
@@ -702,6 +710,9 @@ def get_file_path(instance, filename):
         return common_utils.ChunkedPath("transcoded")(instance, filename)
 
     if instance.library.actor.get_user():
+        if isinstance(instance, Upload) and instance.media_type == MEDIA_TYPE_VIDEO:
+            return os.path.join("videos", str(instance.uuid), filename.replace("/", "-"))
+
         return common_utils.ChunkedPath("tracks")(instance, filename)
     else:
         # we cache remote tracks in a different directory
@@ -740,6 +751,22 @@ class Upload(models.Model):
         related_name="uploads",
         on_delete=models.CASCADE,
     )
+
+    media_type = models.CharField(
+        max_length=10,
+        choices=MEDIA_TYPE_CHOICES,
+        default=MEDIA_TYPE_AUDIO
+    )
+    # Add video-specific fields
+    video_file = models.FileField(
+        upload_to=get_file_path,
+        max_length=255,
+        null=True,
+        blank=True
+    )
+    width = models.PositiveIntegerField(null=True, blank=True)
+    height = models.PositiveIntegerField(null=True, blank=True)
+    video_codec = models.CharField(max_length=50, null=True, blank=True)
 
     # metadata from federation
     metadata = JSONField(
@@ -836,14 +863,17 @@ class Upload(models.Model):
             pass
         if self.audio_file:
             return os.path.splitext(self.audio_file.name)[-1].replace(".", "", 1)
+        if self.video_file:
+            return os.path.splitext(self.video_file.name)[-1].replace(".", "", 1)
         if self.in_place_path:
             return os.path.splitext(self.in_place_path)[-1].replace(".", "", 1)
 
     def get_file_size(self):
-        if self.audio_file:
+        if self.media_type == MEDIA_TYPE_AUDIO and self.audio_file:
             return self.audio_file.size
-
-        if self.source.startswith("file://"):
+        elif self.media_type == MEDIA_TYPE_VIDEO and self.video_file:
+            return self.video_file.size
+        elif self.source.startswith("file://"):
             return os.path.getsize(self.source.replace("file://", "", 1))
 
     def get_audio_file(self):
@@ -874,24 +904,21 @@ class Upload(models.Model):
         return audio
 
     def save(self, **kwargs):
+        # Update mimetype detection
         if not self.mimetype:
             if self.audio_file:
                 self.mimetype = utils.guess_mimetype(self.audio_file)
+            elif self.video_file:
+                self.mimetype = utils.guess_mimetype(self.video_file)
             elif self.source and self.source.startswith("file://"):
                 self.mimetype = utils.guess_mimetype_from_name(self.source)
-        if not self.size and self.audio_file:
-            self.size = self.audio_file.size
-        if not self.checksum:
-            try:
-                audio_file = self.get_audio_file()
-            except FileNotFoundError:
-                pass
-            else:
-                if audio_file:
-                    self.checksum = common_utils.get_file_hash(audio_file)
 
-        if not self.pk and not self.fid and self.library.actor.get_user():
-            self.fid = self.get_federation_id()
+        # Set media_type based on mimetype
+        if self.mimetype.startswith('video/'):
+            self.media_type = MEDIA_TYPE_VIDEO
+        else:
+            self.media_type = MEDIA_TYPE_AUDIO
+
         return super().save(**kwargs)
 
     def get_metadata(self):
@@ -979,6 +1006,16 @@ class Upload(models.Model):
             # external storage
             return self.audio_file.name
 
+    @property
+    def video_file_path(self):
+        if not self.video_file:
+            return None
+        try:
+            return self.video_file.path
+        except NotImplementedError:
+            # external storage
+            return self.video_file.name
+
     def get_all_tagged_items(self):
         track_tags = self.track.tagged_items.all()
         album_tags = (
@@ -1003,6 +1040,7 @@ class UploadVersion(models.Model):
     creation_date = models.DateTimeField(default=timezone.now)
     accessed_date = models.DateTimeField(null=True, blank=True)
     audio_file = models.FileField(upload_to=get_file_path, max_length=255)
+    video_file = models.FileField(upload_to=get_file_path, max_length=255, null=True, blank=True)
     bitrate = models.PositiveIntegerField()
     size = models.IntegerField()
 
@@ -1029,6 +1067,16 @@ class UploadVersion(models.Model):
         except NotImplementedError:
             # external storage
             return self.audio_file.name
+
+    @property
+    def video_file_path(self):
+        if not self.video_file:
+            return None
+        try:
+            return self.video_file.path
+        except NotImplementedError:
+            # external storage
+            return self.video_file.name
 
 
 IMPORT_STATUS_CHOICES = (

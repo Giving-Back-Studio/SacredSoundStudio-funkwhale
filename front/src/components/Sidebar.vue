@@ -377,6 +377,14 @@ const toggleSidebar = () => {
           <router-link
             v-if="$store.state.auth.authenticated"
             class="item"
+            :to="{ path: '/explore' }"
+          >
+            {{ $t('components.Sidebar.link.explore') }}
+          </router-link>
+
+          <router-link
+            v-if="$store.state.auth.authenticated && $store.state.auth.profile.is_artist"
+            class="item"
             :to="{ path: '/mycontent' }"
           >
             {{ $t('components.Sidebar.link.myContent') }}
@@ -399,7 +407,7 @@ const toggleSidebar = () => {
           </router-link> -->
 
           <router-link
-            v-if="$store.state.auth.authenticated"
+            v-if="$store.state.auth.authenticated && $store.state.auth.profile.is_artist"
             class="ui primary button"
             :to="{ path: '/upload' }"
           >

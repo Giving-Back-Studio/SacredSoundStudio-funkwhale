@@ -65,7 +65,7 @@ const store: Module<State, RootState> = {
     lastDate: new Date(),
     maxMessages: 100,
     messageDisplayDuration: 5 * 1000,
-    supportedExtensions: ['flac', 'aiff', 'aif', 'wav'],
+    supportedExtensions: ['flac', 'aiff', 'aif', 'wav', 'mp4'],
     messages: [],
     window: {
       height: 0,
