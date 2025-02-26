@@ -129,6 +129,9 @@ const trackDetailsComplete = computed(() => {
     if (!track.title || !track.description) {
       return false;
     }
+    if (uploadType.value == 'individual' && !track.cover) {
+      return false;
+    }
     for (const category of trackCategories.value) {
       if (category.required) {
         const catTags = track.categoryTags[category.name]
@@ -193,16 +196,6 @@ const formatFileSize = (size) => {
     i++
   }
   return `${size.toFixed(1)} ${units[i]}`
-}
-
-const handleVocalChange = (key) => {
-  if (key === 'instrumental' && currentTrack.value.vocals.instrumental) {
-    Object.keys(currentTrack.value.vocals).forEach(k => {
-      if (k !== 'instrumental') currentTrack.value.vocals[k] = false
-    })
-  } else if (key !== 'instrumental' && currentTrack.value.vocals[key]) {
-    currentTrack.value.vocals.instrumental = false
-  }
 }
 
 const previousTrack = () => {
@@ -543,70 +536,72 @@ const goToMyContent = () => {
           </div>
   
           <!-- Track Form -->
-          <div class="grid grid-cols-2 gap-6">
-            <!-- Basic Info -->
-            <div>
-              <label class="block mb-2">Track Title *</label>
-              <input 
-                v-model="currentTrack.title"
-                type="text"
-                class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-                placeholder="Enter track title"
-              />
-            </div>
-
-            <div>
-              <label class="block mb-2">Description *</label>
-              <textarea
-                v-model="currentTrack.description"
-                class="w-full rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-                placeholder="Enter track description"
-                rows="3"
-              ></textarea>
-            </div>
-
-            <div v-if="uploadType !== 'album'" class="col-span-2">
-              <label class="block mb-2">Track Cover</label>
-              <div
-                @dragover.prevent
-                class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors"
-                :class="{'border-white bg-gray-700': isDraggingCover}"
-                @dragenter="isDraggingCover = true"
-                @dragleave="isDraggingCover = false"
-              >
-                <attachment-input
-                  v-model="currentTrack.cover"
-                  name="cover"
-                  imageClass="podcast">
-                </attachment-input>
+          <div v-for="(track, index) in tracks">
+            <div v-show="index === currentTrackIndex" class="grid grid-cols-2 gap-6">
+              <!-- Basic Info -->
+              <div>
+                <label class="block mb-2">Track Title *</label>
+                <input 
+                  v-model="track.title"
+                  type="text"
+                  class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
+                  placeholder="Enter track title"
+                />
               </div>
-              <label for="cover"></label>
-            </div>
 
-            <!-- Category Tags -->
-            <track-category-tags
-              v-model="currentTrack.categoryTags"
-              class="col-span-2"
-            />
+              <div>
+                <label class="block mb-2">Description *</label>
+                <textarea
+                  v-model="track.description"
+                  class="w-full rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
+                  placeholder="Enter track description"
+                  rows="3"
+                ></textarea>
+              </div>
 
-            <!-- Additional Details -->
-            <div>
-              <label class="block mb-2">Record Label</label>
-              <input 
-                v-model="currentTrack.recordLabel"
-                type="text"
-                class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-                placeholder="Enter record label"
+              <div v-if="uploadType !== 'album'" class="col-span-2">
+                <label class="block mb-2">Track Cover *</label>
+                <div
+                  @dragover.prevent
+                  class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors"
+                  :class="{'border-white bg-gray-700': isDraggingCover}"
+                  @dragenter="isDraggingCover = true"
+                  @dragleave="isDraggingCover = false"
+                >
+                  <attachment-input
+                    v-model="track.cover"
+                    name="cover"
+                    imageClass="podcast">
+                  </attachment-input>
+                </div>
+                <label for="cover"></label>
+              </div>
+
+              <!-- Category Tags -->
+              <track-category-tags
+                v-model="track.categoryTags"
+                class="col-span-2"
               />
-            </div>
-            <div>
-              <label class="block mb-2">Release Date</label>
-              <input 
-                v-model="currentTrack.releaseDate"
-                type="text"
-                class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-                placeholder="Enter release date"
-              />
+
+              <!-- Additional Details -->
+              <div>
+                <label class="block mb-2">Record Label</label>
+                <input 
+                  v-model="track.recordLabel"
+                  type="text"
+                  class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
+                  placeholder="Enter record label"
+                />
+              </div>
+              <div>
+                <label class="block mb-2">Release Date</label>
+                <input 
+                  v-model="track.releaseDate"
+                  type="text"
+                  class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
+                  placeholder="Enter release date"
+                />
+              </div>
             </div>
           </div>
         </div>
