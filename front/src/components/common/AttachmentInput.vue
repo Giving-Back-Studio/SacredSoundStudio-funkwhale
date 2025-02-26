@@ -67,13 +67,18 @@ const remove = async (uuid: string, sendEvent = true) => {
 
   try {
     await axios.delete(`attachments/${uuid}/`)
-    attachment.value = null
 
-    if (sendEvent) emit('delete')
+    if (sendEvent) {
+      attachment.value = null
+      emit('delete')
+    }
   } catch (error) {
     if (error as BackendError) {
-      const { backendErrors } = error as BackendError
-      errors.push(...backendErrors)
+      if (error.response.status !== 404) {
+        // Already deleted, perhaps by manual removal
+        const { backendErrors } = error as BackendError
+        errors.push(...backendErrors)
+      }
     }
   } finally {
     isLoading.value = false
