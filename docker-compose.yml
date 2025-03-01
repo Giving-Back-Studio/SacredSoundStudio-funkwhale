@@ -86,7 +86,7 @@ services:
       - "node3.funkwhale.test:172.17.0.1"
 
   celeryworker:
-    profiles: ["celery"]
+    profiles: ["celery", "typesense"]
     env_file:
       - .env.dev
       - .env
