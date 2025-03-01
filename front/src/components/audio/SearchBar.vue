@@ -76,14 +76,6 @@ const blur = () => {
 
 const categories = computed(() => [
   {
-    code: 'federation',
-    name: t('components.audio.SearchBar.label.category.federation')
-  },
-  {
-    code: 'podcasts',
-    name: t('components.audio.SearchBar.label.category.podcasts')
-  },
-  {
     code: 'artists',
     route: 'library.artists.detail',
     name: labels.value.artist,
