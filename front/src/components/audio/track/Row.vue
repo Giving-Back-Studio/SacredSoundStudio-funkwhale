@@ -66,7 +66,7 @@ const hover = ref(false)
     @mouseout="hover = false"
   >
     <div
-      class="actions one wide left floated column"
+      class="actions one wide left floated column no-bg"
       role="button"
       @click.prevent.exact="activateTrack(track, index)"
     >
@@ -113,7 +113,7 @@ const hover = ref(false)
     </div>
     <div
       v-if="showArt"
-      class="image left floated column"
+      class="image left floated column no-bg"
       role="button"
       @click.prevent.exact="activateTrack(track, index)"
     >
@@ -156,11 +156,12 @@ const hover = ref(false)
       v-if="showAlbum"
       class="content ellipsis left floated column"
     >
-      <router-link
+      <router-link v-if="track.album"
         :to="{ name: 'library.albums.detail', params: { id: track.album?.id } }"
       >
         {{ track.album?.title }}
       </router-link>
+      <span v-else>Single</span>
     </div>
     <div
       v-if="showArtist"
