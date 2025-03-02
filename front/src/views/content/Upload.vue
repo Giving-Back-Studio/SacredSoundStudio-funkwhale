@@ -51,7 +51,7 @@ const albumDetails = ref({
 
 // Track template
 const createTrackTemplate = (file) => ({
-  title: file ? file.file.name.split('.')[0]: '',
+  title: file ? file.file.name.split('.').pop().join(' ') : '',
   description: '',
   categoryTags: new Proxy({}, {
     get: (target, name) => name in target ? target[name] : []
