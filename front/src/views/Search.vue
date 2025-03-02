@@ -84,32 +84,9 @@ const types = computed(() => [
     label: t('views.Search.label.tracks')
   },
   {
-    id: 'playlists',
-    label: t('views.Search.label.playlists')
-  },
-  {
-    id: 'radios',
-    label: t('views.Search.label.radios'),
-    endpoint: 'radios/radios'
-  },
-  {
     id: 'tags',
     label: t('views.Search.label.tags')
   },
-  {
-    id: 'podcasts',
-    label: t('views.Search.label.podcasts'),
-    endpoint: '/artists',
-    contentCategory: 'podcast',
-    includeChannels: true
-  },
-  {
-    id: 'series',
-    label: t('views.Search.label.series'),
-    endpoint: '/albums',
-    includeChannels: true,
-    contentCategory: 'podcast'
-  }
 ] as SearchType[])
 
 const currentType = computed(() => types.value.find(({ id }) => id === type.value))
@@ -269,14 +246,6 @@ const radioConfig = computed(() => {
                 </div>
               </div>
             </form>
-          </div>
-          <div class="column">
-            <radio-button
-              v-if="radioConfig"
-              class="ui right floated medium button"
-              type="custom_multiple"
-              :radio-config="radioConfig"
-            />
           </div>
         </div>
         <div class="ui secondary pointing menu">

@@ -26,6 +26,10 @@ button, *[role="button"] {
   }
 }
 
+*[role="button"].no-bg {
+  background-color: transparent;
+}
+
 // Make secondary button styles more specific to override Semantic UI
 button.secondary,
 .ui.button.secondary {
