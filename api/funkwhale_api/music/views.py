@@ -870,6 +870,7 @@ class Search(views.APIView):
                         "artist", "attachment_cover", "attributed_to"
                     ).prefetch_related("tracks"),
                 ),
+                TAG_PREFETCH
             )
         )
         return common_utils.order_for_search(qs, "title")[: self.max_results]
