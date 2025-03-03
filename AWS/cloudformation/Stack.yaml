@@ -219,7 +219,7 @@ Resources:
         ContainerSecurityGroup: !GetAtt VPC.Outputs.ContainerSecurityGroup
         Image: !Ref BaseImage
         NginxImage: !Ref NginxImage
-        MaxContainers: 10
+        MaxContainers: 2
         AutoScalingTargetValue: 75
         AutoScalingRequestCountValue: 150
         RDSConnectionSecret: !GetAtt RDSCluster.Outputs.ConnectionSecret
