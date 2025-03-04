@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useRouteQuery } from '@vueuse/router'
 import { syncRef } from '@vueuse/core'
 
@@ -14,22 +14,39 @@ import PlayButton from '~/components/audio/PlayButton.vue'
 const q = useRouteQuery('q', '')
 const query = ref(q.value)
 syncRef(q, query, { direction: 'ltr' })
+const isLoading = ref(false)
 
 const activeFilters = ref([])
 const openFilterCategory = ref(null)
 
+const searchInput = ref(null)
 const searchResultsArtists = ref([])
 const searchResultsAlbums = ref([])
 const searchResultsTracks = ref([])
+
+const noResults = ref(false)
+
+const focusSearchInput = () => {
+  nextTick(() => {
+    searchInput.value.focus()
+  })
+}
+
+const clearQuery = () => {
+  query.value = ''
+  search()
+}
 
 const search = async () => {
   if (!query.value && activeFilters.value.length === 0) {
     searchResultsArtists.value = []
     searchResultsAlbums.value = []
     searchResultsTracks.value = []
+    noResults.value = true
     return
   }
 
+  isLoading.value = true
   const response = await axios.get('/search', {
     params: {
       q: query.value,
@@ -40,6 +57,13 @@ const search = async () => {
   searchResultsArtists.value = response.data.artists
   searchResultsAlbums.value = response.data.albums
   searchResultsTracks.value = response.data.tracks
+
+  noResults.value = (
+    response.data.artists.length === 0 &&
+    response.data.albums.length === 0 &&
+    response.data.tracks.length === 0
+  )
+  isLoading.value = false
 }
 
 const contentCategories = ref([])
@@ -55,9 +79,9 @@ const fetchContentCategories = async () => {
   }
 }
 
-
 onMounted(() => {
   fetchContentCategories()
+  focusSearchInput()
 })
 
 // Filter search state
@@ -141,28 +165,23 @@ const getArtistCover = (artist) => {
   }
 }
 
-const getTrackDuration = (track) => {
-  if (track.uploads.length > 0) {
-    return track.uploads[0].duration
-  }
-}
-
 </script>
 
 <template>
   <div class="min-h-screen main with-background">
     <main class="container mx-auto px-4 py-8">
-      <h1 class="text-4xl mb-8 font-serif">Explore Sacred Sounds</h1>
-      <div class="mb-8 ui fluid big right icon left icon input">
+      <h1 class="text-4xl mb-8 font-serif">Search</h1>
+      <div class="mb-8 ui fluid big left icon right action input">
         <i class="search icon"></i>
         <input
           v-model="query"
           @keypress.enter="search"
+          ref="searchInput"
           type="text"
           class="w-full p-2 border border-gray-300 rounded"
           placeholder="Search for artists, albums, or tracks..."
         />
-        <button class="ui icon button" @click="query = ''"><i class="ml-2 close icon"></i></button>
+        <button class="ui icon button" @click="clearQuery"><i class="ml-2 close icon"></i></button>
       </div>
 
       <!-- Active Filters -->
@@ -225,6 +244,13 @@ const getTrackDuration = (track) => {
           </div>
         </div>
       </div>
+
+      <div v-if="isLoading">
+        <div class="ui inverted active dimmer" >
+          <div class="ui loader" />
+        </div>
+      </div>
+      <empty-state v-else-if="noResults" />
 
       <div v-if="searchResultsArtists.length" class="mb-6">
         <h2 class="header text-4xl mb-2">Artists</h2>

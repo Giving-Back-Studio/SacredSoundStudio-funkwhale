@@ -326,9 +326,6 @@ const toggleSidebar = () => {
         </div>
       </nav>
     </header>
-    <div class="ui basic search-wrapper segment">
-      <search-bar @search="isCollapsed = false" />
-    </div>
     <div
       v-if="!$store.state.auth.authenticated"
       class="ui basic signup segment"
@@ -378,9 +375,10 @@ const toggleSidebar = () => {
           <router-link
             v-if="$store.state.auth.authenticated"
             class="item"
-            :to="{ path: '/explore' }"
+            :to="{ path: '/search' }"
+            @click.prevent="toggleSidebar"
           >
-            {{ $t('components.Sidebar.link.explore') }}
+            {{ $t('components.Sidebar.link.search') }}
           </router-link>
 
           <router-link
