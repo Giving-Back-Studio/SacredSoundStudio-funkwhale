@@ -389,14 +389,15 @@ const toggleSidebar = () => {
             {{ $t('components.Sidebar.link.myContent') }}
           </router-link>
 
-          <!-- <router-link
-            v-if="$store.state.auth.authenticated"
+          <router-link
+            v-if="$store.state.auth.authenticated && $store.state.auth.profile.is_artist"
             class="item"
-            :to="{ path: '/mychannel' }"
+            :to="{name: 'channels.detail', params: {id: $store.state.auth.profile.username}}"
           >
             {{ $t('components.Sidebar.link.myChannel') }}
           </router-link>
 
+          <!--
           <router-link
             v-if="$store.state.auth.availablePermissions['settings']"
             class="item"
