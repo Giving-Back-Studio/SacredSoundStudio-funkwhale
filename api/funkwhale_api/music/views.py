@@ -835,15 +835,16 @@ class Search(views.APIView):
     def get(self, request, *args, **kwargs):
         query = request.GET.get("query", request.GET.get("q", "")) or ""
         query = query.strip()
-        tags = request.GET.get("tags", "").split(",")
+        tags_param = request.GET.get("tags", "")
+        tags = tags_param.split(",") if tags_param else []
         if not query and (not tags or not tags[0]):
             return Response({"detail": "empty query"}, status=400)
         actor = utils.get_actor_from_request(request)
         try:
             results = {
-                "artists": self.get_artists(query),
+                "artists": self.get_artists(query, tags),
                 "tracks": self.get_tracks(query, tags, actor),
-                "albums": self.get_albums(query),
+                "albums": self.get_albums(query, tags),
                 "tags": []
                 # "tags": self.get_tags(query),
             }
@@ -883,27 +884,35 @@ class Search(views.APIView):
             qs = qs.filter(tag_query)
         return common_utils.order_for_search(qs, "title")[: self.max_results]
 
-    def get_albums(self, query):
-        query_obj = utils.get_fts_query(
+    def get_albums(self, query, tags):
+        text_query = utils.get_fts_query(
             query, fts_fields=["body_text", "artist__body_text"], model=models.Album
         )
+        tag_query = Q(tagged_items__tag__name__in=tags) | Q(tracks__tagged_items__tag__name__in=tags)
         qs = (
             models.Album.objects.all()
-            .filter(query_obj)
             .select_related("artist", "attachment_cover", "attributed_to")
             .prefetch_related("tracks__artist")
         )
+        if query:
+            qs = qs.filter(text_query)
+        if tags:
+            qs = qs.filter(tag_query).distinct()
         return common_utils.order_for_search(qs, "title")[: self.max_results]
 
-    def get_artists(self, query):
-        query_obj = utils.get_fts_query(query, model=models.Artist)
+    def get_artists(self, query, tags):
+        text_query = utils.get_fts_query(query, model=models.Artist)
+        tag_query = Q(tagged_items__tag__name__in=tags) | Q(tracks__tagged_items__tag__name__in=tags)
         qs = (
             models.Artist.objects.all()
-            .filter(query_obj)
             .with_albums()
             .prefetch_related("channel__actor")
             .select_related("attributed_to")
         )
+        if query:
+            qs = qs.filter(text_query)
+        if tags:
+            qs = qs.filter(tag_query).distinct()
         return common_utils.order_for_search(qs, "name")[: self.max_results]
 
     def get_tags(self, query):
