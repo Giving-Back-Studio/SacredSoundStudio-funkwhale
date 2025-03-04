@@ -134,7 +134,7 @@ const hideArtist = () => {
       class="visually-hidden"
     />
     <div
-      class="ui inverted segment fixed-controls"
+      class="ui inverted segment fixed-controls shadow-top"
       @click.prevent.stop="toggleMobilePlayer"
     >
       <div
@@ -195,6 +195,10 @@ const hideArtist = () => {
                   {{ currentTrack.albumTitle ?? $t('components.audio.Player.meta.unknownAlbum') }}
                 </router-link>
               </template>
+            </div>
+            <div class="hover-info hidden group-hover:block">
+              <span>{{ currentTrack.title }}</span>
+              <span>{{ currentTrack.artistName ?? $t('components.audio.Player.meta.unknownArtist') }}</span>
             </div>
           </div>
         </div>
