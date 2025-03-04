@@ -835,14 +835,17 @@ class Search(views.APIView):
     def get(self, request, *args, **kwargs):
         query = request.GET.get("query", request.GET.get("q", "")) or ""
         query = query.strip()
-        if not query:
+        tags = request.GET.get("tags", "").split(",")
+        if not query and (not tags or not tags[0]):
             return Response({"detail": "empty query"}, status=400)
+        actor = utils.get_actor_from_request(request)
         try:
             results = {
                 "artists": self.get_artists(query),
-                "tracks": self.get_tracks(query),
+                "tracks": self.get_tracks(query, tags, actor),
                 "albums": self.get_albums(query),
-                "tags": self.get_tags(query),
+                "tags": []
+                # "tags": self.get_tags(query),
             }
         except django.db.utils.ProgrammingError as e:
             if "in tsquery:" in str(e):
@@ -852,15 +855,15 @@ class Search(views.APIView):
 
         return Response(serializers.SearchResultSerializer(results).data, status=200)
 
-    def get_tracks(self, query):
-        query_obj = utils.get_fts_query(
+    def get_tracks(self, query, tags, actor):
+        text_query = utils.get_fts_query(
             query,
             fts_fields=["body_text", "album__body_text", "artist__body_text"],
             model=models.Track,
         )
+        tag_query = Q(tagged_items__tag__name__in=tags)
         qs = (
             models.Track.objects.all()
-            .filter(query_obj)
             .prefetch_related(
                 "artist",
                 "attributed_to",
@@ -872,7 +875,12 @@ class Search(views.APIView):
                 ),
                 TAG_PREFETCH
             )
+            .with_playable_uploads(actor)
         )
+        if query:
+            qs = qs.filter(text_query)
+        if tags:
+            qs = qs.filter(tag_query)
         return common_utils.order_for_search(qs, "title")[: self.max_results]
 
     def get_albums(self, query):
