@@ -23,6 +23,13 @@ const searchResultsAlbums = ref([])
 const searchResultsTracks = ref([])
 
 const search = async () => {
+  if (!query.value && activeFilters.value.length === 0) {
+    searchResultsArtists.value = []
+    searchResultsAlbums.value = []
+    searchResultsTracks.value = []
+    return
+  }
+
   const response = await axios.get('/search', {
     params: {
       q: query.value,
