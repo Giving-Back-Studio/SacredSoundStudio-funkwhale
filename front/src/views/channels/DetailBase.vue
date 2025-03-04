@@ -44,36 +44,6 @@
             <!-- Artist Info -->
             <div class="flex-grow">
               <h1 class="text-3xl md:text-4xl font-bold mb-2">{{ object.artist?.name }}</h1>
-              <div class="flex flex-wrap gap-4 items-center">
-                <actor-link
-                  v-if="object.actor"
-                  :avatar="false"
-                  :actor="object.attributed_to"
-                  :display-name="true"
-                  class="text-gray-400"
-                />
-                <div 
-                  v-if="object.actor"
-                  class="text-gray-400"
-                  :title="object.actor.full_username"
-                >
-                  {{ object.actor.full_username }}
-                </div>
-                <div
-                  v-else
-                  class="text-gray-400"
-                >
-                  <a
-                    :href="object.url || object.rss_url"
-                    rel="noopener noreferrer"
-                    target="_blank"
-                    class="hover:text-white transition-colors"
-                  >
-                    <i class="external link icon" />
-                    {{ $t('views.channels.DetailBase.link.mirrored', {domain: externalDomain}) }}
-                  </a>
-                </div>
-              </div>
 
               <!-- Stats -->
               <div class="mt-4 flex flex-wrap gap-4 text-gray-400">
@@ -85,27 +55,13 @@
                     {{ $t('views.channels.DetailBase.meta.tracks', totalTracks) }}
                   </span>
                 </template>
-                <template v-if="object.attributed_to.full_username === $store.state.auth.fullUsername || $store.getters['channels/isSubscribed'](object.uuid)">
-                  <span>{{ $t('views.channels.DetailBase.meta.subscribers', object?.subscriptions_count ?? 0) }}</span>
-                  <span>{{ $t('views.channels.DetailBase.meta.listenings', object?.downloads_count ?? 0) }}</span>
-                </template>
               </div>
 
               <!-- Action Buttons -->
               <div class="mt-6 flex flex-wrap gap-4">
-                <div v-if="isOwner" class="flex gap-2">
-                  <button
-                    class="px-6 py-2 bg-white text-black rounded-full hover:bg-gray-200 transition-colors flex items-center gap-2"
-                    @click.prevent.stop="$store.commit('channels/showUploadModal', {show: true, config: {channel: object}})"
-                  >
-                    <i class="upload icon" />
-                    {{ $t('views.channels.DetailBase.button.upload') }}
-                  </button>
-                </div>
-
                 <play-button
                   :is-playable="isPlayable"
-                  class="px-6 py-2 bg-white text-black rounded-full hover:bg-gray-200 transition-colors flex items-center gap-2"
+                  class="px-6 py-2 bg-primary text-black rounded-full hover:bg-gray-200 transition-colors flex items-center gap-2"
                   :artist="object.artist"
                 >
                   {{ $t('views.channels.DetailBase.button.play') }}
@@ -118,15 +74,6 @@
                   @unsubscribed="updateSubscriptionCount(-1)"
                 />
 
-                <!-- Feed Button -->
-                <button
-                  class="px-6 py-2 bg-gray-800 text-white rounded-full hover:bg-gray-700 transition-colors flex items-center gap-2"
-                  @click.stop.prevent="showSubscribeModal = true"
-                >
-                  <i class="feed icon" />
-                  {{ $t('views.channels.DetailBase.button.feed') }}
-                </button>
-
                 <!-- More Actions Dropdown -->
                 <button
                   ref="dropdown"
@@ -135,25 +82,6 @@
                 >
                   <i class="ellipsis vertical icon" />
                   <div class="menu">
-                    <a
-                      v-if="totalTracks > 0"
-                      href=""
-                      class="basic item"
-                      @click.prevent="showEmbedModal = !showEmbedModal"
-                    >
-                      <i class="code icon" />
-                      {{ $t('views.channels.DetailBase.button.embed') }}
-                    </a>
-                    <a
-                      v-if="object.actor && object.actor.domain != $store.getters['instance/domain']"
-                      :href="object.url"
-                      target="_blank"
-                      class="basic item"
-                    >
-                      <i class="external icon" />
-                      {{ $t('views.channels.DetailBase.link.domainView', {domain: object.actor.domain}) }}
-                    </a>
-                    <div class="divider" />
                     <a
                       v-for="obj in getReportableObjects({account: object.attributed_to, channel: object})"
                       :key="obj.target.type + obj.target.id"
@@ -174,31 +102,6 @@
                         <i class="edit icon" />
                         {{ $t('views.channels.DetailBase.button.edit') }}
                       </a>
-                      <dangerous-button
-                        v-if="object"
-                        :class="['ui', {loading: isLoading}, 'item']"
-                        @confirm="remove()"
-                      >
-                        <i class="ui trash icon" />
-                        {{ $t('views.channels.DetailBase.button.delete') }}
-                        <template #modal-header>
-                          <p>
-                            {{ $t('views.channels.DetailBase.modal.delete.header') }}
-                          </p>
-                        </template>
-                        <template #modal-content>
-                          <div>
-                            <p>
-                              {{ $t('views.channels.DetailBase.modal.delete.content.warning') }}
-                            </p>
-                          </div>
-                        </template>
-                        <template #modal-confirm>
-                          <p>
-                            {{ $t('views.channels.DetailBase.button.confirm') }}
-                          </p>
-                        </template>
-                      </dangerous-button>
                     </template>
                     <template v-if="$store.state.auth.availablePermissions['library']">
                       <div class="divider" />
@@ -432,11 +335,6 @@ const showSubscribeModal = ref(false)
 const isOwner = computed(() => store.state.auth.authenticated && object.value?.attributed_to.full_username === store.state.auth.fullUsername)
 const isPodcast = computed(() => object.value?.artist?.content_category === 'podcast')
 const isPlayable = computed(() => totalTracks.value > 0)
-const externalDomain = computed(() => {
-  const parser = document.createElement('a')
-  parser.href = object.value?.url ?? object.value?.rss_url ?? ''
-  return parser.hostname
-})
 
 const { t } = useI18n()
 const labels = computed(() => ({
