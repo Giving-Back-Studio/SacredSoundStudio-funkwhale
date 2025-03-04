@@ -237,9 +237,9 @@ const deleteContent = (item) => {
                   class="w-full h-full object-cover"
                 />
                 <div v-if="$store.state.auth.profile.artist == item.artist_id" class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                  <a :href="item.edit_url" class="p-2 rounded-full bg-white text-[#434289] hover:bg-gray-100">
+                  <router-link :to="item.edit_url" class="p-2 rounded-full bg-white text-[#434289] hover:bg-gray-100">
                     <Edit2 class="h-5 w-5" />
-                  </a>
+                  </router-link>
                   <dangerous-button @confirm="deleteContent(item)" :class="['p-2', 'rounded-full', 'bg-white', 'text-red-500', 'hover:bg-gray-100']">
                     <Trash2 class="h-5 w-5 text-red-500" />
                     <template #modal-header>
@@ -259,15 +259,15 @@ const deleteContent = (item) => {
                 </div>
               </div>
               <div class="p-4">
-                <a :href="item.track_url">
+                <router-link :to="item.track_url">
                     <h3 class="font-semibold text-[#434289] mb-1">{{ item.title }}</h3>
-                </a>
-                <a :href="item.artist_url" class="text-sm text-gray-600">
+                </router-link>
+                <router-link :to="item.artist_url" class="text-sm text-gray-600">
                     {{ item.artist_name }}
-                </a>
-                <a v-if="item.album_name" :href="item.album_url" class="text-sm text-gray-600 block">
+                </router-link>
+                <router-link v-if="item.album_name" :to="item.album_url" class="text-sm text-gray-600 block">
                   {{ item.album_name }}
-                </a>
+                </router-link>
                 <span v-else class="text-sm text-gray-600 block">Single</span>
                 <div class="flex items-center gap-2 mt-2">
                   <play-button
