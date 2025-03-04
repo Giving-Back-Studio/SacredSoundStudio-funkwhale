@@ -36,9 +36,9 @@ export default [
     component: () => import('~/components/auth/AuthForm.vue')
   },
   {
-    path: '/explore',
-    name: 'explore',
-    component: () => import('~/views/content/AllContent.vue')
+    path: '/search',
+    name: 'search',
+    component: () => import('~/views/content/Search.vue')
   },
   {
     path: '/index.html',
@@ -71,11 +71,6 @@ export default [
     path: '/notifications',
     name: 'notifications',
     component: () => import('~/views/Notifications.vue')
-  },
-  {
-    path: '/search',
-    name: 'search',
-    component: () => import('~/views/Search.vue')
   },
   ...auth,
   ...settings,
