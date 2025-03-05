@@ -27,19 +27,6 @@
         <!-- Profile Section -->
         <div class="container mx-auto px-4">
           <div class="relative -mt-24 md:-mt-32 flex flex-col md:flex-row items-start md:items-end gap-6 mb-8">
-            <!-- Profile Image -->
-            <div class="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-gray-900 shrink-0">
-              <img 
-                v-if="object.artist?.cover"
-                :src="$store.getters['instance/absoluteUrl'](object.artist.cover.urls.medium_square_crop)"
-                :alt="object.artist?.name"
-                class="w-full h-full object-cover"
-              >
-              <i
-                v-else
-                class="huge circular inverted users violet icon"
-              />
-            </div>
 
             <!-- Artist Info -->
             <div class="flex-grow">
@@ -69,52 +56,16 @@
 
                 <subscribe-button
                   :channel="object"
-                  class="px-6 py-2 bg-white text-black rounded-full hover:bg-gray-200 transition-colors"
                   @subscribed="updateSubscriptionCount(1)"
                   @unsubscribed="updateSubscriptionCount(-1)"
                 />
 
-                <!-- More Actions Dropdown -->
-                <button
-                  ref="dropdown"
-                  v-dropdown="{direction: 'downward'}"
-                  class="px-6 py-2 bg-gray-800 text-white rounded-full hover:bg-gray-700 transition-colors"
-                >
-                  <i class="ellipsis vertical icon" />
-                  <div class="menu">
-                    <a
-                      v-for="obj in getReportableObjects({account: object.attributed_to, channel: object})"
-                      :key="obj.target.type + obj.target.id"
-                      href=""
-                      class="basic item"
-                      @click.stop.prevent="report(obj)"
-                    >
-                      <i class="share icon" /> {{ obj.label }}
-                    </a>
-
-                    <template v-if="isOwner">
-                      <div class="divider" />
-                      <a
-                        class="item"
-                        href=""
-                        @click.stop.prevent="showEditModal = true"
-                      >
-                        <i class="edit icon" />
-                        {{ $t('views.channels.DetailBase.button.edit') }}
-                      </a>
-                    </template>
-                    <template v-if="$store.state.auth.availablePermissions['library']">
-                      <div class="divider" />
-                      <router-link
-                        class="basic item"
-                        :to="{name: 'manage.channels.detail', params: {id: object.uuid}}"
-                      >
-                        <i class="wrench icon" />
-                        {{ $t('views.channels.DetailBase.link.moderation') }}
-                      </router-link>
-                    </template>
-                  </div>
-                </button>
+                <template v-if="isOwner">
+                  <router-link to="/mychannel" class="ui icon labeled button">
+                    <i class="edit icon" />
+                    Edit My Channel
+                  </router-link>
+                </template>
               </div>
             </div>
           </div>
