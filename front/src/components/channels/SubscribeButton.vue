@@ -48,7 +48,7 @@ const loginModal = ref()
     :class="['ui', 'pink', {'inverted': isSubscribed}, {'favorited': isSubscribed}, 'icon', 'labeled', 'button']"
     @click.stop="toggle"
   >
-    <i class="heart icon" />
+    <i class="large heart icon" />
     {{ title }}
   </button>
   <button
@@ -56,7 +56,7 @@ const loginModal = ref()
     :class="['ui', 'pink', 'icon', 'labeled', 'button']"
     @click="loginModal.show = true"
   >
-    <i class="heart icon" />
+    <i class="large heart icon" />
     {{ title }}
     <login-modal
       ref="loginModal"

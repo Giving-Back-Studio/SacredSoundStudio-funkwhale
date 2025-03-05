@@ -20,7 +20,6 @@ const tags = ref([] as Array<string>)
 
 // Image preview states
 const cover = ref<string | null>(null)
-const avatar = ref<string | null>(null)
 const isLoaded = ref(false)
 const isSaving = ref(false)
 
@@ -38,13 +37,13 @@ const saveChanges = async () => {
         text: bio.value
       },
       cover: cover.value,
-      avatar: avatar.value,
       tags: tags.value
     })
   } catch (error) {
     useErrorHandler(error as Error)
   } finally {
     isSaving.value = false
+    router.push('/channels/' + store.state.auth.username)
   }
 }
 
@@ -62,10 +61,6 @@ const loadChannelData = async () => {
     if (channel.artist?.cover?.uuid) {
       cover.value = channel.artist.cover.uuid
     }
-    
-    if (store.state.auth.profile.avatar) {
-      avatar.value = store.state.auth.profile.avatar.uuid
-    }
 
     isLoaded.value = true
     
@@ -74,13 +69,7 @@ const loadChannelData = async () => {
   }
 }
 
-onMounted(() => {
-  if (!store.state.auth.authenticated) {
-    router.push('/login')
-    return
-  }
-  loadChannelData()
-})
+onMounted(loadChannelData)
 </script>
 
 <template>
@@ -106,20 +95,12 @@ onMounted(() => {
           name="cover"
           imageClass="podcast">
         </attachment-input>
-
-        <!-- Profile Image -->
-        <label class="block text-xl mb-2">Avatar</label>
-        <attachment-input
-          v-model="avatar"
-          name="avatar"
-          imageClass="podcast">
-        </attachment-input>
       </div>
 
       <!-- Artist Details Form -->
       <div class="space-y-6 max-w-2xl">
         <div>
-          <label class="block text-xl mb-2">Your name</label>
+          <label class="block text-xl mb-2">Channel Name</label>
           <input
             v-model="artistName"
             type="text"
@@ -139,7 +120,7 @@ onMounted(() => {
           />
         </div>
         <div>
-          <label class="block text-xl mb-2">Description</label>
+          <label class="block text-xl mb-2">Description (Supports Markdown)</label>
           <textarea
             v-model="bio"
             rows="4"
