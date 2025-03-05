@@ -20,6 +20,7 @@ from funkwhale_api.common import locales, preferences
 from funkwhale_api.common import serializers as common_serializers
 from funkwhale_api.common import session
 from funkwhale_api.common import utils as common_utils
+from funkwhale_api.common import models as common_models
 from funkwhale_api.federation import actors
 from funkwhale_api.federation import models as federation_models
 from funkwhale_api.federation import serializers as federation_serializers
@@ -165,6 +166,15 @@ class ChannelUpdateSerializer(serializers.Serializer):
     )
     metadata = serializers.DictField(required=False)
     cover = COVER_WRITE_FIELD
+    avatar = common_serializers.RelatedField(
+        "uuid",
+        queryset=common_models.Attachment.objects.all().local().attached(False),
+        serializer=None,
+        queryset_filter=lambda qs, context: qs.filter(
+            actor=context["request"].user.actor
+        ),
+        write_only=True,
+    )
 
     def validate(self, validated_data):
         validated_data = super().validate(validated_data)
@@ -209,6 +219,9 @@ class ChannelUpdateSerializer(serializers.Serializer):
         if "name" in validated_data:
             actor_update_fields.append(("name", validated_data["name"]))
             artist_update_fields.append(("name", validated_data["name"]))
+
+        if "avatar" in validated_data:
+            actor_update_fields.append(("attachment_icon", validated_data["avatar"]))
 
         if "content_category" in validated_data:
             artist_update_fields.append(
