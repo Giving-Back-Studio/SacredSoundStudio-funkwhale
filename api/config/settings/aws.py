@@ -72,3 +72,5 @@ EMAIL_BACKEND = 'django_ses.SESBackend'
 DEFAULT_FROM_EMAIL = 'Sacred Sound <Team@sacredsound.app>'
 AWS_SES_REGION_NAME = getenv('AWS_DEFAULT_REGION')
 EMAIL_SUBJECT_PREFIX = "[Sacred Sound] "
+
+MUSIC_USE_DENORMALIZATION = False
