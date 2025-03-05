@@ -73,60 +73,64 @@ onMounted(loadChannelData)
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-b from-gray-900 to-black p-6">
-    <div class="max-w-4xl mx-auto">
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold">My Channel</h1>
-        <button
-          @click="saveChanges"
-          class="px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors"
-          :disabled="isSaving"
-        >
-          {{ isSaving ? 'Saving...' : 'Save Changes' }}
-        </button>
-      </div>
-
-      <!-- Banner and Profile Section -->
-      <div v-if="isLoaded" class="relative text-white mb-6">
-        <label class="block text-xl mb-2">Cover</label>
-        <attachment-input
-          v-model="cover"
-          name="cover"
-          imageClass="podcast">
-        </attachment-input>
-      </div>
-
-      <!-- Artist Details Form -->
-      <div class="space-y-6 max-w-2xl">
-        <div>
-          <label class="block text-xl mb-2">Channel Name</label>
-          <input
-            v-model="artistName"
-            type="text"
-            class="w-full bg-gray-800 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-            placeholder="Enter your name"
-          />
+  <div class="main pusher">
+    <div class="ui container">
+      <div class="ui basic segment">
+        <!-- Header -->
+        <div class="ui clearing basic segment">
+          <h1 class="ui left floated header">My Channel</h1>
+          <button
+            @click="saveChanges"
+            :class="['ui', 'right', 'floated', 'primary', {loading: isSaving}, 'button']"
+            :disabled="isSaving"
+          >
+            {{ isSaving ? 'Saving...' : 'Save Changes' }}
+          </button>
         </div>
 
-        <div class="ui field">
-          <label for="channel-tags">
-            {{ $t('components.audio.ChannelForm.label.tags') }}
-          </label>
-          <tags-selector
-            id="channel-tags"
-            v-model="tags"
-            :required="false"
-          />
-        </div>
-        <div>
-          <label class="block text-xl mb-2">Description (Supports Markdown)</label>
-          <textarea
-            v-model="bio"
-            rows="4"
-            class="w-full bg-gray-800 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white"
-            placeholder="Tell us about yourself..."
-          ></textarea>
+        <!-- Channel Form -->
+        <div v-if="isLoaded" class="ui form">
+          <!-- Cover Image -->
+          <div class="ui field">
+            <label>Cover</label>
+            <attachment-input
+              v-model="cover"
+              name="cover"
+              imageClass="channel-image large">
+            </attachment-input>
+          </div>
+
+          <!-- Channel Name -->
+          <div class="ui required field">
+            <label>Channel Name</label>
+            <input
+              v-model="artistName"
+              type="text"
+              placeholder="Enter your name"
+            />
+          </div>
+
+          <!-- Tags -->
+          <div class="ui field">
+            <label for="channel-tags">
+              {{ $t('components.audio.ChannelForm.label.tags') }}
+            </label>
+            <tags-selector
+              id="channel-tags"
+              v-model="tags"
+              :required="false"
+            />
+          </div>
+
+          <!-- Description -->
+          <div class="ui field">
+            <label>Description (Supports Markdown)</label>
+            <textarea
+              v-model="bio"
+              rows="4"
+              placeholder="Tell us about yourself..."
+            ></textarea>
+          </div>
         </div>
       </div>
     </div>
