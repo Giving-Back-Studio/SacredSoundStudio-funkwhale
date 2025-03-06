@@ -9,6 +9,7 @@ import store from '~/store'
 
 import useErrorHandler from '~/composables/useErrorHandler'
 import AlbumCard from '~/components/audio/album/Card.vue'
+import TrackCard from '~/components/audio/track/Card.vue'
 import PlayButton from '~/components/audio/PlayButton.vue'
 
 const q = useRouteQuery('q', '')
@@ -76,6 +77,21 @@ const fetchContentCategories = async () => {
   } catch (error) {
     useErrorHandler(error)
     contentCategories.value = []
+  }
+}
+
+const fetchRecentContent = async () => {
+  try {
+    const response = await axios.get('recent-content/')
+
+    searchResultsArtists.value = response.data.artists
+    searchResultsAlbums.value = response.data.albums
+    searchResultsTracks.value = response.data.tracks
+  } catch (error) {
+    useErrorHandler(error)
+    searchResultsArtists.value = []
+    searchResultsAlbums.value = []
+    searchResultsTracks.value = []
   }
 }
 
@@ -283,31 +299,7 @@ const getArtistCover = (artist) => {
       <div v-if="searchResultsTracks.length" class="mb-6">
         <h2 class="header text-4xl mb-2">Tracks</h2>
         <div class="view-all-grid">
-          <div v-for="(track, index) in searchResultsTracks" :key="index" class="track-card">
-            <div class="track-cover">
-              <img :src="getTrackCover(track)" :alt="track.title" />
-              <div class="play-overlay">
-                <play-button
-                  id="playmenu"
-                  class="primary"
-                  :discrete="true"
-                  :is-playable="track.is_playable"
-                  :track="track"
-                />
-              </div>
-            </div>
-            <div class="track-title">{{ track.title }}</div>
-            <div class="track-artist">{{ track.artist.name }}</div>
-            <div class="track-metadata">
-              <span class="track-genre">{{ track.tags.Genre[0] }}</span>
-              <span class="track-duration">
-                <human-duration
-                  v-if="track.uploads[0] && track.uploads[0].duration"
-                  :duration="track.uploads[0].duration"
-                />
-              </span>
-            </div>
-          </div>
+          <track-card v-for="(track, index) in searchResultsTracks" :key="index" :track="track" />
         </div>
       </div>
     </main>
