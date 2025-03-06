@@ -844,7 +844,7 @@ class Search(views.APIView):
             results = {
                 "artists": self.get_artists(query, tags),
                 "tracks": self.get_tracks(query, tags, actor),
-                "albums": self.get_albums(query, tags),
+                "albums": self.get_albums(query, tags, actor),
                 "tags": []
                 # "tags": self.get_tags(query),
             }
@@ -884,7 +884,7 @@ class Search(views.APIView):
             qs = qs.filter(tag_query)
         return common_utils.order_for_search(qs, "title")[: self.max_results]
 
-    def get_albums(self, query, tags):
+    def get_albums(self, query, tags, actor):
         text_query = utils.get_fts_query(
             query, fts_fields=["body_text", "artist__body_text"], model=models.Album
         )
@@ -892,12 +892,18 @@ class Search(views.APIView):
         qs = (
             models.Album.objects.all()
             .select_related("artist", "attachment_cover", "attributed_to")
-            .prefetch_related("tracks__artist")
         )
         if query:
             qs = qs.filter(text_query)
         if tags:
             qs = qs.filter(tag_query).distinct()
+
+        tracks = models.Track.objects.all().prefetch_related("album")
+        tracks = tracks.annotate_playable_by_actor(actor)
+        qs = qs.prefetch_related(
+            Prefetch("tracks", queryset=tracks), TAG_PREFETCH
+        )
+
         return common_utils.order_for_search(qs, "title")[: self.max_results]
 
     def get_artists(self, query, tags):
