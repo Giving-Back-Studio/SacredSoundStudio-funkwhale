@@ -175,7 +175,7 @@ class TrackFilter(
         model = models.Track
         fields = {
             "title": ["exact", "iexact", "startswith", "icontains"],
-            "id": ["exact"],
+            "id": ["exact", "in"],
             "album": ["exact"],
             "license": ["exact"],
             "mbid": ["exact"],
