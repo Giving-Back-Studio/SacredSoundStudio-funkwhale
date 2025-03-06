@@ -12,7 +12,7 @@ import { requireLoggedIn } from '~/router/guards'
 const routeToIndex = (to: any, from: any, next: any) => {
   if (store.state.auth.authenticated) {
     if (store.state.auth.profile?.is_artist) return next('/mycontent')
-    return next('/search')
+    return next('/explore')
   }
   return next()
 }
@@ -36,9 +36,9 @@ export default [
     component: () => import('~/components/auth/AuthForm.vue')
   },
   {
-    path: '/search',
-    name: 'search',
-    component: () => import('~/views/content/Search.vue')
+    path: '/explore',
+    name: 'explore',
+    component: () => import('~/views/content/Explore.vue')
   },
   {
     path: '/index.html',

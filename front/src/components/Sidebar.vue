@@ -12,9 +12,7 @@ import { Menu, Settings } from 'lucide-vue-next'
 
 import SemanticModal from '~/components/semantic/Modal.vue'
 import UserModal from '~/components/common/UserModal.vue'
-import SearchBar from '~/components/audio/SearchBar.vue'
 import UserMenu from '~/components/common/UserMenu.vue'
-import Logo from '~/components/Logo.vue'
 
 import useThemeList from '~/composables/useThemeList'
 import useTheme from '~/composables/useTheme'
@@ -375,10 +373,10 @@ const toggleSidebar = () => {
           <router-link
             v-if="$store.state.auth.authenticated"
             class="item"
-            :to="{ path: '/search' }"
+            :to="{ path: '/explore' }"
             @click.prevent="toggleSidebar"
           >
-            {{ $t('components.Sidebar.link.search') }}
+            {{ $t('components.Sidebar.header.explore') }}
           </router-link>
 
           <router-link

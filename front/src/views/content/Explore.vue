@@ -8,8 +8,7 @@ import axios from 'axios'
 import store from '~/store'
 
 import useErrorHandler from '~/composables/useErrorHandler'
-import AlbumCard from '~/components/audio/album/Card.vue'
-import TrackCard from '~/components/audio/track/Card.vue'
+import ContentCard from '~/components/audio/ContentCard.vue'
 import PlayButton from '~/components/audio/PlayButton.vue'
 
 const q = useRouteQuery('q', '')
@@ -24,6 +23,9 @@ const searchInput = ref(null)
 const searchResultsArtists = ref([])
 const searchResultsAlbums = ref([])
 const searchResultsTracks = ref([])
+
+const recentActivity = ref([])
+const recentlyUploadedAlbums = ref([])
 
 const noResults = ref(false)
 
@@ -43,7 +45,7 @@ const search = async () => {
     searchResultsArtists.value = []
     searchResultsAlbums.value = []
     searchResultsTracks.value = []
-    noResults.value = true
+    noResults.value = false
     return
   }
 
@@ -80,24 +82,42 @@ const fetchContentCategories = async () => {
   }
 }
 
-const fetchRecentContent = async () => {
+const fetchRecentActivity = async () => {
   try {
-    const response = await axios.get('recent-content/')
+    const activityResponse = await axios.get('activity/')
+    const allActivity = activityResponse.data.results
 
-    searchResultsArtists.value = response.data.artists
-    searchResultsAlbums.value = response.data.albums
-    searchResultsTracks.value = response.data.tracks
+    // Use a Set to track unique tracks
+    const uniqueTracks = new Set()
+    const filteredActivities = []
+
+    for (const activity of allActivity) {
+      if (!uniqueTracks.has(activity.object.local_id)) {
+        uniqueTracks.add(activity.object.local_id)
+        filteredActivities.push(activity)
+      }
+    }
+
+    // Slice to take the top 12 unique activities
+    const latestActivity = filteredActivities.slice(0, 12)
+    const trackIds = latestActivity.map(activity => activity.object.local_id)
+
+    const tracksResponse = await axios.get('tracks/?id__in=' + trackIds.join(','))
+
+    for (const activity of latestActivity) {
+      activity.track = tracksResponse.data.results.find((track) => (track.id === activity.object.local_id))
+    }
+
+    recentActivity.value = latestActivity    
   } catch (error) {
     useErrorHandler(error)
-    searchResultsArtists.value = []
-    searchResultsAlbums.value = []
-    searchResultsTracks.value = []
   }
 }
 
 onMounted(() => {
   fetchContentCategories()
   focusSearchInput()
+  fetchRecentActivity()
 })
 
 // Filter search state
@@ -181,12 +201,16 @@ const getArtistCover = (artist) => {
   }
 }
 
+const translateActivityType = (activityType) => {
+  // TODO possibly use translation dict lookup?
+  return {"Listen": "listened to", "Like": "liked"}[activityType]
+}
+
 </script>
 
 <template>
   <div class="min-h-screen main with-background">
     <main class="container mx-auto px-4 py-8">
-      <h1 class="text-4xl mb-8 font-serif">Search</h1>
       <div class="mb-8 ui fluid big left icon right action input">
         <i class="search icon"></i>
         <input
@@ -268,8 +292,8 @@ const getArtistCover = (artist) => {
       </div>
       <empty-state v-else-if="noResults" />
 
-      <div v-if="searchResultsArtists.length" class="mb-6">
-        <h2 class="header text-4xl mb-2">Artists</h2>
+      <div v-if="searchResultsArtists.length" class="ui segment">
+        <div class="ui horizontal divider">Artists</div>
         <div class="results-scroll-container">
           <div v-for="(artist, index) in searchResultsArtists" :key="index" class="artist-card">
             <router-link
@@ -285,21 +309,30 @@ const getArtistCover = (artist) => {
         </div>
       </div>
 
-      <div v-if="searchResultsAlbums.length" class="mb-6">
-        <h2 class="header text-4xl mb-2">Albums</h2>
-        <div class="ui five app-cards cards">
-          <album-card
-            v-for="album in searchResultsAlbums"
-            :key="album.id"
-            :album="album"
-          />
+      <div v-if="searchResultsAlbums.length" class="ui segment">
+        <div class="ui horizontal divider">Albums</div>
+        <div class="ui stackable cards">
+          <content-card v-for="(album, index) in searchResultsAlbums" :key="index" :album="album" />
         </div>
       </div>
 
-      <div v-if="searchResultsTracks.length" class="mb-6">
-        <h2 class="header text-4xl mb-2">Tracks</h2>
-        <div class="view-all-grid">
-          <track-card v-for="(track, index) in searchResultsTracks" :key="index" :track="track" />
+      <div v-if="searchResultsTracks.length" class="ui segment">
+        <div class="ui horizontal divider">Tracks</div>
+        <div class="ui stackable cards">
+          <content-card v-for="(track, index) in searchResultsTracks" :key="index" :track="track" />
+        </div>
+      </div>
+
+      <div v-if="!query && activeFilters.length === 0">
+        <div class="ui stackable cards">
+          <template v-for="activity in recentActivity">
+            <content-card :track="activity.track">
+              <span>
+                <router-link :to="'/@' + activity.actor.name">{{ activity.actor.name }}</router-link>
+                {{ translateActivityType(activity.type) }}
+              </span>
+            </content-card>
+          </template>
         </div>
       </div>
     </main>
@@ -309,6 +342,10 @@ const getArtistCover = (artist) => {
 <style>
 .main.with-background {
   background: var(--site-background) !important;
+}
+
+.segment .ui.card {
+  background: none !important;
 }
 
 /* Active Filters */
@@ -512,46 +549,7 @@ const getArtistCover = (artist) => {
   gap: 1.5rem;
 }
 
-/* Track Card */
-.track-card {
-  display: flex;
-  flex-direction: column;
-  min-width: 200px;
-  max-width: 200px;
-}
 
-.track-cover {
-  position: relative;
-  width: 200px;
-  height: 200px;
-  border-radius: 8px;
-  overflow: hidden;
-  margin-bottom: 0.5rem;
-}
-
-.track-cover img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.play-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(67, 66, 137, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.track-cover:hover .play-overlay {
-  opacity: 1;
-}
 
 .play-icon {
   color: white;
