@@ -89,10 +89,6 @@ v1_patterns += [
     url(
         r"^text-preview/?$", common_views.TextPreviewView.as_view(), name="text-preview"
     ),
-    url(
-        r"^concerts/",
-        include(("funkwhale_api.concerts.urls", "concerts"), namespace="concerts"),
-    ),
     url(r'^ses/event-webhook/$', csrf_exempt(SESEventWebhookView.as_view()), name='handle-ses-event-webhook')
 ]
 
