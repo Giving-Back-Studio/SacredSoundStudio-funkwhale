@@ -157,6 +157,12 @@ Resources:
       GenerateSecretString: 
         PasswordLength: 42
 
+  MuxSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: Credentials for the MUX API
+      SecretString: '{"token_id":"secret", "token_secret":"secret"}'
+
   Namespace:
     Type: AWS::ServiceDiscovery::PrivateDnsNamespace
     Properties:
@@ -186,6 +192,7 @@ Resources:
         S3Bucket: !GetAtt CDN.Outputs.Bucket
         CdnId: !GetAtt CDN.Outputs.DistributionId
         DjangoSecretKey: !Ref DjangoSecretKey
+        MuxSecret: !Ref MuxSecret
         Cpu: 512
         Memory: 2GB
         EfsFileSystemId: !Ref EFS
@@ -220,6 +227,7 @@ Resources:
         S3Bucket: !GetAtt CDN.Outputs.Bucket
         CdnId: !GetAtt CDN.Outputs.DistributionId
         DjangoSecretKey: !Ref DjangoSecretKey
+        MuxSecret: !Ref MuxSecret
         EfsFileSystemId: !Ref EFS
       TemplateURL: FargateService.yaml
 
@@ -264,6 +272,7 @@ Resources:
                 Resource:
                   - !GetAtt RDSCluster.Outputs.ConnectionSecret
                   - !Ref DjangoSecretKey
+                  - !Ref MuxSecret
 
   TranscoderRule:
     Type: AWS::Events::Rule
@@ -346,6 +355,7 @@ Resources:
         S3Bucket: !GetAtt CDN.Outputs.Bucket
         CdnId: !GetAtt CDN.Outputs.DistributionId
         DjangoSecretKey: !Ref DjangoSecretKey
+        MuxSecret: !Ref MuxSecret
         EfsFileSystemId: !Ref EFS
       TemplateURL: FargateService.yaml
 
