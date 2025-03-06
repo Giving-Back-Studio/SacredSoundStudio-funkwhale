@@ -10,6 +10,7 @@ from funkwhale_api.common import views as common_views
 from funkwhale_api.music import views
 from funkwhale_api.playlists import views as playlists_views
 from funkwhale_api.tags import views as tags_views
+from funkwhale_api.concerts import views as concerts_views
 
 router = common_routers.OptionalSlashRouter()
 router.register(r"activity", activity_views.ActivityViewSet, "activity")
@@ -29,6 +30,7 @@ router.register(r"licenses", views.LicenseViewSet, "licenses")
 router.register(r"playlists", playlists_views.PlaylistViewSet, "playlists")
 router.register(r"mutations", common_views.MutationViewSet, "mutations")
 router.register(r"attachments", common_views.AttachmentViewSet, "attachments")
+router.register(r"concerts", concerts_views.ConcertViewSet, "concerts")
 v1_patterns = router.urls
 
 v1_patterns += [
@@ -86,6 +88,10 @@ v1_patterns += [
     url(r"^rate-limit/?$", common_views.RateLimitView.as_view(), name="rate-limit"),
     url(
         r"^text-preview/?$", common_views.TextPreviewView.as_view(), name="text-preview"
+    ),
+    url(
+        r"^concerts/",
+        include(("funkwhale_api.concerts.urls", "concerts"), namespace="concerts"),
     ),
     url(r'^ses/event-webhook/$', csrf_exempt(SESEventWebhookView.as_view()), name='handle-ses-event-webhook')
 ]
