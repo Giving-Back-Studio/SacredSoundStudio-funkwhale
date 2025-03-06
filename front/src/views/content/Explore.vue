@@ -327,10 +327,10 @@ const translateActivityType = (activityType) => {
         <div class="ui stackable cards">
           <template v-for="activity in recentActivity">
             <content-card :track="activity.track">
-              <span>
+              <div>
                 <router-link :to="'/@' + activity.actor.name">{{ activity.actor.name }}</router-link>
                 {{ translateActivityType(activity.type) }}
-              </span>
+              </div>
             </content-card>
           </template>
         </div>

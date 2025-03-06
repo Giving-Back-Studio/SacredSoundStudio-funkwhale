@@ -26,7 +26,7 @@ interface Props {
 }
 
 const emit = defineEmits<Events>()
-defineProps<Props>()
+const props = defineProps<Props>()
 
 const store = useStore()
 const { theme } = useTheme()
@@ -122,6 +122,12 @@ const toggleSidebar = () => {
   isSidebarCollapsed.value = !isSidebarCollapsed.value
   emit('update:collapsed', isSidebarCollapsed.value)
 }
+
+watch(() => props.width, (width) => {
+  if (width < 1024 && !isSidebarCollapsed.value) {
+    toggleSidebar()
+  }
+})
 </script>
 
 <template>
@@ -439,7 +445,6 @@ const toggleSidebar = () => {
 .ui.vertical.left.visible.wide.sidebar.component-sidebar .header-wrapper {
   background-color: #D9D9E7 !important;
   transition: all 0.3s ease !important;
-  width: 275px !important;
 }
 
 /* Add collapsed state styles with transition */
@@ -484,12 +489,12 @@ const toggleSidebar = () => {
   transition: margin-left 0.3s ease !important;
 }
 
-#app > div > .main.pusher.sidebar-collapsed {
-  margin-left: 60px !important;
-}
-
 #app > div > .main.pusher.no-sidebar {
   margin-left: 0px !important;
+}
+
+#app > div > .main.pusher.sidebar-collapsed:not(.small) {
+  margin-left: 60px !important;
 }
 
 /* Apply color to navigation items only, excluding top icons */

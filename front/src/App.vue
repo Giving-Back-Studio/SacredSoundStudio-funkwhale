@@ -103,8 +103,8 @@ const handleSidebarCollapse = (collapsed: boolean) => {
       :href="url"
     >
 
-    <Sidebar @update:collapsed="handleSidebarCollapse" />
-    <main id="main" :class="['main', 'pusher', { 'sidebar-collapsed': isSidebarCollapsed }]">
+    <sidebar @update:collapsed="handleSidebarCollapse" :width="width" />
+    <main id="main" :class="['main', 'pusher', { 'sidebar-collapsed': isSidebarCollapsed }, { 'small': width < 1024}]">
       <set-instance-modal v-model:show="showSetInstanceModal" />
       <service-messages />
       <transition name="queue">
