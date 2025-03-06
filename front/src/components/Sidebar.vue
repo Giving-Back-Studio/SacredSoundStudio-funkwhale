@@ -433,6 +433,10 @@ watch(() => props.width, (width) => {
   cursor: pointer !important;
 }
 
+.sidebar {
+  padding-bottom: 1rem;
+}
+
 /* Wrench icon color with more specific selector */
 .ui.menu .item .wrench.icon,
 .ui.admin-dropdown .wrench.icon,
