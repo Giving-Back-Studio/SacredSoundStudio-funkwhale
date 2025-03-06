@@ -396,7 +396,7 @@ watch(() => props.width, (width) => {
           <router-link
             v-if="$store.state.auth.authenticated && $store.state.auth.profile.is_artist"
             class="item"
-            :to="{name: 'channels.detail', params: {id: $store.state.auth.profile.username}}"
+            :to="{name: 'channels.detail', params: {id: $store.state.auth.fullUsername}}"
           >
             {{ $t('components.Sidebar.link.myChannel') }}
           </router-link>
