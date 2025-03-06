@@ -281,6 +281,7 @@ LOCAL_APPS = (
     "funkwhale_api.subsonic",
     "funkwhale_api.tags",
     "funkwhale_api.typesense",
+    "funkwhale_api.concerts",
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
