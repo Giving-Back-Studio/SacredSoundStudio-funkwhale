@@ -24,7 +24,7 @@ const searchResultsArtists = ref([])
 const searchResultsAlbums = ref([])
 const searchResultsTracks = ref([])
 
-const recentActivity = ref([])
+const hotTracks = ref([])
 const recentlyUploadedAlbums = ref([])
 
 const noResults = ref(false)
@@ -104,11 +104,7 @@ const fetchRecentActivity = async () => {
 
     const tracksResponse = await axios.get('tracks/?id__in=' + trackIds.join(','))
 
-    for (const activity of latestActivity) {
-      activity.track = tracksResponse.data.results.find((track) => (track.id === activity.object.local_id))
-    }
-
-    recentActivity.value = latestActivity    
+    hotTracks.value = tracksResponse.data.results
   } catch (error) {
     useErrorHandler(error)
   }
@@ -323,16 +319,10 @@ const translateActivityType = (activityType) => {
         </div>
       </div>
 
-      <div v-if="!query && activeFilters.length === 0">
+      <div v-if="!query && activeFilters.length === 0" class="ui segment">
+        <div class="ui horizontal divider">Trending Tracks</div>
         <div class="ui stackable cards">
-          <template v-for="activity in recentActivity">
-            <content-card :track="activity.track">
-              <div>
-                <router-link :to="'/@' + activity.actor.name">{{ activity.actor.name }}</router-link>
-                {{ translateActivityType(activity.type) }}
-              </div>
-            </content-card>
-          </template>
+          <content-card v-for="(track, index) in hotTracks" :key="index" :track="track"/>
         </div>
       </div>
     </main>
