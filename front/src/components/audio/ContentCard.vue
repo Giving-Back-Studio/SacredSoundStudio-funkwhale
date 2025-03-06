@@ -30,16 +30,8 @@ const tagList = computed(() => {
 </script>
 
 <template>
-  <div class="ui card center aligned text">
-    <slot />
-    <router-link :to="{name: track ? 'library.tracks.detail' : 'library.albums.detail', params: {id: content.id}}">{{ content.title }}</router-link>
-    <div>
-      by
-      <router-link :to="{name: 'channels.detail', params: {id: content.artist.channel.actor.preferred_username }}">
-        {{ content.artist.name }}
-      </router-link>
-    </div>
-    <div class="track-cover middle aligned">
+  <div class="ui card center aligned">
+    <div class="content-cover middle aligned">
       <img :src="imageUrl" :alt="content.title" />
       <div class="play-overlay">
         <router-link
@@ -50,37 +42,41 @@ const tagList = computed(() => {
         </router-link>
       </div>
     </div>
-    <div class="horizontal center aligned">
-      <human-duration class="mr-2"
-        v-if="track && track.uploads[0] && track.uploads[0].duration"
-        :duration="track.uploads[0].duration"
-      />
-      <play-button
-        id="playmenu"
-        class="play-button basic icon"
-        :is-playable="content.is_playable"
-        :hidePlayText="true"
-        :track="track"
-        :album="album"
-      />
+    <div class="content">
+      <router-link
+        :to="{name: track ? 'library.tracks.detail' : 'library.albums.detail', params: {id: content.id}}">
+        <h3 class="ui header title">{{ content.title }}</h3>
+      </router-link>
+      <router-link :to="{name: 'channels.detail', params: {id: content.artist.channel.actor.preferred_username }}">
+          {{ content.artist.name }}
+      </router-link>
+      <div>
+        <human-duration class="ui left floated"
+          v-if="track && track.uploads[0] && track.uploads[0].duration"
+          :duration="track.uploads[0].duration"
+        />
+        <play-button
+          id="playmenu"
+          class="ui right floated play-button primary basic icon"
+          :is-playable="content.is_playable"
+          :hidePlayText="true"
+          :track="track"
+          :album="album"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <style>
 
-.ui.card {
-    box-shadow: none !important;
-}
-
-.track-cover {
+.content-cover {
   position: relative;
   border-radius: 8px;
   overflow: hidden;
-  margin-bottom: 0.5rem;
 }
 
-.track-cover img {
+.content-cover img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -100,7 +96,14 @@ const tagList = computed(() => {
   place-content: space-evenly;
 }
 
-.track-cover:hover .play-overlay {
+.content-cover:hover .play-overlay {
   opacity: 1;
+}
+
+.title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%; /* Adjust as needed */
 }
 </style>

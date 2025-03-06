@@ -6,6 +6,7 @@ import moment from 'moment'
 
 import { useStore } from '~/store'
 import PlayButton from '~/components/audio/PlayButton.vue'
+import ContentCard from '~/components/audio/ContentCard.vue'
 import useLogger from '~/composables/useLogger'
 import useErrorHandler from '~/composables/useErrorHandler'
 
@@ -92,20 +93,6 @@ const categories = computed(() => {
     if (item.uploads.length > 0) {
       duration = item.uploads[0].duration
     }
-    const slimItem = {
-      id: item.id,
-      title: item.title,
-      track_url: `library/tracks/${item.id}`,
-      edit_url: `library/tracks/${item.id}/edit`,
-      artist_name: item.artist.name,
-      artist_id: item.artist.id,
-      artist_url: `channels/${item.artist.channel.actor.preferred_username}`,
-      album_name: item.album?.title,
-      album_url: `library/albums/${item.album?.id}`,
-      duration: moment.duration(duration, 'seconds'),
-      is_playable: item.is_playable,
-      cover: item.cover?.urls?.medium_square_crop || item.album?.cover?.urls?.medium_square_crop || '/placeholder.svg?height=280&width=280'
-    }
 
     for (const tagCategoryIdx in trackCategories.value) {
       const tagCategory = trackCategories.value[tagCategoryIdx].name
@@ -113,16 +100,16 @@ const categories = computed(() => {
         const tags = item.tags[tagCategory]
         if (!tags) {
           if (!cats[NONE]) cats[NONE] = []
-          cats[NONE].push(slimItem)
+          cats[NONE].push(item)
           scrollPositions.value[NONE] = 0
           continue
         }
 
         for (const tag of tags) {
-          if (cats[tag] && !cats[tag].includes(slimItem)) {
-            cats[tag].push(slimItem)
+          if (cats[tag] && !cats[tag].includes(item)) {
+            cats[tag].push(item)
           } else {
-            cats[tag] = [slimItem]
+            cats[tag] = [item]
             scrollPositions.value[tag] = 0
           }
         }
@@ -220,70 +207,14 @@ const deleteContent = (item) => {
         :ref="el => { if (el) scrollContainers[category] = el }"
       >
         <div 
-          class="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
+          class="ui stackable cards"
           @scroll="updateScrollPosition(category, $event)"
         >
-          <!-- Content Items -->
-          <div 
+          <content-card
             v-for="item in items" 
             :key="item.id"
-            class="flex-none w-[280px]"
-          >
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-transform hover:scale-[1.02]">
-              <div class="aspect-square relative group">
-                <img 
-                  :src="item.cover" 
-                  :alt="item.title"
-                  class="w-full h-full object-cover"
-                />
-                <div v-if="$store.state.auth.profile.artist == item.artist_id" class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                  <router-link :to="item.edit_url" class="p-2 rounded-full bg-white text-[#434289] hover:bg-gray-100">
-                    <Edit2 class="h-5 w-5" />
-                  </router-link>
-                  <dangerous-button @confirm="deleteContent(item)" :class="['p-2', 'rounded-full', 'bg-white', 'text-red-500', 'hover:bg-gray-100']">
-                    <Trash2 class="h-5 w-5 text-red-500" />
-                    <template #modal-header>
-                      <h3>Delete Track?</h3>
-                    </template>
-                    <template #modal-content>
-                      <div>
-                        <p class="text-black">
-                          Are you sure you want to delete "{{ item.title }}"?
-                        </p>
-                      </div>
-                    </template>
-                    <template #modal-confirm>
-                      <span>Delete</span>
-                    </template>
-                  </dangerous-button>
-                </div>
-              </div>
-              <div class="p-4">
-                <router-link :to="item.track_url">
-                    <h3 class="font-semibold text-[#434289] mb-1">{{ item.title }}</h3>
-                </router-link>
-                <router-link :to="item.artist_url" class="text-sm text-gray-600">
-                    {{ item.artist_name }}
-                </router-link>
-                <router-link v-if="item.album_name" :to="item.album_url" class="text-sm text-gray-600 block">
-                  {{ item.album_name }}
-                </router-link>
-                <span v-else class="text-sm text-gray-600 block">Single</span>
-                <div class="flex items-center gap-2 mt-2">
-                  <play-button
-                    class="primary"
-                    :track="item"
-                    :is-playable="item.is_playable"
-                    :discrete="true"
-                  />
-                  <Clock class="h-4 w-4 text-gray-400" />
-                  <span class="text-sm text-gray-500">
-                    {{ item.duration.humanize() }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+            :track="item"
+          />
         </div>
       </div>
     </div>
