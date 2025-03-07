@@ -79,7 +79,7 @@ watchEffect(() => {
   if (store.state.auth.authenticated) {
     setupDropdown('.admin-dropdown', el.value)
   }
-  
+
   setupDropdown('.user-dropdown', el.value, {
     action: 'click',
     direction: 'downward',
@@ -136,8 +136,11 @@ watch(() => props.width, (width) => {
     :class="['ui', 'vertical', 'left', 'visible', 'wide', 'sidebar', 'component-sidebar', { collapsed: isSidebarCollapsed }]"
   >
     <header class="ui basic segment header-wrapper">
-      <Menu class="menu-icon" @click="toggleSidebar" />
-      <div class="spacer"></div>
+      <Menu
+        class="menu-icon"
+        @click="toggleSidebar"
+      />
+      <div class="spacer" />
       <nav class="top ui compact right aligned inverted text menu">
         <div class="right menu">
           <div
@@ -218,10 +221,16 @@ watch(() => props.width, (width) => {
                   v-else-if="$store.state.auth.authenticated"
                   :actor="{preferred_username: $store.state.auth.username, full_username: $store.state.auth.username,}"
                 />
-                <i v-else class="cog icon" />
+                <i
+                  v-else
+                  class="cog icon"
+                />
               </div>
               <div class="menu dropdown-menu">
-                <user-menu v-bind="$attrs" :width="width" />
+                <user-menu
+                  v-bind="$attrs"
+                  :width="width"
+                />
               </div>
             </div>
           </div>
@@ -401,6 +410,14 @@ watch(() => props.width, (width) => {
             {{ $t('components.Sidebar.link.myChannel') }}
           </router-link>
 
+          <router-link
+            v-if="$store.state.auth.authenticated"
+            class="item"
+            :to="{ path: '/concerts' }"
+          >
+            {{ $t('components.Sidebar.link.concerts') }}
+          </router-link>
+
           <!--
           <router-link
             v-if="$store.state.auth.availablePermissions['settings']"
@@ -416,7 +433,7 @@ watch(() => props.width, (width) => {
             :to="{ path: '/upload' }"
           >
             {{ $t('components.Sidebar.link.upload') }}
-          </router-link> 
+          </router-link>
         </nav>
       </section>
     </nav>
@@ -570,7 +587,7 @@ watch(() => props.width, (width) => {
 
 .ui.dropdown.user-dropdown {
   position: relative !important;
-  
+
   .trigger {
     cursor: pointer;
     display: flex;
@@ -589,18 +606,18 @@ watch(() => props.width, (width) => {
     box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
     margin-top: 0.5rem !important;
     z-index: 1000 !important;
-    
+
     .menu {
       position: static !important;
       border: none !important;
       box-shadow: none !important;
       background: transparent !important;
     }
-    
+
     .item {
       color: var(--primary-color) !important;
       padding: 0.8rem 1rem !important;
-      
+
       &:hover {
         background-color: rgba(0,0,0,0.05) !important;
       }
