@@ -1,77 +1,57 @@
 <template>
-  <main
-    v-title="labels.title"
-    class="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white"
-  >
-    <div
-      v-if="isLoading"
-      class="flex justify-center items-center py-8"
-    >
-      <div class="ui centered active inline loader" />
+  <main v-title="labels.title" class="ui inverted segment">
+    <div v-if="isLoading" class="ui basic segment">
+      <div class="ui active centered inline loader"></div>
     </div>
     <template v-if="object && !isLoading">
       <!-- Hero Section with Banner and Profile -->
-      <div class="relative">
+      <div class="ui grid">
         <!-- Banner Image -->
-        <div class="relative w-full h-[300px] md:h-[400px]">
-          <img 
-            v-if="object.artist?.cover"
-            :src="$store.getters['instance/absoluteUrl'](object.artist.cover.urls.original)"
-            :alt="object.artist?.name"
-            class="w-full h-full object-cover"
-          >
-          <div v-else class="w-full h-full bg-gray-800" />
-          <div class="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900"></div>
+        <div class="sixteen wide column">
+          <div class="ui fluid image">
+            <img 
+              v-if="object.artist?.cover"
+              :src="$store.getters['instance/absoluteUrl'](object.artist.cover.urls.original)"
+              :alt="object.artist?.name"
+              class="ui image"
+            >
+            <div v-else class="ui placeholder"></div>
+          </div>
         </div>
 
         <!-- Profile Section -->
-        <div class="container mx-auto px-4">
-          <div class="relative -mt-24 md:-mt-32 flex flex-col md:flex-row items-start md:items-end gap-6 mb-8">
+        <div class="sixteen wide column">
+          <div class="ui basic segment">
 
             <!-- Artist Info -->
-            <div class="flex-grow">
-              <h1 class="text-3xl md:text-4xl font-bold mb-2">{{ object.artist?.name }}</h1>
-
-              <!-- Stats -->
-              <div class="mt-4 flex flex-wrap gap-4 text-gray-400">
-                <template v-if="totalTracks > 0">
-                  <span v-if="isPodcast">
-                    {{ $t('views.channels.DetailBase.meta.episodes', totalTracks) }}
-                  </span>
-                  <span v-else>
-                    {{ $t('views.channels.DetailBase.meta.tracks', totalTracks) }}
-                  </span>
-                </template>
-              </div>
+            <div class="ui inverted">
+              <h1 class="ui huge header">{{ object.artist?.name }}</h1>
 
               <!-- Action Buttons -->
-              <div class="mt-6 flex flex-wrap gap-4">
-                <play-button
-                  :is-playable="isPlayable"
-                  class="px-6 py-2 bg-primary text-black rounded-full hover:bg-gray-200 transition-colors flex items-center gap-2"
-                  :artist="object.artist"
-                >
-                  {{ $t('views.channels.DetailBase.button.play') }}
-                </play-button>
+              <play-button
+                :is-playable="isPlayable"
+                class="ui primary button"
+                style="margin-right: 0.25rem"
+                :artist="object.artist"
+              >
+                {{ $t('views.channels.DetailBase.button.play') }}
+              </play-button>
 
-                <subscribe-button
-                  :channel="object"
-                  @subscribed="updateSubscriptionCount(1)"
-                  @unsubscribed="updateSubscriptionCount(-1)"
-                />
+              <subscribe-button
+                :channel="object"
+                @subscribed="updateSubscriptionCount(1)"
+                @unsubscribed="updateSubscriptionCount(-1)"
+              />
 
-                <template v-if="isOwner">
-                  <router-link to="/mychannel" class="ui icon labeled button">
-                    <i class="edit icon" />
-                    Edit My Channel
-                  </router-link>
-                </template>
-              </div>
+              <router-link v-if="isOwner" to="/mychannel" class="ui icon labeled button">
+                <i class="edit icon" />
+                Edit My Channel
+              </router-link>
             </div>
           </div>
 
           <!-- Description -->
-          <div class="max-w-3xl mb-12" v-if="$store.getters['ui/layoutVersion'] === 'large'">
+          <div class="ui basic segment" v-if="$store.getters['ui/layoutVersion'] === 'large'">
             <rendered-description
               :content="object.artist?.description"
               :update-url="`channels/${object.uuid}/`"
@@ -81,45 +61,45 @@
           </div>
 
           <!-- Tags -->
-          <div class="mb-8">
+          <div class="ui basic segment">
             <tags-list
               v-if="object.artist?.tags && object.artist?.tags.length > 0"
               :tags="object.artist.tags"
-              class="flex flex-wrap gap-2"
+              class="ui labels"
             />
           </div>
 
           <!-- Navigation -->
-          <div class="mb-8">
-            <nav class="flex justify-center border-b border-gray-800">
-              <router-link
-                class="px-6 py-3 text-gray-400 hover:text-white transition-colors border-b-2 border-transparent"
-                :class="{'border-white text-white': $route.name === 'channels.detail'}"
-                :to="{name: 'channels.detail', params: {id: id}}"
-              >
-                {{ $t('views.channels.DetailBase.link.channelOverview') }}
-              </router-link>
-              <router-link
-                class="px-6 py-3 text-gray-400 hover:text-white transition-colors border-b-2 border-transparent"
-                :class="{'border-white text-white': $route.name === 'channels.detail.episodes'}"
-                :to="{name: 'channels.detail.episodes', params: {id: id}}"
-              >
-                <span v-if="isPodcast">
-                  {{ $t('views.channels.DetailBase.link.channelEpisodes') }}
-                </span>
-                <span v-else>
-                  {{ $t('views.channels.DetailBase.link.channelTracks') }}
-                </span>
-              </router-link>
-            </nav>
+          <div class="ui secondary pointing menu">
+            <router-link
+              class="item"
+              :class="{'active': $route.name === 'channels.detail'}"
+              :to="{name: 'channels.detail', params: {id: id}}"
+            >
+              {{ $t('views.channels.DetailBase.link.channelOverview') }}
+            </router-link>
+            <router-link
+              class="item"
+              :class="{'active': $route.name === 'channels.detail.episodes'}"
+              :to="{name: 'channels.detail.episodes', params: {id: id}}"
+            >
+              <span v-if="isPodcast">
+                {{ $t('views.channels.DetailBase.link.channelEpisodes') }}
+              </span>
+              <span v-else>
+                {{ $t('views.channels.DetailBase.link.channelTracks') }}
+              </span>
+            </router-link>
           </div>
 
           <!-- Content -->
-          <router-view
-            v-if="object"
-            :object="object"
-            @tracks-loaded="totalTracks = $event"
-          />
+          <div class="ui basic segment">
+            <router-view
+              v-if="object"
+              :object="object"
+              @tracks-loaded="totalTracks = $event"
+            />
+          </div>
         </div>
       </div>
     </template>
