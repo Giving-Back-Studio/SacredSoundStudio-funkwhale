@@ -55,7 +55,10 @@ const loadChannelData = async () => {
     
     artistName.value = channel.artist.name
 
-    bio.value = channel.artist.description.text
+    if (channel.artist.description) {
+      bio.value = channel.artist.description.text
+    }
+
     tags.value = channel.artist.tags
     
     if (channel.artist?.cover?.uuid) {
