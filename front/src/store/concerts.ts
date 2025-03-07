@@ -62,7 +62,7 @@ const store: Module<State, RootState> = {
         commit('setConcerts', concerts)
         if (concerts.length > 0) {
           commit('setFeaturedConcert', concerts[0])
-          commit('setNextConcert', concerts.slice(1))
+          commit('setNextConcerts', concerts.slice(1))
         }
       } catch (error) {
         console.error('Error fetching concerts:', error)
