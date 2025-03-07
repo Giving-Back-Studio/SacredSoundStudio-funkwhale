@@ -45,7 +45,7 @@ const loginModal = ref()
 <template>
   <button
     v-if="$store.state.auth.authenticated"
-    :class="['ui', 'pink', {'inverted': isSubscribed}, {'favorited': isSubscribed}, 'icon', 'labeled', 'button']"
+    :class="['ui', 'alternative', {'inverted': isSubscribed}, {'favorited': isSubscribed}, 'icon', 'labeled', 'button']"
     @click.stop="toggle"
   >
     <i class="heart icon" />
@@ -53,7 +53,7 @@ const loginModal = ref()
   </button>
   <button
     v-else
-    :class="['ui', 'pink', 'icon', 'labeled', 'button']"
+    :class="['ui', 'alternative', 'icon', 'labeled', 'button']"
     @click="loginModal.show = true"
   >
     <i class="heart icon" />

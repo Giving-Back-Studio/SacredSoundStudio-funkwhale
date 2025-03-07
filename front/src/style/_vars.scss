@@ -1,10 +1,18 @@
 // All vars in this file are made available as CSS vars.
-// For instance, $vibrant-color: #f2711c !default;
-// will be exposed as --vibrant-color: #f2711c
-$font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif !default;
-$vibrant-color: #f2711c !default;
-$vibrant-hover-color: #f26202 !default;
-$vibrant-active-color: #cf590c !default;
+// For instance, $vibrant-color: #dfd360 !default;
+// will be exposed as --vibrant-color: #dfd360
+
+// Additional brand colors
+$elm: #1c8085 !default;
+$kidnapper: #eef3e6 !default;
+$chenin: #dfd360 !default;
+$celeste: #cccec4 !default;
+$light-elm: #e5f1f2 !default;
+
+$font-family: 'Montserrat', 'Helvetica Neue', Arial, Helvetica, sans-serif !default;
+$vibrant-color: #dfd360 !default;
+$vibrant-hover-color: darken(#dfd360, 5%) !default;
+$vibrant-active-color: darken(#dfd360, 10%) !default;
 $vibrant-focus-color: var(--vibrant-hover-color) !default;
 
 $success-color: #206b00 !default;
@@ -12,17 +20,17 @@ $success-hover-color: #3a9104 !default;
 $success-active-color: #198f35 !default;
 $success-focus-color: var(--success-hover-color) !default;
 
-$primary-color: #434289 !default;
-$primary-hover-color: darken(#434289, 5%) !default;
-$primary-active-color: darken(#434289, 10%) !default;
+$primary-color: #1c8085 !default;
+$primary-hover-color: darken(#1c8085, 5%) !default;
+$primary-active-color: darken(#1c8085, 10%) !default;
 $primary-focus-color: var(--primary-hover-color) !default;
 
-$warning-color: #FBBD08 !default;
-$warning-hover-color: #eaae00 !default;
-$warning-active-color: #cd9903 !default;
+$warning-color: #e8391c !default;
+$warning-hover-color: #e8391c !default;
+$warning-active-color: #e8391c !default;
 $warning-focus-color: var(--warning-hover-color) !default;
 
-$danger-color: #DB2828 !default;
+$danger-color: #e8391c !default;
 $danger-hover-color: #ff392b !default;
 $danger-active-color: #b21e1e !default;
 $danger-focus-color: var(--danger-hover-color) !default;
@@ -31,18 +39,18 @@ $accent-color: var(--alternative-color) !default;
 $accent-hover-color: var(--alternative-hover-color) !default;
 $accent-active-color: var(--alternative-active-color) !default;
 
-$link-color: #0d52bf !default;
+$link-color: #e7922f !default;
 $link-text-decoration: none !default;
-$link-hover-color: #002e99 !default;
+$link-hover-color: darken(#e7922f, 20%) !default;
 $link-hover-text-decoration: underline !default;
 
-$sidebar-background: #D9D9E7 !default;
+$sidebar-background: #eef3e6 !default;
 $sidebar-header-background: var(--sidebar-background) !default;
 $sidebar-header-color: var(--sidebar-color) !default;
 $sidebar-active-item-background: rgba(255, 255, 255, 0.15) !default;
 $sidebar-header-box-shadow: none !default;
 $sidebar-box-shadow: 0 0 20px rgba(34,36,38,.15) !default;
-$site-background: #F1F4F8 !default;
+$site-background: #e5f1f2 !default;
 
 $text-color: var(--primary-color) !default;
 $discrete-text-color: var(--primary-color) !default;
@@ -124,12 +132,13 @@ $border-color: rgba(34, 36, 38, 0.15) !default;
 // Typography
 $heading-font: 'Playfair Display', serif !default;
 $body-font: 'Montserrat', sans-serif !default;
+
 $small-font-size: 0.875rem !default;  // 14px if base is 16px
 
 // Core theme colors
-$alternative-color: #A3C4A3 !default;
-$alternative-hover-color: darken(#A3C4A3, 5%) !default;
-$alternative-active-color: darken(#A3C4A3, 10%) !default;
+$alternative-color: #e7922f !default;
+$alternative-hover-color: darken(#e7922f, 5%) !default;
+$alternative-active-color: darken(#e7922f, 10%) !default;
 
 $form-background: #FFFFFF !default;
 

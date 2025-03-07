@@ -444,10 +444,8 @@ watch(() => props.width, (width) => {
   color: #373571 !important;
 }
 
-/* Set sidebar and header background color */
 .ui.vertical.left.visible.wide.sidebar.component-sidebar,
 .ui.vertical.left.visible.wide.sidebar.component-sidebar .header-wrapper {
-  background-color: #D9D9E7 !important;
   transition: all 0.3s ease !important;
 }
 
@@ -506,30 +504,13 @@ watch(() => props.width, (width) => {
 .ui.vertical.menu .item:hover,
 .secondary .component-sidebar .item,
 .secondary .component-sidebar a {
-  color: #434289 !important;
+  color: #1c8085 !important;
 }
 
 /* Keep top menu icons with their original color */
 .top.menu .icon,
 .top.menu .item {
   color: inherit !important;
-}
-
-.ui.menu .item.upload-button {
-  background-color: #434289 !important;
-  color: white !important;
-  border: none !important;
-  padding: 0.5rem 1rem !important;
-  border-radius: 4px !important;
-  font-family: 'Montserrat', sans-serif !important;
-  cursor: pointer !important;
-  transition: all 0.2s !important;
-  margin: 0.5rem !important;
-}
-
-.ui.menu .item.upload-button:hover {
-  background-color: #373571 !important;
-  color: white !important;
 }
 
 .ui.vertical.menu {
@@ -552,20 +533,8 @@ watch(() => props.width, (width) => {
   border-right: none !important;
 }
 
-/* Target My Content link with all its possible states */
-.ui.vertical.menu .item.active.router-link-exact-active[href="/mycontent"],
-.ui.vertical.menu .item.router-link-exact-active[href="/mycontent"],
-.ui.vertical.menu a.item[href="/mycontent"] {
-  background: transparent !important;
-  color: #434289 !important;
-}
-
-/* Ensure hover state stays transparent */
-.ui.vertical.menu .item.active.router-link-exact-active[href="/mycontent"]:hover,
-.ui.vertical.menu .item.router-link-exact-active[href="/mycontent"]:hover,
-.ui.vertical.menu a.item[href="/mycontent"]:hover {
-  background: rgb(202, 202, 221) !important;
-  border-radius: 4px !important;
+.ui.vertical.inverted.menu .router-link-exact-active.active {
+  color: #e7922f !important;
 }
 
 .ui.dropdown.user-dropdown {
