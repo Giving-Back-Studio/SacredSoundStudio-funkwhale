@@ -24,8 +24,8 @@ const store = useStore()
 
 const isSubscribed = computed(() => store.getters['channels/isSubscribed'](props.channel.uuid))
 const title = computed(() => isSubscribed.value
-  ? t('components.channels.SubscribeButton.title.unsubscribe')
-  : t('components.channels.SubscribeButton.title.subscribe')
+  ? 'Unfollow'
+  : 'Follow'
 )
 
 const message = computed(() => ({
@@ -48,7 +48,7 @@ const loginModal = ref()
     :class="['ui', 'pink', {'inverted': isSubscribed}, {'favorited': isSubscribed}, 'icon', 'labeled', 'button']"
     @click.stop="toggle"
   >
-    <i class="large heart icon" />
+    <i class="heart icon" />
     {{ title }}
   </button>
   <button
@@ -56,7 +56,7 @@ const loginModal = ref()
     :class="['ui', 'pink', 'icon', 'labeled', 'button']"
     @click="loginModal.show = true"
   >
-    <i class="large heart icon" />
+    <i class="heart icon" />
     {{ title }}
     <login-modal
       ref="loginModal"
