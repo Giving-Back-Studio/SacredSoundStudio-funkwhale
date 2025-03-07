@@ -138,7 +138,7 @@ const shareConcert = (concert) => {
     <section class="next-concerts">
       <h2 class="section-title">Next Concerts</h2>
       <div v-if="nextConcerts?.length > 0">
-        <div v-for="concert in nextConcerts" :key="concert.id" class="concert-card">
+        <div v-for="concert in nextConcerts" :key="concert.id" class="concert-card mb-3">
           <img
             class="concert-thumbnail"
             :src="concert.cover"
