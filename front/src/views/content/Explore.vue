@@ -207,7 +207,7 @@ const translateActivityType = (activityType) => {
 <template>
   <div class="min-h-screen main with-background">
     <main class="container mx-auto px-4 py-8">
-      <div class="mb-8 ui fluid big left icon right action input">
+      <div class="mb-8 ui fluid big left icon input" :class="{ 'right action': query}">
         <i class="search icon"></i>
         <input
           v-model="query"
@@ -217,7 +217,7 @@ const translateActivityType = (activityType) => {
           class="w-full p-2 border border-gray-300 rounded"
           placeholder="Search for artists, albums, or tracks..."
         />
-        <button class="ui icon button" @click="clearQuery"><i class="ml-2 close icon"></i></button>
+        <button v-if="query" class="ui icon button" @click="clearQuery"><i class="ml-2 close icon"></i></button>
       </div>
 
       <!-- Active Filters -->
