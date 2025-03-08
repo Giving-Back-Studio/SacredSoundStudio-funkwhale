@@ -30,7 +30,7 @@ const tagList = computed(() => {
 </script>
 
 <template>
-  <div class="ui card center aligned">
+  <div class="ui center aligned">
     <div class="content-cover middle aligned">
       <img :src="imageUrl" :alt="content.title" />
       <div class="play-overlay">
@@ -42,7 +42,6 @@ const tagList = computed(() => {
         </router-link>
       </div>
     </div>
-    <div class="content">
       <router-link
         :to="{name: track ? 'library.tracks.detail' : 'library.albums.detail', params: {id: content.id}}">
         <h3 class="ui header title">{{ content.title }}</h3>
@@ -50,21 +49,21 @@ const tagList = computed(() => {
       <router-link :to="{name: 'channels.detail', params: {id: content.artist.channel.actor.preferred_username }}">
           {{ content.artist.name }}
       </router-link>
-      <div>
-        <human-duration class="ui left floated"
-          v-if="track && track.uploads[0] && track.uploads[0].duration"
-          :duration="track.uploads[0].duration"
-        />
+      <div class="content">
         <play-button
           id="playmenu"
-          class="ui right floated play-button primary basic icon"
+          class="ui play-button primary basic icon"
           :is-playable="content.is_playable"
-          :hidePlayText="true"
           :track="track"
           :album="album"
-        />
+        >
+          <human-duration class="ui"
+            v-if="track && track.uploads[0] && track.uploads[0].duration"
+            :duration="track.uploads[0].duration"
+          />
+        </play-button>
+
       </div>
-    </div>
   </div>
 </template>
 

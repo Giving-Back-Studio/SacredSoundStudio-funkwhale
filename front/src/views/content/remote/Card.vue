@@ -262,21 +262,6 @@ watch(showScan, (shouldShow) => {
       />
     </div>
     <div
-      v-if="displayCopyFid"
-      class="extra content"
-    >
-      <div class="ui form">
-        <div class="field">
-          <label :for="library.fid">{{ $t('views.content.remote.Card.label.sharingLink') }}</label>
-          <copy-input
-            :id="library.fid"
-            :button-classes="'basic'"
-            :value="library.fid"
-          />
-        </div>
-      </div>
-    </div>
-    <div
       v-if="displayFollow || radioPlayable"
       :class="['ui', {two: displayFollow && radioPlayable}, 'bottom', 'attached', 'buttons']"
     >
