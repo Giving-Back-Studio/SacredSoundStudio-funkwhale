@@ -426,7 +426,7 @@ watch(() => props.width, (width) => {
 <style>
 /* Menu icon color */
 .menu-icon {
-  color: #A3C4A3 !important;
+  color: #1c8085 !important;
   position: absolute !important;
   top: 1rem !important;
   left: 1rem !important;
@@ -454,7 +454,7 @@ watch(() => props.width, (width) => {
   width: 60px !important;
   min-width: 60px !important;
   max-width: 60px !important;
-  background-color: #F1F4F8 !important;
+  background-color: #e5f1f2 !important;
   box-shadow: none !important;
 }
 
@@ -466,7 +466,7 @@ watch(() => props.width, (width) => {
   padding: 1rem 0 !important;
   display: flex !important;
   justify-content: center !important;
-  background-color: #F1F4F8 !important;
+  background-color: #e5f1f2 !important;
 }
 
 /* Hide elements when collapsed */
