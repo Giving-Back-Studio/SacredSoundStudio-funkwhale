@@ -321,8 +321,8 @@ const translateActivityType = (activityType) => {
 
       <div v-if="!query && activeFilters.length === 0" class="ui segment">
         <div class="ui horizontal divider">Trending Tracks</div>
-        <div class="ui stackable cards">
-          <content-card v-for="(track, index) in hotTracks" :key="index" :track="track"/>
+        <div class="ui grid">
+          <content-card class="four wide column" v-for="(track, index) in hotTracks" :key="index" :track="track"/>
         </div>
       </div>
     </main>
