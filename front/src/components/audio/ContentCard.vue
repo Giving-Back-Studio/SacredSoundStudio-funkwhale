@@ -1,38 +1,40 @@
 <script setup lang="ts">
-import type { Track, Album } from '~/types'
+import type { Track, Album, ContentType } from '~/types'
 
 import PlayButton from '~/components/audio/PlayButton.vue'
 import { computed } from 'vue'
 import { useStore } from '~/store'
 
 interface Props {
-  track?: Track
-  album?: Album
+  content: Album | Track,
+  type: ContentType
 }
 
 const props = defineProps<Props>()
 const store = useStore()
 
-const content = computed(() => (props.track || props.album))
+const isTrack = computed(() => {
+  return props.type === "track"
+})
 
 const imageUrl = computed(() => {
-  if (content.value.cover) {
-    return store.getters['instance/absoluteUrl'](content.value.cover.urls.medium_square_crop)
+  if (props.content.cover) {
+    return store.getters['instance/absoluteUrl'](props.content.cover.urls.medium_square_crop)
   }
-  if (props.track && props.track.album && props.track.album.cover) {
-    return store.getters['instance/absoluteUrl'](props.track.album.cover.urls.medium_square_crop)
+  if (isTrack.value && props.content.album && props.content.album.cover) {
+    return store.getters['instance/absoluteUrl'](props.content.album.cover.urls.medium_square_crop)
   }
 })
 
 const tagList = computed(() => {
-    return [...new Set(Object.values(content.value.tags).flat())] 
+    return [...new Set(Object.values(props.content.tags).flat())]
 })
 </script>
 
 <template>
   <div class="ui center aligned">
     <div class="content-cover middle aligned">
-      <img :src="imageUrl" :alt="content.title" />
+      <img :src="imageUrl" :alt="props.content.title" />
       <div class="play-overlay">
         <router-link
             v-for="tag in tagList"
@@ -42,28 +44,29 @@ const tagList = computed(() => {
         </router-link>
       </div>
     </div>
+    <div class="ui content mt-2">
       <router-link
-        :to="{name: track ? 'library.tracks.detail' : 'library.albums.detail', params: {id: content.id}}">
-        <h3 class="ui header title">{{ content.title }}</h3>
+        :to="{name: isTrack ? 'library.tracks.detail' : 'library.albums.detail', params: {id: props.content.id}}">
+        <h3 class="ui header title">{{ props.content.title }}</h3>
       </router-link>
-      <router-link :to="{name: 'channels.detail', params: {id: content.artist.channel.actor.preferred_username }}">
-          {{ content.artist.name }}
+      <router-link :to="{name: 'channels.detail', params: {id: props.content.artist.channel.actor.preferred_username }}">
+          {{ props.content.artist.name }}
       </router-link>
       <div class="content">
         <play-button
           id="playmenu"
           class="ui play-button primary basic icon"
-          :is-playable="content.is_playable"
-          :track="track"
-          :album="album"
+          :is-playable="props.content.is_playable"
+          :track="props.type === 'track' ? props.content : null"
+          :album="props.type === 'album' ? props.content : null"
         >
           <human-duration class="ui"
-            v-if="track && track.uploads[0] && track.uploads[0].duration"
-            :duration="track.uploads[0].duration"
+            v-if="isTrack && props.content.uploads[0] && props.content.uploads[0].duration"
+            :duration="props.content.uploads[0].duration"
           />
         </play-button>
-
       </div>
+    </div>
   </div>
 </template>
 

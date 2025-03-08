@@ -264,16 +264,6 @@ watchEffect(() => {
             :url="'playlists/'"
             :filters="{track: track.id, playable: true, ordering: '-modification_date'}"
           />
-
-          <h2 class="ui header">
-            {{ $t('components.library.TrackDetail.header.library') }}
-          </h2>
-          <library-widget
-            :url="`tracks/${track.id}/libraries/`"
-            @loaded="emit('libraries-loaded', $event)"
-          >
-            {{ $t('components.library.TrackDetail.description.library') }}
-          </library-widget>
         </div>
       </div>
     </section>
