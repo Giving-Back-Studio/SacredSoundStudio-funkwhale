@@ -9,6 +9,7 @@ import store from '~/store'
 
 import useErrorHandler from '~/composables/useErrorHandler'
 import ContentCard from '~/components/audio/ContentCard.vue'
+import ContentSet from '~/components/library/ContentSet.vue'
 import PlayButton from '~/components/audio/PlayButton.vue'
 
 const q = useRouteQuery('q', '')
@@ -305,26 +306,15 @@ const translateActivityType = (activityType) => {
         </div>
       </div>
 
-      <div v-if="searchResultsAlbums.length" class="ui segment">
-        <div class="ui horizontal divider">Albums</div>
-        <div class="ui stackable cards">
-          <content-card v-for="(album, index) in searchResultsAlbums" :key="index" :album="album" />
-        </div>
-      </div>
+      <content-set title="Albums" :content="searchResultsAlbums" type="album"/>
 
-      <div v-if="searchResultsTracks.length" class="ui segment">
-        <div class="ui horizontal divider">Tracks</div>
-        <div class="ui stackable cards">
-          <content-card v-for="(track, index) in searchResultsTracks" :key="index" :track="track" />
-        </div>
-      </div>
+      <content-set title="Tracks" :content="searchResultsTracks" type="track"/>
 
-      <div v-if="!query && activeFilters.length === 0" class="ui segment">
-        <div class="ui horizontal divider">Trending Tracks</div>
-        <div class="ui grid">
-          <content-card class="four wide column" v-for="(track, index) in hotTracks" :key="index" :track="track"/>
-        </div>
-      </div>
+      <content-set v-if="!query && activeFilters.length === 0"
+        title="Trending Tracks"
+        :content="hotTracks"
+        type="track"
+      />
     </main>
   </div>
 </template>
