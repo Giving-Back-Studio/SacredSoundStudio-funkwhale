@@ -18,6 +18,7 @@ interface Props extends PlayOptionsProps {
   iconOnly?: boolean
   playing?: boolean
   paused?: boolean
+  hidePlayText?: boolean
 
   // TODO(wvffle): Remove after https://github.com/vuejs/core/pull/4512 is merged
   isPlayable?: boolean
@@ -46,6 +47,7 @@ const props = withDefaults(defineProps<Props>(), {
   discrete: () => false,
   dropdownOnly: () => false,
   iconOnly: () => false,
+  hidePlayText: () => false,
   isPlayable: () => false,
   playing: () => false,
   paused: () => false
@@ -139,7 +141,7 @@ const openMenu = () => {
         v-else
         :class="[playIconClass, 'icon']"
       />
-      <template v-if="!discrete && !iconOnly">&nbsp;<slot>{{ $t('components.audio.PlayButton.button.discretePlay') }}</slot></template>
+      <template v-if="!hidePlayText && !discrete && !iconOnly">&nbsp;<slot>{{ $t('components.audio.PlayButton.button.discretePlay') }}</slot></template>
     </button>
     <button
       v-if="!discrete && !iconOnly"

@@ -1,14 +1,21 @@
 from django.conf import settings
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 
 from . import models
 
 
 
 class TagCategorySerializer(serializers.ModelSerializer):
+
+    options = serializers.SerializerMethodField()
     class Meta:
         model = models.TagCategory
-        fields = ["name", "creation_date", "max_tags", "required"]
+        fields = ["name", "creation_date", "max_tags", "required", "options"]
+
+    @extend_schema_field({"type": "array", "items": {"type": "string"}})
+    def get_options(self, obj):
+        return [tag.name for tag in obj.tags.all()]
 
 
 class TagSerializer(serializers.ModelSerializer):

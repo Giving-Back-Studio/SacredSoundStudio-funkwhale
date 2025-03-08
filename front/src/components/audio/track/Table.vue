@@ -210,7 +210,7 @@ const updatePage = (page: number) => {
             class="meta right floated column"
           >
             <i
-              class="clock outline icon"
+              class="clock icon"
               style="padding: 0.5rem"
             />
           </div>

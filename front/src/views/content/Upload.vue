@@ -50,17 +50,21 @@ const albumDetails = ref({
 })
 
 // Track template
-const createTrackTemplate = (file) => ({
-  title: file ? file.file.name.split('.')[0]: '',
-  description: '',
-  categoryTags: new Proxy({}, {
-    get: (target, name) => name in target ? target[name] : []
-  }),
-  recordLabel: '',
-  releaseDate: '',
-  file: file,
-  cover: null
-})
+const createTrackTemplate = (file) => {
+  const fileParts = file ? file.file.name.split('.') : ['']
+  fileParts.pop()
+  return {
+    title: fileParts.join(' '),
+    description: '',
+    categoryTags: new Proxy({}, {
+      get: (target, name) => name in target ? target[name] : []
+    }),
+    recordLabel: '',
+    releaseDate: '',
+    file: file,
+    cover: null
+  }
+}
 
 const tracks = ref([])
 
@@ -661,8 +665,7 @@ const goToMyContent = () => {
             <button 
               v-if="currentStep < 3"
               @click="nextStep"
-              class="ui button px-6"
-              style="background-color: #434289; color: white;"
+              class="ui primary button px-6"
               :disabled="!canProceed"
             >
               Next

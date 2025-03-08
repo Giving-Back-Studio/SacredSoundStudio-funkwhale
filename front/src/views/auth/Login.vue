@@ -13,7 +13,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  next: '/explore'
+  next: '/search'
 })
 
 const { t } = useI18n()
@@ -25,7 +25,7 @@ const store = useStore()
 const router = useRouter()
 whenever(() => store.state.auth.authenticated, () => {
   const resolved = router.resolve(props.next)
-  router.push(resolved.name === '404' ? '/explore' : props.next)
+  router.push(resolved.name === '404' ? '/search' : props.next)
 })
 </script>
 

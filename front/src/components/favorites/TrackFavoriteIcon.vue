@@ -52,3 +52,9 @@ const title = computed(() => isFavorite.value
     <i :class="['heart', {'pink': isFavorite}, 'basic', 'icon']" />
   </button>
 </template>
+
+<style>
+.favorite-icon:hover {
+  color: #1c8085;
+}
+</style>

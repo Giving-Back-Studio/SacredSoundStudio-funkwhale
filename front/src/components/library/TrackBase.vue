@@ -122,36 +122,6 @@ const remove = async () => {
               <h1 class="ui header">
                 {{ track.title }}
               </h1>
-              <span class="ui header">
-                <i18n-t
-                  v-if="track.attributed_to"
-                  keypath="components.library.TrackBase.subtitle.with-uploader"
-                >
-                  <a
-                    class="internal"
-                    :href="attributedToUrl"
-                  >
-                    <span class="symbol at" />{{ track.attributed_to.full_username }}
-                  </a>
-                  <time
-                    :title="track.creation_date"
-                    :datetime="track.creation_date"
-                  >
-                    {{ momentFormat(new Date(track.creation_date), 'LL') }}
-                  </time>
-                </i18n-t>
-                <i18n-t
-                  v-else
-                  keypath="components.library.TrackBase.subtitle.without-uploader"
-                >
-                  <time
-                    :title="track.creation_date"
-                    :datetime="track.creation_date"
-                  >
-                    {{ momentFormat(new Date(track.creation_date), 'LL') }}
-                  </time>
-                </i18n-t>
-              </span>
             </div>
             <div class="eight wide right aligned column button-group">
               <play-button
@@ -172,38 +142,6 @@ const remove = async () => {
                 :border="true"
                 :track="track"
               />
-              <a
-                v-if="upload"
-                role="button"
-                :aria-label="labels.download"
-                :href="downloadUrl"
-                target="_blank"
-                class="ui basic circular icon button"
-                :title="labels.download"
-              >
-                <i class="download icon" />
-              </a>
-              <semantic-modal
-                v-if="isEmbedable"
-                v-model:show="showEmbedModal"
-              >
-                <h4 class="header">
-                  {{ $t('components.library.TrackBase.modal.embed.header') }}
-                </h4>
-                <div class="scrolling content">
-                  <div class="description">
-                    <embed-wizard
-                      :id="track.id"
-                      type="track"
-                    />
-                  </div>
-                </div>
-                <div class="actions">
-                  <button class="ui basic deny button">
-                    {{ $t('components.library.TrackBase.button.cancel') }}
-                  </button>
-                </div>
-              </semantic-modal>
               <button
                 v-dropdown="{direction: 'downward'}"
                 class="ui floating dropdown circular icon basic button"
@@ -214,43 +152,6 @@ const remove = async () => {
                   class="menu"
                   style="right: 0; left: auto"
                 >
-                  <a
-                    v-if="domain != $store.getters['instance/domain']"
-                    :href="track.fid"
-                    target="_blank"
-                    class="basic item"
-                  >
-                    <i class="external icon" />
-                    {{ $t('components.library.TrackBase.link.domain', {domain: domain}) }}
-                  </a>
-                  <div
-                    v-if="isEmbedable"
-                    role="button"
-                    class="basic item"
-                    @click="showEmbedModal = !showEmbedModal"
-                  >
-                    <i class="code icon" />
-                    {{ $t('components.library.TrackBase.button.embed') }}
-                  </div>
-                  <a
-                    :href="wikipediaUrl"
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    class="basic item"
-                  >
-                    <i class="wikipedia w icon" />
-                    {{ $t('components.library.TrackBase.link.wikipedia') }}
-                  </a>
-                  <a
-                    v-if="discogsUrl"
-                    :href="discogsUrl"
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    class="basic item"
-                  >
-                    <i class="external icon" />
-                    {{ $t('components.library.TrackBase.link.discogs') }}
-                  </a>
                   <router-link
                     v-if="track.is_local"
                     :to="{name: 'library.tracks.edit', params: {id: track.id }}"

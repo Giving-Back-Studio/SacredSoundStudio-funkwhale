@@ -28,6 +28,8 @@ Parameters:
     Type: String
   DjangoSecretKey:
     Type: String
+  MuxSecret:
+    Type: String
   RedisUrl:
     Type: String
   S3Bucket:
@@ -167,9 +169,7 @@ Resources:
             - Name: FUNKWHALE_PROTOCOL
               Value: 'https'
             - Name: FUNKWHALE_URL
-              Value: 'https://beta.sacredsound.app'
-            - Name: TYPESENSE_API_KEY
-              Value: "apikey"
+              Value: 'https://staging.sacredsound.app'
             - Name: FUNKWHALE_SENTRY_DSN
               Value: "https://76e86b1b6de843608e9ea47f25ccb643@app.glitchtip.com/10060"
             - Name: FUNKWHALE_SENTRY_SR
@@ -183,6 +183,10 @@ Resources:
               ValueFrom: !Sub "${RDSConnectionSecret}:host::"
             - Name: DJANGO_SECRET_KEY
               ValueFrom: !Sub "${DjangoSecretKey}"
+            - Name: MUX_TOKEN_ID
+              ValueFrom: !Sub "${MuxSecret}:token_id::"
+            - Name: MUX_TOKEN_SECRET
+              ValueFrom: !Sub "${MuxSecret}:token_secret::"
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Name: external

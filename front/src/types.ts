@@ -108,6 +108,8 @@ export interface Track {
   is_local: boolean
 }
 
+export type ContentType = "album" | "track"
+
 export interface Channel {
   id: number
   uuid: string

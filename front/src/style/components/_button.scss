@@ -2,8 +2,8 @@
   outline-color: white;
 }
 button, *[role="button"] {
-  background-color: #434289;
-  color: white;
+  background-color: #e5f1f2;
+  color: #1c8085;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;
@@ -12,11 +12,11 @@ button, *[role="button"] {
   transition: all 0.2s;
 
   &:hover {
-    background-color: darken(#434289, 5%);
+    background-color: darken(#e5f1f2, 5%);
   }
 
   &:active {
-    background-color: darken(#434289, 10%);
+    background-color: darken(#e5f1f2, 10%);
   }
 
   &:disabled {
@@ -24,6 +24,10 @@ button, *[role="button"] {
     cursor: default;
     pointer-events: none;
   }
+}
+
+*[role="button"].no-bg {
+  background-color: transparent;
 }
 
 // Make secondary button styles more specific to override Semantic UI

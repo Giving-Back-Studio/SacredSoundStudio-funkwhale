@@ -24,8 +24,8 @@ const store = useStore()
 
 const isSubscribed = computed(() => store.getters['channels/isSubscribed'](props.channel.uuid))
 const title = computed(() => isSubscribed.value
-  ? t('components.channels.SubscribeButton.title.unsubscribe')
-  : t('components.channels.SubscribeButton.title.subscribe')
+  ? 'Unfollow'
+  : 'Follow'
 )
 
 const message = computed(() => ({
@@ -45,7 +45,7 @@ const loginModal = ref()
 <template>
   <button
     v-if="$store.state.auth.authenticated"
-    :class="['ui', 'pink', {'inverted': isSubscribed}, {'favorited': isSubscribed}, 'icon', 'labeled', 'button']"
+    :class="['ui', 'alternative', {'inverted': isSubscribed}, {'favorited': isSubscribed}, 'icon', 'labeled', 'button']"
     @click.stop="toggle"
   >
     <i class="heart icon" />
@@ -53,7 +53,7 @@ const loginModal = ref()
   </button>
   <button
     v-else
-    :class="['ui', 'pink', 'icon', 'labeled', 'button']"
+    :class="['ui', 'alternative', 'icon', 'labeled', 'button']"
     @click="loginModal.show = true"
   >
     <i class="heart icon" />

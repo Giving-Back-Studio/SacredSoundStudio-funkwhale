@@ -12,9 +12,7 @@ import { Menu, Settings } from 'lucide-vue-next'
 
 import SemanticModal from '~/components/semantic/Modal.vue'
 import UserModal from '~/components/common/UserModal.vue'
-import SearchBar from '~/components/audio/SearchBar.vue'
 import UserMenu from '~/components/common/UserMenu.vue'
-import Logo from '~/components/Logo.vue'
 
 import useThemeList from '~/composables/useThemeList'
 import useTheme from '~/composables/useTheme'
@@ -28,7 +26,7 @@ interface Props {
 }
 
 const emit = defineEmits<Events>()
-defineProps<Props>()
+const props = defineProps<Props>()
 
 const store = useStore()
 const { theme } = useTheme()
@@ -81,7 +79,7 @@ watchEffect(() => {
   if (store.state.auth.authenticated) {
     setupDropdown('.admin-dropdown', el.value)
   }
-  
+
   setupDropdown('.user-dropdown', el.value, {
     action: 'click',
     direction: 'downward',
@@ -124,6 +122,12 @@ const toggleSidebar = () => {
   isSidebarCollapsed.value = !isSidebarCollapsed.value
   emit('update:collapsed', isSidebarCollapsed.value)
 }
+
+watch(() => props.width, (width) => {
+  if (width < 1024 && !isSidebarCollapsed.value) {
+    toggleSidebar()
+  }
+})
 </script>
 
 <template>
@@ -132,8 +136,11 @@ const toggleSidebar = () => {
     :class="['ui', 'vertical', 'left', 'visible', 'wide', 'sidebar', 'component-sidebar', { collapsed: isSidebarCollapsed }]"
   >
     <header class="ui basic segment header-wrapper">
-      <Menu class="menu-icon" @click="toggleSidebar" />
-      <div class="spacer"></div>
+      <Menu
+        class="menu-icon"
+        @click="toggleSidebar"
+      />
+      <div class="spacer" />
       <nav class="top ui compact right aligned inverted text menu">
         <div class="right menu">
           <div
@@ -214,10 +221,16 @@ const toggleSidebar = () => {
                   v-else-if="$store.state.auth.authenticated"
                   :actor="{preferred_username: $store.state.auth.username, full_username: $store.state.auth.username,}"
                 />
-                <i v-else class="cog icon" />
+                <i
+                  v-else
+                  class="cog icon"
+                />
               </div>
               <div class="menu dropdown-menu">
-                <user-menu v-bind="$attrs" :width="width" />
+                <user-menu
+                  v-bind="$attrs"
+                  :width="width"
+                />
               </div>
             </div>
           </div>
@@ -326,8 +339,6 @@ const toggleSidebar = () => {
         </div>
       </nav>
     </header>
-    <div class="ui basic search-wrapper segment">
-    </div>
     <div
       v-if="!$store.state.auth.authenticated"
       class="ui basic signup segment"
@@ -378,8 +389,9 @@ const toggleSidebar = () => {
             v-if="$store.state.auth.authenticated"
             class="item"
             :to="{ path: '/explore' }"
+            @click.prevent="toggleSidebar"
           >
-            {{ $t('components.Sidebar.link.explore') }}
+            {{ $t('components.Sidebar.header.explore') }}
           </router-link>
 
           <router-link
@@ -390,14 +402,23 @@ const toggleSidebar = () => {
             {{ $t('components.Sidebar.link.myContent') }}
           </router-link>
 
-          <!-- <router-link
-            v-if="$store.state.auth.authenticated"
+          <router-link
+            v-if="$store.state.auth.authenticated && $store.state.auth.profile.is_artist"
             class="item"
-            :to="{ path: '/mychannel' }"
+            :to="{name: 'channels.detail', params: {id: $store.state.auth.fullUsername}}"
           >
             {{ $t('components.Sidebar.link.myChannel') }}
           </router-link>
 
+          <router-link
+            v-if="$store.state.auth.authenticated"
+            class="item"
+            :to="{ path: '/concerts' }"
+          >
+            {{ $t('components.Sidebar.link.concerts') }}
+          </router-link>
+
+          <!--
           <router-link
             v-if="$store.state.auth.availablePermissions['settings']"
             class="item"
@@ -412,7 +433,7 @@ const toggleSidebar = () => {
             :to="{ path: '/upload' }"
           >
             {{ $t('components.Sidebar.link.upload') }}
-          </router-link> 
+          </router-link>
         </nav>
       </section>
     </nav>
@@ -422,11 +443,15 @@ const toggleSidebar = () => {
 <style>
 /* Menu icon color */
 .menu-icon {
-  color: #A3C4A3 !important;
+  color: #1c8085 !important;
   position: absolute !important;
   top: 1rem !important;
   left: 1rem !important;
   cursor: pointer !important;
+}
+
+.sidebar {
+  padding-bottom: 1rem;
 }
 
 /* Wrench icon color with more specific selector */
@@ -436,12 +461,9 @@ const toggleSidebar = () => {
   color: #373571 !important;
 }
 
-/* Set sidebar and header background color */
 .ui.vertical.left.visible.wide.sidebar.component-sidebar,
 .ui.vertical.left.visible.wide.sidebar.component-sidebar .header-wrapper {
-  background-color: #D9D9E7 !important;
   transition: all 0.3s ease !important;
-  width: 275px !important;
 }
 
 /* Add collapsed state styles with transition */
@@ -449,7 +471,7 @@ const toggleSidebar = () => {
   width: 60px !important;
   min-width: 60px !important;
   max-width: 60px !important;
-  background-color: #F1F4F8 !important;
+  background-color: #e5f1f2 !important;
   box-shadow: none !important;
 }
 
@@ -461,7 +483,7 @@ const toggleSidebar = () => {
   padding: 1rem 0 !important;
   display: flex !important;
   justify-content: center !important;
-  background-color: #F1F4F8 !important;
+  background-color: #e5f1f2 !important;
 }
 
 /* Hide elements when collapsed */
@@ -486,12 +508,12 @@ const toggleSidebar = () => {
   transition: margin-left 0.3s ease !important;
 }
 
-#app > div > .main.pusher.sidebar-collapsed {
-  margin-left: 60px !important;
-}
-
 #app > div > .main.pusher.no-sidebar {
   margin-left: 0px !important;
+}
+
+#app > div > .main.pusher.sidebar-collapsed:not(.small) {
+  margin-left: 60px !important;
 }
 
 /* Apply color to navigation items only, excluding top icons */
@@ -499,30 +521,13 @@ const toggleSidebar = () => {
 .ui.vertical.menu .item:hover,
 .secondary .component-sidebar .item,
 .secondary .component-sidebar a {
-  color: #434289 !important;
+  color: #1c8085 !important;
 }
 
 /* Keep top menu icons with their original color */
 .top.menu .icon,
 .top.menu .item {
   color: inherit !important;
-}
-
-.ui.menu .item.upload-button {
-  background-color: #434289 !important;
-  color: white !important;
-  border: none !important;
-  padding: 0.5rem 1rem !important;
-  border-radius: 4px !important;
-  font-family: 'Montserrat', sans-serif !important;
-  cursor: pointer !important;
-  transition: all 0.2s !important;
-  margin: 0.5rem !important;
-}
-
-.ui.menu .item.upload-button:hover {
-  background-color: #373571 !important;
-  color: white !important;
 }
 
 .ui.vertical.menu {
@@ -545,25 +550,13 @@ const toggleSidebar = () => {
   border-right: none !important;
 }
 
-/* Target My Content link with all its possible states */
-.ui.vertical.menu .item.active.router-link-exact-active[href="/mycontent"],
-.ui.vertical.menu .item.router-link-exact-active[href="/mycontent"],
-.ui.vertical.menu a.item[href="/mycontent"] {
-  background: transparent !important;
-  color: #434289 !important;
-}
-
-/* Ensure hover state stays transparent */
-.ui.vertical.menu .item.active.router-link-exact-active[href="/mycontent"]:hover,
-.ui.vertical.menu .item.router-link-exact-active[href="/mycontent"]:hover,
-.ui.vertical.menu a.item[href="/mycontent"]:hover {
-  background: rgb(202, 202, 221) !important;
-  border-radius: 4px !important;
+.ui.vertical.inverted.menu .router-link-exact-active.active {
+  color: #e7922f !important;
 }
 
 .ui.dropdown.user-dropdown {
   position: relative !important;
-  
+
   .trigger {
     cursor: pointer;
     display: flex;
@@ -582,18 +575,18 @@ const toggleSidebar = () => {
     box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
     margin-top: 0.5rem !important;
     z-index: 1000 !important;
-    
+
     .menu {
       position: static !important;
       border: none !important;
       box-shadow: none !important;
       background: transparent !important;
     }
-    
+
     .item {
       color: var(--primary-color) !important;
       padding: 0.8rem 1rem !important;
-      
+
       &:hover {
         background-color: rgba(0,0,0,0.05) !important;
       }

@@ -20,6 +20,7 @@ from funkwhale_api.common import locales, preferences
 from funkwhale_api.common import serializers as common_serializers
 from funkwhale_api.common import session
 from funkwhale_api.common import utils as common_utils
+from funkwhale_api.common import models as common_models
 from funkwhale_api.federation import actors
 from funkwhale_api.federation import models as federation_models
 from funkwhale_api.federation import serializers as federation_serializers

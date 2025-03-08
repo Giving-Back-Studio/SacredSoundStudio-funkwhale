@@ -6,6 +6,8 @@ import moment from 'moment'
 
 import { useStore } from '~/store'
 import PlayButton from '~/components/audio/PlayButton.vue'
+import ContentCard from '~/components/audio/ContentCard.vue'
+import ContentSet from '~/components/library/ContentSet.vue'
 import useLogger from '~/composables/useLogger'
 import useErrorHandler from '~/composables/useErrorHandler'
 
@@ -20,8 +22,6 @@ const props = defineProps({
 
 const logger = useLogger()
 
-const scrollContainers = ref({})
-const scrollPositions = ref({})
 const selectedCategory = ref("Category")
 
 const content = ref([])
@@ -92,20 +92,6 @@ const categories = computed(() => {
     if (item.uploads.length > 0) {
       duration = item.uploads[0].duration
     }
-    const slimItem = {
-      id: item.id,
-      title: item.title,
-      track_url: `library/tracks/${item.id}`,
-      edit_url: `library/tracks/${item.id}/edit`,
-      artist_name: item.artist.name,
-      artist_id: item.artist.id,
-      artist_url: `channels/${item.artist.channel.actor.preferred_username}`,
-      album_name: item.album?.title,
-      album_url: `library/albums/${item.album?.id}`,
-      duration: moment.duration(duration, 'seconds'),
-      is_playable: item.is_playable,
-      cover: item.cover?.urls?.medium_square_crop || item.album?.cover?.urls?.medium_square_crop || '/placeholder.svg?height=280&width=280'
-    }
 
     for (const tagCategoryIdx in trackCategories.value) {
       const tagCategory = trackCategories.value[tagCategoryIdx].name
@@ -113,17 +99,15 @@ const categories = computed(() => {
         const tags = item.tags[tagCategory]
         if (!tags) {
           if (!cats[NONE]) cats[NONE] = []
-          cats[NONE].push(slimItem)
-          scrollPositions.value[NONE] = 0
+          cats[NONE].push(item)
           continue
         }
 
         for (const tag of tags) {
-          if (cats[tag] && !cats[tag].includes(slimItem)) {
-            cats[tag].push(slimItem)
+          if (cats[tag] && !cats[tag].includes(item)) {
+            cats[tag].push(item)
           } else {
-            cats[tag] = [slimItem]
-            scrollPositions.value[tag] = 0
+            cats[tag] = [item]
           }
         }
       }
@@ -132,29 +116,6 @@ const categories = computed(() => {
 
   return Object.entries(cats).sort((a, b) => b[1].length - a[1].length)
 })
-
-const scroll = (categoryId, direction) => {
-  const container = scrollContainers.value[categoryId]
-  if (!container) return
-  
-  const scrollAmount = 600
-  const scrollLeft = direction === 'left' 
-    ? container.scrollLeft - scrollAmount
-    : container.scrollLeft + scrollAmount
-    
-  container.scrollTo({
-    left: scrollLeft,
-    behavior: 'smooth'
-  })
-}
-
-const updateScrollPosition = (categoryId, event) => {
-  scrollPositions.value[categoryId] = event.target.scrollLeft
-}
-
-const viewMore = (categoryId) => {
-  console.log(`View more for ${categoryId}`)
-}
 
 const deleteContent = (item) => {
   console.log('Delete content:', item)
@@ -168,126 +129,28 @@ const deleteContent = (item) => {
 
 <template>
   <div>
-    <div>
-      <label class="mr-2" for="category">Explore By:</label>
-      <select
-        id="category"
-        v-model="selectedCategory"
-        class="ui dropdown"
+    <label class="mr-2" for="category">Explore By:</label>
+    <select
+      id="category"
+      v-model="selectedCategory"
+      class="ui dropdown"
+    >
+      <option
+        v-for="category in trackCategories"
+        :key="category.id"
+        :value="category.name"
       >
-        <option
-          v-for="category in trackCategories"
-          :key="category.id"
-          :value="category.name"
-        >
-        {{ category.name }}
-        </option>
-      </select>
-    </div>
-    <div class="ui divider"></div>
-    <div v-for="([category, items]) in categories" :key="category" class="mb-12">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-serif">{{ category }}</h2>
-        <div v-if="items.length > 4" class="flex items-center gap-4">
-          <div class="flex gap-2">
-            <button 
-              @click="scroll(category, 'left')"
-              class="p-2 rounded-full bg-white shadow-sm hover:bg-gray-50 transition-colors"
-              :disabled="scrollPositions[category] <= 0"
-              :aria-label="`Scroll ${category} left`"
-            >
-              <ChevronLeft class="h-5 w-5" />
-            </button>
-            <button 
-              @click="scroll(category, 'right')"
-              class="p-2 rounded-full bg-white shadow-sm hover:bg-gray-50 transition-colors"
-              :aria-label="`Scroll ${category} right`"
-            >
-              <ChevronRight class="h-5 w-5" />
-            </button>
-          </div>
-          <button 
-            class="text-sm font-medium hover:underline"
-            @click="viewMore(category)"
-          >
-            More
-          </button>
-        </div>
-      </div>
-
-      <div 
-        class="relative overflow-hidden"
-        :ref="el => { if (el) scrollContainers[category] = el }"
-      >
-        <div 
-          class="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
-          @scroll="updateScrollPosition(category, $event)"
-        >
-          <!-- Content Items -->
-          <div 
-            v-for="item in items" 
-            :key="item.id"
-            class="flex-none w-[280px]"
-          >
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-transform hover:scale-[1.02]">
-              <div class="aspect-square relative group">
-                <img 
-                  :src="item.cover" 
-                  :alt="item.title"
-                  class="w-full h-full object-cover"
-                />
-                <div v-if="$store.state.auth.profile.artist == item.artist_id" class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                  <a :href="item.edit_url" class="p-2 rounded-full bg-white text-[#434289] hover:bg-gray-100">
-                    <Edit2 class="h-5 w-5" />
-                  </a>
-                  <dangerous-button @confirm="deleteContent(item)" :class="['p-2', 'rounded-full', 'bg-white', 'text-red-500', 'hover:bg-gray-100']">
-                    <Trash2 class="h-5 w-5 text-red-500" />
-                    <template #modal-header>
-                      <h3>Delete Track?</h3>
-                    </template>
-                    <template #modal-content>
-                      <div>
-                        <p class="text-black">
-                          Are you sure you want to delete "{{ item.title }}"?
-                        </p>
-                      </div>
-                    </template>
-                    <template #modal-confirm>
-                      <span>Delete</span>
-                    </template>
-                  </dangerous-button>
-                </div>
-              </div>
-              <div class="p-4">
-                <a :href="item.track_url">
-                    <h3 class="font-semibold text-[#434289] mb-1">{{ item.title }}</h3>
-                </a>
-                <a :href="item.artist_url" class="text-sm text-gray-600">
-                    {{ item.artist_name }}
-                </a>
-                <a v-if="item.album_name" :href="item.album_url" class="text-sm text-gray-600 block">
-                  {{ item.album_name }}
-                </a>
-                <span v-else class="text-sm text-gray-600 block">Single</span>
-                <div class="flex items-center gap-2 mt-2">
-                  <play-button
-                    class="primary"
-                    :track="item"
-                    :is-playable="item.is_playable"
-                    :discrete="true"
-                  />
-                  <Clock class="h-4 w-4 text-gray-400" />
-                  <span class="text-sm text-gray-500">
-                    {{ item.duration.humanize() }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      {{ category.name }}
+      </option>
+    </select>
   </div>
+  <div class="ui divider"></div>
+  <content-set
+    v-for="([category, items]) in categories"
+    :content="items"
+    type="track"
+    :title="category"
+  />
 </template>
 
 <style scoped>
