@@ -14,8 +14,11 @@ const formatDate = (date) => {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
+    year: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
+    timeZone: 'UTC',
+    timeZoneName: 'short'
   }
   return new Date(date).toLocaleDateString('en-US', options)
 }
@@ -23,7 +26,7 @@ const formatDate = (date) => {
 const isLive = computed(() => {
   if (!featuredConcert.value) return false
   const now = new Date()
-  const concertStartTime = new Date(featuredConcert.value.date)
+  const concertStartTime = new Date(featuredConcert.value.start_time)
   return now >= concertStartTime
 })
 
@@ -53,14 +56,14 @@ const shareConcert = (concert) => {
 
   if (navigator.share) {
     navigator.share({
-      title: concert.name,
-      text: `Check out this concert: ${concert.name} at ${concert.venue}`,
+      title: concert.title,
+      text: `Check out this concert: ${concert.title} at ${concert.venue}`,
       url: window.location.href,
     })
     .catch((error) => console.log('Error sharing', error))
   } else {
     // Fallback for browsers that don't support the Web Share API
-    alert(`Share this concert: ${concert.name}`)
+    alert(`Share this concert: ${concert.title}`)
   }
 }
 
@@ -83,11 +86,11 @@ const shareConcert = (concert) => {
       <div class="concert-media">
         <!-- Show video if concert is streaming, otherwise show banner image -->
 <!--  <div v-if="featuredConcert?.isStreaming" class="video-container">-->
-          <div v-if="isLive" class="video-container">
+        <div v-if="isLive" class="video-container">
           <mux-player
-            :playback-id="featuredConcert?.playbackId"
+            :playback-id="featuredConcert?.mux_playback_id"
             :metadata-video-id="featuredConcert?.id"
-            :metadata-video-title="featuredConcert?.name"
+            :metadata-video-title="featuredConcert?.title"
             :metadata-viewer-user-id="store.state.auth.profile.username"
             controls
             muted
@@ -98,15 +101,15 @@ const shareConcert = (concert) => {
           v-else
           class="concert-banner"
           :src="featuredConcert?.cover"
-          :alt="featuredConcert?.name"
+          :alt="featuredConcert?.title"
         />
       </div>
 
       <div class="concert-details">
         <div class="concert-header">
           <div>
-            <h1 class="concert-title">{{ featuredConcert?.name }}</h1>
-            <p class="concert-datetime">{{ formatDate(featuredConcert?.date) }}</p>
+            <h1 class="concert-title">{{ featuredConcert?.title }}</h1>
+            <p class="concert-datetime">{{ formatDate(featuredConcert?.start_time) }}</p>
           </div>
           <button class="share-button" @click="shareConcert(featuredConcert)">
             <span class="icon">
@@ -120,11 +123,11 @@ const shareConcert = (concert) => {
         <div class="artist-section">
           <p class="led-by">Led by</p>
           <div class="artist">
-            <img
-              class="artist-image"
-              :src="featuredConcert?.artist.image"
-              :alt="featuredConcert?.artist.name"
-            />
+<!--            <img-->
+<!--              class="artist-image"-->
+<!--              :src="featuredConcert?.artist.image"-->
+<!--              :alt="featuredConcert?.artist.name"-->
+<!--            />-->
             <span class="artist-name">{{ featuredConcert?.artist.name }}</span>
           </div>
         </div>
@@ -138,17 +141,17 @@ const shareConcert = (concert) => {
     <section class="next-concerts">
       <h2 class="section-title">Next Concerts</h2>
       <div v-if="nextConcerts?.length > 0">
-        <div v-for="concert in nextConcerts" :key="concert.id" class="concert-card mb-3">
+        <div v-for="concert in nextConcerts" :key="concert.id" class="concert-card mb-3 mx-2">
           <img
             class="concert-thumbnail"
             :src="concert.cover"
-            :alt="concert.name"
+            :alt="concert.title"
           />
           <div class="concert-card-details">
             <div class="concert-card-header">
               <div>
-                <h3 class="concert-card-title">{{ concert.name }}</h3>
-                <p class="concert-datetime">{{ formatDate(concert.date) }}</p>
+                <h3 class="concert-card-title">{{ concert.title }}</h3>
+                <p class="concert-datetime">{{ formatDate(concert.start_time) }}</p>
               </div>
               <button class="share-button" @click="shareConcert(concert)">
                 <span class="icon">
@@ -160,11 +163,11 @@ const shareConcert = (concert) => {
             <div class="artist-section">
               <p class="led-by">Led by</p>
               <div class="artist">
-                <img
-                  class="artist-image"
-                  :src="concert.artist.image"
-                  :alt="concert.artist.name"
-                />
+<!--                <img-->
+<!--                  class="artist-image"-->
+<!--                  :src="concert.artist.image"-->
+<!--                  :alt="concert.artist.name"-->
+<!--                />-->
                 <span class="artist-name">{{ concert.artist.name }}</span>
               </div>
             </div>
