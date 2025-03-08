@@ -4,12 +4,13 @@ import axios from 'axios'
 
 export interface Concert {
   id: number
-  name: string
+  title: string
   description: string
-  date: string
-  isStreaming: boolean
+  start_time: string
+  end_time: string
+  is_streaming: boolean
   cover: string
-  playbackId: string | null
+  mux_playback_id: string | null
   artist: {
     name: string
     image: string
@@ -57,8 +58,7 @@ const store: Module<State, RootState> = {
     async fetchConcerts ({ commit }) {
       try {
         const response = await axios.get('/concerts/')
-        const concerts = response.data
-
+        const concerts = response.data.results
         commit('setConcerts', concerts)
         if (concerts.length > 0) {
           commit('setFeaturedConcert', concerts[0])
