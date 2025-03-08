@@ -97,8 +97,8 @@ const navigateToAuth = () => {
       <div class="absolute inset-0 bg-black/50">
         <nav class="container mx-auto px-4 py-6">
           <div class="flex items-center">
-            <img src="/SS_FavIcon.png" alt="Sacred Sound Logo" class="h-10" />
-            <span class="ml-2 text-xl font-semibold">Sacred Sound</span>
+            <img src="/android-chrome-192x192.png" alt="Sacred Sound Logo" class="h-20" />
+            <h3 class="text-white text-xl">Sacred Sound</h3>
           </div>
         </nav>
         <div class="container mx-auto px-4 h-full flex items-center">
@@ -107,7 +107,7 @@ const navigateToAuth = () => {
             <p class="text-xl mb-8">Connect intimately with listeners that go deep.</p>
             <button 
               @click="navigateToAuth"
-              class="bg-[#5850A9] hover:bg-[#4A4491] px-8 py-3 rounded-md transition-colors"
+              class="bg-[#1c8085] hover:bg-[#e5f1f2] px-8 py-3 rounded-md transition-colors"
             >
               GET STARTED
             </button>
@@ -121,7 +121,7 @@ const navigateToAuth = () => {
       <div class="container mx-auto px-4">
         <div class="grid md:grid-cols-2 gap-12 items-center">
           <div class="text-black">
-            <h2 class="text-4xl font-serif mb-6 text-[#5850A9]">
+            <h2 class="text-4xl font-serif mb-6 text-[#1c8085]">
               A platform designed for your journey as a sacred music artist.
             </h2>
             <p class="text-gray-600">
@@ -140,10 +140,10 @@ const navigateToAuth = () => {
     </section>
 
     <!-- Cloud Studio Section -->
-    <section class="py-20 bg-gray-50">
+    <section class="py-20 bg-[#e5f1f2]">
       <div class="container mx-auto px-4">
         <div class="grid md:grid-cols-2 gap-12">
-          <div class="bg-[#A5C5A9] p-12 rounded-lg">
+          <div class="bg-[#1c8085] p-12 rounded-lg">
             <h2 class="text-4xl font-serif text-white mb-4">
               Welcome to Your<br/>
               <em>Cloud Studio</em>
@@ -154,15 +154,15 @@ const navigateToAuth = () => {
           </div>
           <div class="space-y-8 text-black">
             <div>
-              <h3 class="text-2xl font-serif text-[#5850A9] mb-2">Create new revenue streams with your content.</h3>
+              <h3 class="text-2xl font-serif text-[#1c8085] mb-2">Create new revenue streams with your content.</h3>
               <p class="text-gray-600">Upload your magic into our sacred music library and get paid for every minute of content that gets viewed.</p>
             </div>
             <div>
-              <h3 class="text-2xl font-serif text-[#5850A9] mb-2">Expand through more intimate connection.</h3>
+              <h3 class="text-2xl font-serif text-[#1c8085] mb-2">Expand through more intimate connection.</h3>
               <p class="text-gray-600">Invite your listeners along deeper into your creative process through video lessons, events, behind the scenes, and more!</p>
             </div>
             <div>
-              <h3 class="text-2xl font-serif text-[#5850A9] mb-2">Earn professional studio support through your music.</h3>
+              <h3 class="text-2xl font-serif text-[#1c8085] mb-2">Earn professional studio support through your music.</h3>
               <p class="text-gray-600">Gain tokens, Thanks coins, directly from listeners as they gain inspiration, which you can redeem for studio services.</p>
             </div>
           </div>
@@ -173,31 +173,31 @@ const navigateToAuth = () => {
     <!-- Features Section -->
     <section class="py-20 bg-white text-black">
       <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-serif text-center text-[#5850A9] mb-4">Let's Create Magic Together</h2>
+        <h2 class="text-4xl font-serif text-center text-[#1c8085] mb-4">Let's Create Magic Together</h2>
         <p class="text-center text-gray-600 mb-12">Share sacred music and receive support from listeners you inspire.</p>
         
         <div class="grid md:grid-cols-3 gap-8">
           <div class="text-center">
             <div class="mb-4 flex justify-center">
-              <UsersIcon class="h-12 w-12 text-[#5850A9]" />
+              <UsersIcon class="h-12 w-12 text-[#1c8085]" />
             </div>
-            <h3 class="text-xl font-serif text-[#5850A9] mb-2">Join the Artist Collective</h3>
+            <h3 class="text-xl font-serif text-[#1c8085] mb-2">Join the Artist Collective</h3>
             <p class="text-gray-600">Be one of up to 100 artists selected to join the Sacred Sound Artist Collective.</p>
           </div>
           
           <div class="text-center">
             <div class="mb-4 flex justify-center">
-              <MusicIcon class="h-12 w-12 text-[#5850A9]" />
+              <MusicIcon class="h-12 w-12 text-[#1c8085]" />
             </div>
-            <h3 class="text-xl font-serif text-[#5850A9] mb-2">Publish Your Magic</h3>
+            <h3 class="text-xl font-serif text-[#1c8085] mb-2">Publish Your Magic</h3>
             <p class="text-gray-600">Reach the right audience for you and get paid for every minute of content that gets viewed.</p>
           </div>
           
           <div class="text-center">
             <div class="mb-4 flex justify-center">
-              <HeartIcon class="h-12 w-12 text-[#5850A9]" />
+              <HeartIcon class="h-12 w-12 text-[#1c8085]" />
             </div>
-            <h3 class="text-xl font-serif text-[#5850A9] mb-2">Get Support</h3>
+            <h3 class="text-xl font-serif text-[#1c8085] mb-2">Get Support</h3>
             <p class="text-gray-600">Unlock studio time and services to continue enhancing the potency of every item that you publish.</p>
           </div>
         </div>
@@ -205,7 +205,7 @@ const navigateToAuth = () => {
         <div class="text-center mt-12">
           <button 
             @click="navigateToAuth"
-            class="bg-[#5850A9] text-white hover:bg-[#4A4491] px-8 py-3 rounded-md transition-colors"
+            class="bg-[#1c8085] text-white hover:bg-[#e5f1f2] px-8 py-3 rounded-md transition-colors"
           >
             GET STARTED
           </button>
@@ -216,7 +216,7 @@ const navigateToAuth = () => {
     <!-- FAQ Section -->
     <section class="py-20 bg-gray-50">
       <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-serif text-center text-[#5850A9] mb-12">FAQ</h2>
+        <h2 class="text-4xl font-serif text-center text-[#1c8085] mb-12">FAQ</h2>
         
         <div class="max-w-2xl mx-auto space-y-4">
           <div v-for="(item, index) in faqs" :key="index" class="border-b border-gray-200">
@@ -226,7 +226,7 @@ const navigateToAuth = () => {
             >
               <span class="text-lg font-serif">{{ item.question }}</span>
               <ChevronDownIcon 
-                class="h-5 w-5 text-[#5850A9] transition-transform"
+                class="h-5 w-5 text-[#1c8085] transition-transform"
                 :class="{ 'rotate-180': openFaq === index }"
               />
             </button>
