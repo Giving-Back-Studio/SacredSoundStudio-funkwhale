@@ -15,7 +15,7 @@ const props = defineProps<Props>()
 <template>
   <div v-if="props.content.length > 0" class="ui segment">
     <div class="ui horizontal divider">{{ props.title }}</div>
-    <div class="ui grid">
+    <div class="ui stackable grid">
       <content-card class="four wide column" v-for="(contentItem, index) in props.content" :key="index" :type="props.type" :content="contentItem"/>
     </div>
   </div>
