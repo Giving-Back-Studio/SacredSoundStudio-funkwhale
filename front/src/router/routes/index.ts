@@ -31,6 +31,16 @@ export default [
     beforeEnter: routeToIndex
   },
   {
+    path: '/concerts',
+    name: 'concerts',
+    component: () => import('~/views/content/Concerts.vue')
+  },
+  {
+    path: '/manage-concerts',
+    name: 'manageConcerts',
+    component: () => import('~/views/content/ManageConcerts.vue')
+  },
+  {
     path: '/auth',
     name: 'auth',
     component: () => import('~/components/auth/AuthForm.vue')
