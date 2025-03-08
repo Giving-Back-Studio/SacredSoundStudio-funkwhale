@@ -665,8 +665,7 @@ const goToMyContent = () => {
             <button 
               v-if="currentStep < 3"
               @click="nextStep"
-              class="ui button px-6"
-              style="background-color: #434289; color: white;"
+              class="ui primary button px-6"
               :disabled="!canProceed"
             >
               Next

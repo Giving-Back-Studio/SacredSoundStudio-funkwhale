@@ -2,7 +2,7 @@
   outline-color: white;
 }
 button, *[role="button"] {
-  background-color: #434289;
+  background-color: #e5f1f2;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -12,11 +12,11 @@ button, *[role="button"] {
   transition: all 0.2s;
 
   &:hover {
-    background-color: darken(#434289, 5%);
+    background-color: darken(#e5f1f2, 5%);
   }
 
   &:active {
-    background-color: darken(#434289, 10%);
+    background-color: darken(#e5f1f2, 10%);
   }
 
   &:disabled {
