@@ -2,20 +2,18 @@ import type { Module } from 'vuex'
 import type { RootState } from '~/store/index'
 import axios from 'axios'
 
+import type { Artist } from '~/types'
+
 export interface Concert {
   id: number
   title: string
   description: string
   start_time: string
   end_time: string
-  is_streaming: boolean
   cover: string
   mux_playback_id: string | null
-  artist: {
-    name: string
-    image: string
-  }
-  venue: string
+  mux_live_stream_id: string | null
+  artist: Artist
 }
 
 export interface State {
