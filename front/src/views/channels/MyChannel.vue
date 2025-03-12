@@ -50,7 +50,7 @@ const saveChanges = async () => {
 // Load initial data
 const loadChannelData = async () => {
   try {
-    const response = await axios.get(`channels/${store.state.auth.username}/`)
+    const response = await axios.get(`channels/${store.state.auth.profile.actor_username}/`)
     const channel = response.data as Channel
     
     artistName.value = channel.artist.name
