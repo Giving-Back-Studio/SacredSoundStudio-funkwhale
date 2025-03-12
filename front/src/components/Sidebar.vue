@@ -123,10 +123,16 @@ const toggleSidebar = () => {
   emit('update:collapsed', isSidebarCollapsed.value)
 }
 
-watch(() => props.width, (width) => {
+const checkSidebar = (width) => {
   if (width < 1024 && !isSidebarCollapsed.value) {
     toggleSidebar()
   }
+}
+
+watch(() => props.width, checkSidebar)
+
+onMounted(() => {
+  checkSidebar(props.width)
 })
 </script>
 
