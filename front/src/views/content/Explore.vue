@@ -276,8 +276,7 @@ const translateActivityType = (activityType) => {
             :class="{ 'selected': isFilterSelected(openFilterCategory, option) }"
             @click="toggleFilter(openFilterCategory, option)"
           >
-            <span>{{ option }}</span>
-            <i v-if="isFilterSelected(openFilterCategory, option)" class="check icon ml-auto" />
+            {{ option }}
           </div>
         </div>
       </div>
@@ -340,7 +339,7 @@ const translateActivityType = (activityType) => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: #D9D9E7;
+  background-color: #eef3e6;
   padding: 0.5rem 0.75rem;
   border-radius: 20px;
   font-size: 0.875rem;
@@ -350,7 +349,7 @@ const translateActivityType = (activityType) => {
   background: none;
   border: none;
   cursor: pointer;
-  color: #434289;
+  color: #e7922f;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -368,7 +367,7 @@ const translateActivityType = (activityType) => {
   overflow-x: auto;
   padding-bottom: 0.5rem;
   scrollbar-width: thin;
-  scrollbar-color: #A3C4A3 #F1F4F8;
+  scrollbar-color: #1c8085 #F1F4F8;
 }
 
 .filter-scroll-container::-webkit-scrollbar {
@@ -380,7 +379,7 @@ const translateActivityType = (activityType) => {
 }
 
 .filter-scroll-container::-webkit-scrollbar-thumb {
-  background-color: #A3C4A3;
+  background-color: #eef3e6;
   border-radius: 20px;
 }
 
@@ -402,9 +401,9 @@ const translateActivityType = (activityType) => {
 }
 
 .filter-category.active {
-  background-color: #434289;
+  background-color: #1c8085;
   color: white;
-  border-color: #434289;
+  border-color: #1c8085;
 }
 
 /* Filter Search */
@@ -445,18 +444,18 @@ const translateActivityType = (activityType) => {
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
 }
 
 .filter-option:hover {
-  background-color: #D9D9E7;
+  background-color: #eef3e6;
 }
 
 /* Selected filter option */
 .filter-option.selected {
-  background-color: #D9D9E7;
+  background-color: #eef3e6;
   font-weight: 500;
-  display: flex;
-  align-items: center;
 }
 
 .filter-option.custom-option {
@@ -492,15 +491,6 @@ const translateActivityType = (activityType) => {
   cursor: pointer;
 }
 
-.back-button {
-  display: flex;
-  align-items: center;
-  color: #434289;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-}
-
 .results-scroll-container {
   display: flex;
   gap: 1rem;
@@ -527,40 +517,6 @@ const translateActivityType = (activityType) => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1.5rem;
-}
-
-
-
-.play-icon {
-  color: white;
-  width: 48px;
-  height: 48px;
-}
-
-.track-title {
-  font-weight: 500;
-  margin-bottom: 0.25rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.track-artist {
-  font-size: 0.875rem;
-  color: #434289;
-  opacity: 0.8;
-  margin-bottom: 0.25rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.track-metadata {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.75rem;
-  color: #434289;
-  opacity: 0.6;
 }
 
 .artist-card {
