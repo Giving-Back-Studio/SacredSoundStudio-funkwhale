@@ -5,6 +5,7 @@ import { computed, ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import axios from 'axios'
+import router from '~/router'
 
 interface Props {
   defaultKey: string
@@ -21,14 +22,13 @@ const labels = computed(() => ({
 const errors = ref([] as string[])
 const key = ref(props.defaultKey)
 const isLoading = ref(false)
-const success = ref(false)
 const submit = async () => {
   isLoading.value = true
   errors.value = []
 
   try {
     await axios.post('auth/registration/verify-email/', { key: key.value })
-    success.value = true
+    router.push('/trial')
   } catch (error) {
     errors.value = (error as BackendError).backendErrors
   }
@@ -50,7 +50,6 @@ onMounted(() => {
       <div class="ui small text container">
         <h2>{{ labels.confirm }}</h2>
         <form
-          v-if="!success"
           class="ui form"
           @submit.prevent="submit()"
         >
@@ -91,20 +90,6 @@ onMounted(() => {
             {{ labels.confirm }}
           </button>
         </form>
-        <div
-          v-else
-          class="ui positive message"
-        >
-          <h4 class="header">
-            {{ $t('views.auth.EmailConfirm.header.success') }}
-          </h4>
-          <p>
-            {{ $t('views.auth.EmailConfirm.message.success') }}
-          </p>
-          <router-link :to="{name: 'login'}">
-            {{ $t('views.auth.EmailConfirm.link.login') }}
-          </router-link>
-        </div>
       </div>
     </section>
   </main>

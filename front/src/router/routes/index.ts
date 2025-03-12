@@ -36,6 +36,11 @@ export default [
     component: () => import('~/views/content/Concerts.vue')
   },
   {
+    path: '/trial',
+    name: 'trial',
+    component: () => import('~/views/TrialOnboarding.vue')
+  },
+  {
     path: '/manage-concerts',
     name: 'manageConcerts',
     component: () => import('~/views/content/ManageConcerts.vue')
