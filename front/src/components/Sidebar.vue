@@ -411,7 +411,7 @@ onMounted(() => {
           <router-link
             v-if="$store.state.auth.authenticated && $store.state.auth.profile.is_artist"
             class="item"
-            :to="{name: 'channels.detail', params: {id: $store.state.auth.fullUsername}}"
+            :to="{name: 'channels.detail', params: {id: $store.state.auth.profile.actor_username}}"
           >
             {{ $t('components.Sidebar.link.myChannel') }}
           </router-link>
