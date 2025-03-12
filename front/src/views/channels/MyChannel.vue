@@ -23,13 +23,15 @@ const cover = ref<string | null>(null)
 const isLoaded = ref(false)
 const isSaving = ref(false)
 
+const channelUrl = `/channels/${store.state.auth.profile.actor_username}`
+
 // Save changes
 const saveChanges = async () => {
 
   isSaving.value = true
 
   try {
-    await axios.put(`channels/${store.state.auth.username}/`, {
+    await axios.put(channelUrl, {
       content_category: 'music',
       name: artistName.value,
       description: {
@@ -43,14 +45,14 @@ const saveChanges = async () => {
     useErrorHandler(error as Error)
   } finally {
     isSaving.value = false
-    router.push('/channels/' + store.state.auth.username)
+    router.push(channelUrl)
   }
 }
 
 // Load initial data
 const loadChannelData = async () => {
   try {
-    const response = await axios.get(`channels/${store.state.auth.username}/`)
+    const response = await axios.get(channelUrl)
     const channel = response.data as Channel
     
     artistName.value = channel.artist.name
