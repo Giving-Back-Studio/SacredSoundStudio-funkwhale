@@ -30,17 +30,23 @@ const saveChanges = async () => {
 
   isSaving.value = true
 
+  const channelData = {
+    content_category: 'music',
+    name: artistName.value,
+    cover: cover.value,
+    tags: tags.value,
+    description: null
+  }
+
+  if (bio.value) {
+    channelData.description = {
+      content_type: 'text/markdown',
+      text: bio.value
+    }
+  }
+
   try {
-    await axios.put(channelUrl, {
-      content_category: 'music',
-      name: artistName.value,
-      description: {
-        content_type: 'text/markdown',
-        text: bio.value
-      },
-      cover: cover.value,
-      tags: tags.value
-    })
+    await axios.put(channelUrl, channelData)
   } catch (error) {
     useErrorHandler(error as Error)
   } finally {
