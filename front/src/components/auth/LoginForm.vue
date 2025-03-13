@@ -16,7 +16,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  next: '/library',
+  next: '/explore',
   buttonClasses: 'success',
   showSignup: true
 })
