@@ -123,10 +123,16 @@ const toggleSidebar = () => {
   emit('update:collapsed', isSidebarCollapsed.value)
 }
 
-watch(() => props.width, (width) => {
+const checkSidebar = (width) => {
   if (width < 1024 && !isSidebarCollapsed.value) {
     toggleSidebar()
   }
+}
+
+watch(() => props.width, checkSidebar)
+
+onMounted(() => {
+  checkSidebar(props.width)
 })
 </script>
 
@@ -405,7 +411,7 @@ watch(() => props.width, (width) => {
           <router-link
             v-if="$store.state.auth.authenticated && $store.state.auth.profile.is_artist"
             class="item"
-            :to="{name: 'channels.detail', params: {id: $store.state.auth.fullUsername}}"
+            :to="{name: 'channels.detail', params: {id: $store.state.auth.profile.actor_username}}"
           >
             {{ $t('components.Sidebar.link.myChannel') }}
           </router-link>

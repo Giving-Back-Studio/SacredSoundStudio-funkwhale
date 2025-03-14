@@ -33,15 +33,15 @@ button, *[role="button"] {
 // Make secondary button styles more specific to override Semantic UI
 button.secondary,
 .ui.button.secondary {
-  background-color: #A3C4A3 !important;
-  color: #434289 !important;
+  background-color: #e7922f !important;
+  color: #1c8085 !important;
 
   &:hover {
-    background-color: darken(#A3C4A3, 5%) !important;
+    background-color: darken(#e7922f, 5%) !important;
   }
 
   &:active {
-    background-color: darken(#A3C4A3, 10%) !important;
+    background-color: darken(#e7922f, 10%) !important;
   }
 }
 
