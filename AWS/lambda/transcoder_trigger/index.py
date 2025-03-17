@@ -26,34 +26,37 @@ def calculate_resources(size_bytes):
         size_bytes (int): Size of the file in bytes
         
     Returns:
-        tuple: (cpu, memory) where cpu is in CPU units and memory is in MB
+        tuple: (cpu, memory) where cpu is in CPU units and memory is in GB with "GB" suffix
     """
     # Convert bytes to MB for easier calculation
     size_mb = size_bytes / (1024 * 1024)
     
-    # Base values
-    base_cpu = 1024  # 1 vCPU
-    base_memory = 2048  # 2GB
+    # Valid Fargate CPU and memory combinations:
+    # 256 (.25 vCPU) - Available memory values: 0.5GB, 1GB, 2GB
+    # 512 (.5 vCPU) - Available memory values: 1GB, 2GB, 3GB, 4GB
+    # 1024 (1 vCPU) - Available memory values: 2GB, 3GB, 4GB, 5GB, 6GB, 7GB, 8GB
+    # 2048 (2 vCPU) - Available memory values: Between 4GB and 16GB in 1GB increments
+    # 4096 (4 vCPU) - Available memory values: Between 8GB and 30GB in 1GB increments
     
-    # Small files (< 100MB): Use base values
+    # Small files (< 100MB): Use minimal resources
     if size_mb < 100:
-        return base_cpu, base_memory
+        return 256, "0.5GB"
     
-    # Medium files (100MB - 1GB): Scale up linearly
+    # Medium files (100MB - 500MB): Use moderate resources
+    elif size_mb < 500:
+        return 512, "1GB"
+    
+    # Large files (500MB - 1GB): Use more resources
     elif size_mb < 1024:
-        cpu = min(2048, int(base_cpu * (1 + size_mb / 200)))
-        memory = min(4096, int(base_memory * (1 + size_mb / 200)))
-        return cpu, memory
+        return 1024, "2GB"
     
-    # Large files (1GB - 5GB): Use higher resources
+    # Very large files (1GB - 5GB): Use high resources
     elif size_mb < 5120:
-        cpu = min(4096, int(base_cpu * (1 + size_mb / 400)))
-        memory = min(8192, int(base_memory * (1 + size_mb / 300)))
-        return cpu, memory
+        return 2048, "4GB"
     
-    # Very large files (> 5GB): Use maximum resources
+    # Extremely large files (> 5GB): Use maximum resources
     else:
-        return 4096, 8192  # 4 vCPU, 8GB
+        return 4096, "8GB"
 
 def lambda_handler(event, context):
     """
@@ -84,7 +87,7 @@ def lambda_handler(event, context):
         # Calculate CPU and memory based on file size
         cpu, memory = calculate_resources(size_bytes)
         
-        logger.info(f"Calculated resources: CPU={cpu}, Memory={memory}MB")
+        logger.info(f"Calculated resources: CPU={cpu}, Memory={memory}")
         
         # Run the ECS task with the calculated resources
         response = ecs_client.run_task(
@@ -101,7 +104,7 @@ def lambda_handler(event, context):
             },
             overrides={
                 'cpu': str(cpu),
-                'memory': str(memory),
+                'memory': memory,
                 'containerOverrides': [
                     {
                         'name': 'transcoder',
