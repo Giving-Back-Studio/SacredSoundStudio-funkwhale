@@ -1,0 +1,107 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: "Lambda function to trigger ECS tasks with dynamic CPU and memory allocation"
+
+Parameters:
+  ClusterName:
+    Type: String
+    Description: "The name of the ECS cluster"
+  
+  TaskDefinition:
+    Type: String
+    Description: "The ARN of the ECS task definition"
+  
+  SubnetA:
+    Type: String
+    Description: "The ID of the first subnet"
+  
+  SubnetB:
+    Type: String
+    Description: "The ID of the second subnet"
+  
+  SecurityGroup:
+    Type: String
+    Description: "The ID of the security group"
+  
+  S3Bucket:
+    Type: String
+    Description: "The name of the S3 bucket for the Lambda code"
+
+Resources:
+  TranscoderTriggerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:HeadObject
+                Resource: !Sub "arn:aws:s3:::${S3Bucket}/*"
+        - PolicyName: ECSAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecs:RunTask
+                Resource: !Ref TaskDefinition
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - ecs:DescribeTaskDefinition
+                Resource: "*"
+
+  TranscoderTriggerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${ClusterName}-transcoder-trigger"
+      Handler: index.lambda_handler
+      Role: !GetAtt TranscoderTriggerRole.Arn
+      CodeUri: ../lambda/transcoder_trigger/
+      Runtime: python3.9
+      Timeout: 30
+      MemorySize: 128
+      Environment:
+        Variables:
+          CLUSTER_NAME: !Ref ClusterName
+          TASK_DEFINITION: !Ref TaskDefinition
+          SUBNET_A: !Ref SubnetA
+          SUBNET_B: !Ref SubnetB
+          SECURITY_GROUP: !Ref SecurityGroup
+      Events:
+        S3Event:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - aws.s3
+              detail-type:
+                - Object Created
+              detail:
+                bucket:
+                  name:
+                    - !Ref S3Bucket
+                object:
+                  key:
+                    - prefix: "videos/"
+
+Outputs:
+  TranscoderTriggerFunction:
+    Description: "The ARN of the Lambda function"
+    Value: !GetAtt TranscoderTriggerFunction.Arn

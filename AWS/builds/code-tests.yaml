@@ -13,6 +13,7 @@ phases:
       - aws cloudformation validate-template --template-body file://AWS/cloudformation/DevOps.yaml
       - aws cloudformation validate-template --template-body file://AWS/cloudformation/FargateService.yaml
       - aws cloudformation validate-template --template-body file://AWS/cloudformation/VPC.yaml
+      - aws cloudformation validate-template --template-body file://AWS/cloudformation/TranscoderLambda.yaml
       - echo "Run more code tests here!"
   post_build:
     on-failure: ABORT
