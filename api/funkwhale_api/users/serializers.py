@@ -195,6 +195,7 @@ class UserWriteSerializer(serializers.ModelSerializer):
 class UserReadSerializer(serializers.ModelSerializer):
     permissions = serializers.SerializerMethodField()
     full_username = serializers.SerializerMethodField()
+    actor_username = serializers.SerializerMethodField()
     avatar = common_serializers.AttachmentSerializer(source="get_avatar")
 
     class Meta:
@@ -203,6 +204,7 @@ class UserReadSerializer(serializers.ModelSerializer):
             "id",
             "username",
             "full_username",
+            "actor_username",
             "name",
             "email",
             "is_staff",
@@ -222,6 +224,11 @@ class UserReadSerializer(serializers.ModelSerializer):
     def get_full_username(self, o):
         if o.actor:
             return o.actor.full_username
+
+    @extend_schema_field(OpenApiTypes.STR)
+    def get_actor_username(self, o):
+        if o.actor:
+            return o.actor.preferred_username
 
 
 class MeSerializer(UserReadSerializer):

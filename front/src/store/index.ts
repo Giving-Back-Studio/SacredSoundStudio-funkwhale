@@ -7,6 +7,8 @@ import type { State as InstanceState } from './instance'
 import type { State as RadiosState } from './radios'
 import type { State as AuthState } from './auth'
 import type { State as UiState } from './ui'
+import type { State as ConcertsState } from './concerts'
+
 import type { InjectionKey } from 'vue'
 
 import { createStore, Store, useStore as baseUseStore } from 'vuex'
@@ -21,6 +23,7 @@ import instance from './instance'
 import radios from './radios'
 import auth from './auth'
 import ui from './ui'
+import concerts from './concerts'
 
 export interface RootState {
   moderation: ModerationState
@@ -32,6 +35,7 @@ export interface RootState {
   radios: RadiosState
   auth: AuthState
   ui: UiState
+  concerts: ConcertsState
 }
 
 export const key: InjectionKey<Store<RootState>> = Symbol('vuex state injection key')
@@ -45,7 +49,8 @@ export default createStore<RootState>({
     instance,
     radios,
     auth,
-    ui
+    ui,
+    concerts
   },
   plugins: [
     createPersistedState({

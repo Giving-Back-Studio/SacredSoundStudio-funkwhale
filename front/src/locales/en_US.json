@@ -328,7 +328,8 @@
         "search": "Search",
         "settings": "Settings",
         "switchInstance": "Switch instance",
-        "users": "Users"
+        "users": "Users",
+        "concerts": "Concerts"
       }
     },
     "admin": {

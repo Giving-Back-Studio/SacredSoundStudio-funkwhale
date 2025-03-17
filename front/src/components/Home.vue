@@ -70,7 +70,7 @@ const navigateToAuth = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F1F4F8]">
+  <div class="min-h-screen bg-[#e5f1f2]">
     <!-- Meta tags -->
     <!-- <title>{{ pageTitle }}</title>
     <meta name="description" :content="pageDescription">
@@ -87,14 +87,13 @@ const navigateToAuth = () => {
       <div class="absolute inset-0 bg-black/40">
         <nav class="container mx-auto px-4 py-6">
           <div class="flex items-center justify-between">
-            <img 
-              :src="'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/SS-Logo-xFTJTuPTR704RYU0yrafPlvc9iJuF0.png'" 
-              alt="Sacred Sound Logo" 
-              class="h-20 w-60"
-            />
+            <div class="flex items-center">
+              <img src="/android-chrome-192x192.png" alt="Sacred Sound Logo" class="h-20" />
+              <h2 class="text-white text-xl">Sacred Sound</h2>
+            </div>
             <button 
               @click="navigateToAuth"
-              class="bg-[#5850A9] hover:bg-[#4A4491] px-6 py-2 text-white rounded-md transition-colors">
+              class="bg-[#1c8085] hover:bg-[#e5f1f2] px-6 py-2 text-white rounded-md transition-colors">
               Join Now
             </button>
           </div>
@@ -109,7 +108,7 @@ const navigateToAuth = () => {
             </p>
             <button 
               @click="navigateToAuth"
-              class="bg-[#5850A9] hover:bg-[#4A4491] px-8 py-3 text-white rounded-md transition-colors">
+              class="bg-[#1c8085] hover:bg-[#e5f1f2] px-8 py-3 text-white rounded-md transition-colors">
               JOIN THE PLATFORM
             </button>
           </div>
@@ -122,25 +121,25 @@ const navigateToAuth = () => {
       <!-- Features Section -->
       <section class="py-20">
         <div class="container mx-auto px-4">
-          <h2 class="text-4xl md:text-5xl font-serif text-[#5850A9] text-center mb-16">
+          <h2 class="text-4xl md:text-5xl font-serif text-[#1c8085] text-center mb-16">
             It's time to elevate sacred music together.
           </h2>
           
           <div class="grid md:grid-cols-3 gap-12">
             <div>
-              <h3 class="text-2xl font-serif text-[#5850A9] mb-4">Discover</h3>
+              <h3 class="text-2xl font-serif text-[#1c8085] mb-4">Discover</h3>
               <p class="text-gray-600">
                 Immerse yourself in a curated collection of transformative sacred music from diverse artists.
               </p>
             </div>
             <div>
-              <h3 class="text-2xl font-serif text-[#5850A9] mb-4">Connect</h3>
+              <h3 class="text-2xl font-serif text-[#1c8085] mb-4">Connect</h3>
               <p class="text-gray-600">
                 Engage with fellow community members, share insights, and foster connections in a supportive space.
               </p>
             </div>
             <div>
-              <h3 class="text-2xl font-serif text-[#5850A9] mb-4">Elevate</h3>
+              <h3 class="text-2xl font-serif text-[#1c8085] mb-4">Elevate</h3>
               <p class="text-gray-600">
                 Unlock premium content, live sessions, and behind-the-scenes experiences.
               </p>
@@ -154,7 +153,7 @@ const navigateToAuth = () => {
         <div class="container mx-auto px-4">
           <div class="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 class="text-4xl font-serif text-[#5850A9] mb-6">
+              <h2 class="text-4xl font-serif text-[#1c8085] mb-6">
                 Join the Sacred Sound Community
               </h2>
               <p class="text-gray-600 mb-6">
@@ -173,7 +172,7 @@ const navigateToAuth = () => {
       </section>
 
       <!-- Sanctuary Section -->
-      <section class="bg-[#A5C5A9] py-20">
+      <section class="bg-[#1c8085] py-20">
         <div class="container mx-auto px-4">
           <div class="grid md:grid-cols-2 gap-12">
             <div>
@@ -220,12 +219,12 @@ const navigateToAuth = () => {
       <!-- Join Section -->
       <section class="py-20">
         <div class="container mx-auto px-4 max-w-xl text-center">
-          <h2 class="text-4xl font-serif text-[#5850A9] mb-12">
+          <h2 class="text-4xl font-serif text-[#1c8085] mb-12">
             Join Sacred Sound Today
           </h2>
           <button 
             @click="navigateToAuth"
-            class="bg-[#5850A9] hover:bg-[#4A4491] px-8 py-3 text-white rounded-md transition-colors">
+            class="bg-[#1c8085] hover:bg-[#e5f1f2] px-8 py-3 text-white rounded-md transition-colors">
             GET STARTED
           </button>
         </div>

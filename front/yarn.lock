@@ -1467,6 +1467,34 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
+"@mux/mux-player@3.3.0":
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/@mux/mux-player/-/mux-player-3.3.0.tgz#5b0e62561b98cb927023d8b424e978077a961d8d"
+  integrity sha512-/VSOPKBd56QzQzVSjuigS8r6kAMJRuNskEUGqU0o0k37FC7ztLH4Fh85fzhEyWSDHs3krJ1dBLqhJ1eCs8r3sA==
+  dependencies:
+    "@mux/mux-video" "0.24.3"
+    "@mux/playback-core" "0.28.3"
+    media-chrome "~4.5.0"
+    player.style "^0.1.4"
+
+"@mux/mux-video@0.24.3":
+  version "0.24.3"
+  resolved "https://registry.yarnpkg.com/@mux/mux-video/-/mux-video-0.24.3.tgz#72cb520892f2feded060b87a817f1437d2d3b539"
+  integrity sha512-HM5oasXfmYVfmsTMv1lZIW/OkHEQMJwavrl1gI4p13bdlmmUu2CNARiTv/tYATJ9+NkYHlU3RsteHXx7tK7+vg==
+  dependencies:
+    "@mux/playback-core" "0.28.3"
+    castable-video "~1.1.4"
+    custom-media-element "~1.4.2"
+    media-tracks "~0.3.2"
+
+"@mux/playback-core@0.28.3":
+  version "0.28.3"
+  resolved "https://registry.yarnpkg.com/@mux/playback-core/-/playback-core-0.28.3.tgz#5ef3b84b3a867e89b52baaf87d1afed16090e9ff"
+  integrity sha512-QID2zp76szCTiXZp5LLYwDZV68HgflOoF10Vmp6P81FqKHonHVrQ0svNGqW6fMZLH2Ymf/Qc6kHSnwWTucgQqA==
+  dependencies:
+    hls.js "~1.5.19"
+    mux-embed "^5.5.0"
+
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz#7619c2eb21b25483f6d167548b4cfd5a7488c3d5"
@@ -3374,6 +3402,18 @@ caseless@~0.12.0:
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
   integrity sha512-4tYFyifaFfGacoiObjJegolkwSU4xQNGbVgUiNYVUxbQ2x2lUsFvY4hVgVzGiIe6WLOPqycWXA40l+PWsxthUw==
 
+castable-video@~1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/castable-video/-/castable-video-1.1.4.tgz#f308aeef67cf1e01cd8c8f89a27ad40221d46a39"
+  integrity sha512-EBQJ04ShZFi1CGKXhBui6UYFJf+6C6wNIa12J2/NSu+ca/XeF5gkXUwHQ8uSKVCpvFYS2RRRB2zf29R0OYz8Iw==
+  dependencies:
+    custom-media-element "~1.4.2"
+
+ce-la-react@^0.1.3:
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/ce-la-react/-/ce-la-react-0.1.3.tgz#ccb34ec24091bd8be3da40ddcedb4a99ae1db72f"
+  integrity sha512-zZwEEJv9XukeEGbswQXObaDJjYAufOIilSnDg4BWCpKNEYN84H9fpaB+wl+rYKWOIH4wBBPbLnOxKvDIwsL/JQ==
+
 chai@^4.3.7:
   version "4.4.1"
   resolved "https://registry.yarnpkg.com/chai/-/chai-4.4.1.tgz#3603fa6eba35425b0f2ac91a009fe924106e50d1"
@@ -3652,6 +3692,11 @@ csstype@^3.1.2, csstype@^3.1.3:
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.1.3.tgz#d80ff294d114fb0e6ac500fbf85b60137d7eff81"
   integrity sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==
+
+custom-media-element@~1.4.2:
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/custom-media-element/-/custom-media-element-1.4.2.tgz#5d70d357b7605deadce72341b7c0b97a447908d4"
+  integrity sha512-AM6FRWqJyW7pWTvXb4uJj6yvHE7C6UutdhJ5o3XO5NEl5aWFcfnpz8/TuW8qr1+/wfbj50wRvdArnSNjTmjmVw==
 
 cypress@12.14.0:
   version "12.14.0"
@@ -4964,6 +5009,11 @@ he@^1.2.0:
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
 
+hls.js@~1.5.19:
+  version "1.5.20"
+  resolved "https://registry.yarnpkg.com/hls.js/-/hls.js-1.5.20.tgz#7eb23bb5e2595311d4e2761038ca6882673de7e2"
+  integrity sha512-uu0VXUK52JhihhnN/MVVo1lvqNNuhoxkonqgO3IpjvQiGpJBdIXMGkofjQb/j9zvV7a1SW8U9g1FslWx/1HOiQ==
+
 html-encoding-sniffer@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/html-encoding-sniffer/-/html-encoding-sniffer-3.0.0.tgz#2cb1a8cf0db52414776e5b2a7a04d5dd98158de9"
@@ -5740,6 +5790,23 @@ make-dir@^4.0.0:
   dependencies:
     semver "^7.5.3"
 
+media-chrome@~4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/media-chrome/-/media-chrome-4.5.0.tgz#0bea54a094caa6227558e55daad1298b33cddf75"
+  integrity sha512-MkVFFM+WvkkMwFu7sXr0bJMdQ5dbJz3BkhofPguiIHvgKYWei7VDPTEC41LmdhxWx4jQQ0FCYHXN8YFOWb7Olw==
+
+media-chrome@~4.7.1:
+  version "4.7.1"
+  resolved "https://registry.yarnpkg.com/media-chrome/-/media-chrome-4.7.1.tgz#2b8ee629b33ce764b851f86708bd58e6f4cd9bf6"
+  integrity sha512-9aZZTpMeSWqHq8klcwo10dKR0DcKHk6SEFaAp0gwgn9dPpl/E6WTkTHswwHqmLPPny1P0Mf33NmA2d2Qj+62tA==
+  dependencies:
+    ce-la-react "^0.1.3"
+
+media-tracks@~0.3.2:
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/media-tracks/-/media-tracks-0.3.3.tgz#cca72bd791dcb76cd6427dfa6b2baa25601ea192"
+  integrity sha512-9P2FuUHnZZ3iji+2RQk7Zkh5AmZTnOG5fODACnjhCVveX1McY3jmCRHofIEI+yTBqplz7LXy48c7fQ3Uigp88w==
+
 merge-stream@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/merge-stream/-/merge-stream-2.0.0.tgz#52823629a14dd00c9770fb6ad47dc6310f2c1f60"
@@ -5860,6 +5927,11 @@ muggle-string@^0.3.1:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/muggle-string/-/muggle-string-0.3.1.tgz#e524312eb1728c63dd0b2ac49e3282e6ed85963a"
   integrity sha512-ckmWDJjphvd/FvZawgygcUeQCxzvohjFO5RxTjj4eq8kw359gFF3E1brjfI+viLMxss5JrHTDRHZvu2/tuy0Qg==
+
+mux-embed@^5.5.0:
+  version "5.8.1"
+  resolved "https://registry.yarnpkg.com/mux-embed/-/mux-embed-5.8.1.tgz#0bf3470b156f9c172e33ab76d7b6716888bb1386"
+  integrity sha512-OK379tvEtMaDubXYhwXKysp+HdBVspSuPuSlv0BdNV7Zl6TFVkMsXV2Wr5xmjBVCvSCCHJ9h3x3jF+2DQovC3g==
 
 mz@^2.7.0:
   version "2.7.0"
@@ -6183,6 +6255,13 @@ pirates@^4.0.1:
   version "4.0.6"
   resolved "https://registry.yarnpkg.com/pirates/-/pirates-4.0.6.tgz#3018ae32ecfcff6c29ba2267cbf21166ac1f36b9"
   integrity sha512-saLsH7WeYYPiD25LDuLRRY/i+6HaPYr6G1OUlN39otzkSTxKnubR9RTxS3/Kk50s1g2JTgFwWQDQyplC5/SHZg==
+
+player.style@^0.1.4:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/player.style/-/player.style-0.1.5.tgz#bb7046023bd5a660c909445275843b39bdaa6f64"
+  integrity sha512-qfeudwJbYWQ/cDERtxeM5gnaY1AvaC7tTgl7COY1lcCMssuz4EQzUz/c5P9OKUSi1TrXj0NAFw3lK6kJoYFNbQ==
+  dependencies:
+    media-chrome "~4.7.1"
 
 pofile@1.0.x:
   version "1.0.11"

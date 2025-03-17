@@ -79,7 +79,7 @@ watchEffect(() => {
   if (store.state.auth.authenticated) {
     setupDropdown('.admin-dropdown', el.value)
   }
-  
+
   setupDropdown('.user-dropdown', el.value, {
     action: 'click',
     direction: 'downward',
@@ -123,10 +123,16 @@ const toggleSidebar = () => {
   emit('update:collapsed', isSidebarCollapsed.value)
 }
 
-watch(() => props.width, (width) => {
+const checkSidebar = (width) => {
   if (width < 1024 && !isSidebarCollapsed.value) {
     toggleSidebar()
   }
+}
+
+watch(() => props.width, checkSidebar)
+
+onMounted(() => {
+  checkSidebar(props.width)
 })
 </script>
 
@@ -136,8 +142,11 @@ watch(() => props.width, (width) => {
     :class="['ui', 'vertical', 'left', 'visible', 'wide', 'sidebar', 'component-sidebar', { collapsed: isSidebarCollapsed }]"
   >
     <header class="ui basic segment header-wrapper">
-      <Menu class="menu-icon" @click="toggleSidebar" />
-      <div class="spacer"></div>
+      <Menu
+        class="menu-icon"
+        @click="toggleSidebar"
+      />
+      <div class="spacer" />
       <nav class="top ui compact right aligned inverted text menu">
         <div class="right menu">
           <div
@@ -218,10 +227,16 @@ watch(() => props.width, (width) => {
                   v-else-if="$store.state.auth.authenticated"
                   :actor="{preferred_username: $store.state.auth.username, full_username: $store.state.auth.username,}"
                 />
-                <i v-else class="cog icon" />
+                <i
+                  v-else
+                  class="cog icon"
+                />
               </div>
               <div class="menu dropdown-menu">
-                <user-menu v-bind="$attrs" :width="width" />
+                <user-menu
+                  v-bind="$attrs"
+                  :width="width"
+                />
               </div>
             </div>
           </div>
@@ -396,9 +411,17 @@ watch(() => props.width, (width) => {
           <router-link
             v-if="$store.state.auth.authenticated && $store.state.auth.profile.is_artist"
             class="item"
-            :to="{name: 'channels.detail', params: {id: $store.state.auth.fullUsername}}"
+            :to="{name: 'channels.detail', params: {id: $store.state.auth.profile.actor_username}}"
           >
             {{ $t('components.Sidebar.link.myChannel') }}
+          </router-link>
+
+          <router-link
+            v-if="$store.state.auth.authenticated"
+            class="item"
+            :to="{ path: '/concerts' }"
+          >
+            {{ $t('components.Sidebar.link.concerts') }}
           </router-link>
 
           <!--
@@ -416,7 +439,7 @@ watch(() => props.width, (width) => {
             :to="{ path: '/upload' }"
           >
             {{ $t('components.Sidebar.link.upload') }}
-          </router-link> 
+          </router-link>
         </nav>
       </section>
     </nav>
@@ -426,7 +449,7 @@ watch(() => props.width, (width) => {
 <style>
 /* Menu icon color */
 .menu-icon {
-  color: #A3C4A3 !important;
+  color: #1c8085 !important;
   position: absolute !important;
   top: 1rem !important;
   left: 1rem !important;
@@ -454,7 +477,7 @@ watch(() => props.width, (width) => {
   width: 60px !important;
   min-width: 60px !important;
   max-width: 60px !important;
-  background-color: #F1F4F8 !important;
+  background-color: #e5f1f2 !important;
   box-shadow: none !important;
 }
 
@@ -466,7 +489,7 @@ watch(() => props.width, (width) => {
   padding: 1rem 0 !important;
   display: flex !important;
   justify-content: center !important;
-  background-color: #F1F4F8 !important;
+  background-color: #e5f1f2 !important;
 }
 
 /* Hide elements when collapsed */
@@ -539,7 +562,7 @@ watch(() => props.width, (width) => {
 
 .ui.dropdown.user-dropdown {
   position: relative !important;
-  
+
   .trigger {
     cursor: pointer;
     display: flex;
@@ -558,18 +581,18 @@ watch(() => props.width, (width) => {
     box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
     margin-top: 0.5rem !important;
     z-index: 1000 !important;
-    
+
     .menu {
       position: static !important;
       border: none !important;
       box-shadow: none !important;
       background: transparent !important;
     }
-    
+
     .item {
       color: var(--primary-color) !important;
       padding: 0.8rem 1rem !important;
-      
+
       &:hover {
         background-color: rgba(0,0,0,0.05) !important;
       }
