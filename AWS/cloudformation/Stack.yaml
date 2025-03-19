@@ -220,6 +220,8 @@ Resources:
         Image: !Ref BaseImage
         NginxImage: !Ref NginxImage
         MaxContainers: 2
+        Cpu: 1024
+        Memory: 2GB
         AutoScalingTargetValue: 75
         AutoScalingRequestCountValue: 150
         RDSConnectionSecret: !GetAtt RDSCluster.Outputs.ConnectionSecret
