@@ -930,6 +930,36 @@ class FSImportSerializer(serializers.Serializer):
             raise serializers.ValidationError("Invalid library")
 
 
+class S3PresignedUrlSerializer(serializers.Serializer):
+    filename = serializers.CharField(required=True)
+    file_size = serializers.IntegerField(required=True)
+    content_type = serializers.CharField(required=True)
+    library = serializers.UUIDField(required=False)
+    channel = serializers.UUIDField(required=False)
+    import_status = serializers.ChoiceField(
+        choices=models.TRACK_FILE_IMPORT_STATUS_CHOICES, default="draft"
+    )
+    import_metadata = ImportMetadataField(required=False)
+    source = serializers.CharField(required=False)
+
+    def validate(self, validated_data):
+        if "library" not in validated_data and "channel" not in validated_data:
+            raise serializers.ValidationError(
+                "You need to specify a channel or a library"
+            )
+        if "library" in validated_data and "channel" in validated_data:
+            raise serializers.ValidationError(
+                "You may specify a channel or a library, not both"
+            )
+        
+        # Check upload quota
+        quota_status = self.context["user"].get_quota_status()
+        if (validated_data["file_size"] / 1000 / 1000) > quota_status["remaining"]:
+            raise serializers.ValidationError("upload_quota_reached")
+            
+        return validated_data
+
+
 class SearchResultSerializer(serializers.Serializer):
     artists = ArtistWithAlbumsSerializer(many=True)
     tracks = TrackSerializer(many=True)

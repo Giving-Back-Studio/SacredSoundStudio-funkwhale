@@ -2,7 +2,9 @@ import base64
 import datetime
 import logging
 import urllib.parse
+import uuid
 
+import boto3
 import django.db.utils
 import requests.exceptions
 from django.conf import settings
@@ -790,6 +792,98 @@ class UploadViewSet(
         if cover_data and "content" in cover_data:
             cover_data["content"] = base64.b64encode(cover_data["content"])
         return Response(payload, status=200)
+
+    @extend_schema(
+        request=serializers.S3PresignedUrlSerializer,
+        responses={200: {"type": "object", "properties": {
+            "presigned_url": {"type": "string"},
+            "upload_uuid": {"type": "string"},
+            "fields": {"type": "object"}
+        }}},
+        operation_id="get_s3_presigned_url",
+    )
+    @action(methods=["post"], detail=False, url_path="s3-presigned-url")
+    def s3_presigned_url(self, request, *args, **kwargs):
+        serializer = serializers.S3PresignedUrlSerializer(
+            data=request.data, context={"user": request.user}
+        )
+        serializer.is_valid(raise_exception=True)
+        
+        # Create a new upload record
+        upload_uuid = str(uuid.uuid4())
+        filename = serializer.validated_data["filename"]
+        file_size = serializer.validated_data["file_size"]
+        content_type = serializer.validated_data["content_type"]
+        
+        # Get the S3 bucket name from settings
+        bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+        
+        # Generate a unique key for the file in S3
+        s3_key = f"uploads/{upload_uuid}/{filename}"
+        
+        # Create an S3 client
+        s3_client = boto3.client(
+            's3',
+            region_name=settings.AWS_S3_REGION_NAME,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+        )
+        
+        # Generate presigned URL for direct upload to S3
+        presigned_post = s3_client.generate_presigned_post(
+            Bucket=bucket_name,
+            Key=s3_key,
+            Fields={
+                'Content-Type': content_type,
+                'Content-Length-Range': [1, file_size + 1000]  # Add a small buffer
+            },
+            Conditions=[
+                {'Content-Type': content_type},
+                ['content-length-range', 1, file_size + 1000]
+            ],
+            ExpiresIn=3600  # URL expires in 1 hour
+        )
+        
+        # Create a placeholder upload record
+        upload_data = {
+            'uuid': upload_uuid,
+            'size': file_size,
+            'filename': filename,
+            'mimetype': content_type,
+            'import_status': serializer.validated_data.get('import_status', 'draft'),
+            'source': serializer.validated_data.get('source', f"s3://{s3_key}")
+        }
+        
+        # Add library or channel
+        if 'library' in serializer.validated_data:
+            try:
+                library = request.user.actor.libraries.get(uuid=serializer.validated_data['library'])
+                upload_data['library'] = library
+            except models.Library.DoesNotExist:
+                return Response({"detail": "Library not found"}, status=400)
+        elif 'channel' in serializer.validated_data:
+            from funkwhale_api.audio.models import Channel
+            try:
+                channel = Channel.objects.get(
+                    uuid=serializer.validated_data['channel'],
+                    attributed_to=request.user.actor
+                )
+                upload_data['library'] = channel.library
+            except Channel.DoesNotExist:
+                return Response({"detail": "Channel not found"}, status=400)
+        
+        # Add import metadata if provided
+        if 'import_metadata' in serializer.validated_data:
+            upload_data['import_metadata'] = serializer.validated_data['import_metadata']
+        
+        # Create the upload record
+        upload = models.Upload.objects.create(**upload_data)
+        
+        return Response({
+            'presigned_url': presigned_post['url'],
+            'fields': presigned_post['fields'],
+            'upload_uuid': upload_uuid
+        })
 
     @action(methods=["post"], detail=False)
     def action(self, request, *args, **kwargs):
