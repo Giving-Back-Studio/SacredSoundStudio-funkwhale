@@ -951,11 +951,6 @@ class S3PresignedUrlSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 "You may specify a channel or a library, not both"
             )
-        
-        # Check upload quota
-        quota_status = self.context["user"].get_quota_status()
-        if (validated_data["file_size"] / 1000 / 1000) > quota_status["remaining"]:
-            raise serializers.ValidationError("upload_quota_reached")
             
         return validated_data
 

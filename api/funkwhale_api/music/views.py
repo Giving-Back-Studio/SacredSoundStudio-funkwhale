@@ -39,6 +39,8 @@ from . import filters, licenses, models, serializers, tasks, utils
 
 logger = logging.getLogger(__name__)
 
+s3_client = boto3.client('s3')
+
 TAG_PREFETCH = Prefetch(
     "tagged_items",
     queryset=TaggedItem.objects.all().select_related().order_by("tag__name"),
@@ -815,43 +817,17 @@ class UploadViewSet(
         file_size = serializer.validated_data["file_size"]
         content_type = serializer.validated_data["content_type"]
         
-        # Get the S3 bucket name from settings
-        bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+        # Determine media type based on content type
+        media_type = models.MEDIA_TYPE_VIDEO if content_type.startswith('video/') else models.MEDIA_TYPE_AUDIO
         
-        # Generate a unique key for the file in S3
-        s3_key = f"uploads/{upload_uuid}/{filename}"
-        
-        # Create an S3 client
-        s3_client = boto3.client(
-            's3',
-            region_name=settings.AWS_S3_REGION_NAME,
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
-        )
-        
-        # Generate presigned URL for direct upload to S3
-        presigned_post = s3_client.generate_presigned_post(
-            Bucket=bucket_name,
-            Key=s3_key,
-            Fields={
-                'Content-Type': content_type,
-                'Content-Length-Range': [1, file_size + 1000]  # Add a small buffer
-            },
-            Conditions=[
-                {'Content-Type': content_type},
-                ['content-length-range', 1, file_size + 1000]
-            ],
-            ExpiresIn=3600  # URL expires in 1 hour
-        )
-        
-        # Create a placeholder upload record
+        # Create a placeholder upload record first
         upload_data = {
             'uuid': upload_uuid,
             'size': file_size,
             'filename': filename,
             'mimetype': content_type,
-            'import_status': serializer.validated_data.get('import_status', 'draft'),
-            'source': serializer.validated_data.get('source', f"s3://{s3_key}")
+            'media_type': media_type,
+            'import_status': serializer.validated_data.get('import_status', 'draft')
         }
         
         # Add library or channel
@@ -878,6 +854,37 @@ class UploadViewSet(
         
         # Create the upload record
         upload = models.Upload.objects.create(**upload_data)
+        
+        # Get the S3 bucket name from settings
+        bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+        
+        # Generate the correct S3 key based on media type
+        # This follows the same path convention as in models.get_file_path
+        if media_type == models.MEDIA_TYPE_VIDEO:
+            s3_key = f"videos/{upload_uuid}/{filename.replace('/', '-')}"
+        else:
+            # For audio files, use the chunked path
+            chunks = [upload_uuid[i:i+2] for i in range(0, 8, 2)]
+            s3_key = f"tracks/{chunks[0]}/{chunks[1]}/{chunks[2]}/{filename}"
+        
+        # Update the source field with the correct S3 path
+        upload.source = f"s3://{s3_key}"
+        upload.save(update_fields=["source"])
+        
+        # Generate presigned URL for direct upload to S3
+        presigned_post = s3_client.generate_presigned_post(
+            Bucket=bucket_name,
+            Key=s3_key,
+            Fields={
+                'Content-Type': content_type,
+                'Content-Length-Range': [1, file_size + 1000]  # Add a small buffer
+            },
+            Conditions=[
+                {'Content-Type': content_type},
+                ['content-length-range', 1, file_size + 1000]
+            ],
+            ExpiresIn=3600  # URL expires in 1 hour
+        )
         
         return Response({
             'presigned_url': presigned_post['url'],
