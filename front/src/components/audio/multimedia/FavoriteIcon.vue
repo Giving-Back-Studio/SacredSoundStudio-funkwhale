@@ -3,27 +3,18 @@ import type { QueueTrack } from '~/composables/audio/queue'
 import type { Track } from '~/types'
 import { useStore } from '~/store'
 import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
 
 interface Props {
   track?: Track | QueueTrack,
-  button: false,
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  track: () => ({} as Track),
-  button: false,
-  border: false
+  track: () => ({} as Track)
 })
 
-const { t } = useI18n()
 const store = useStore()
 
 const isFavorite = computed(() => store.getters['favorites/isFavorite'](props.track.id))
-const title = computed(() => isFavorite.value
-  ? t('components.favorites.TrackFavoriteIcon.button.remove')
-  : t('components.favorites.TrackFavoriteIcon.button.add')
-)
 
 </script>
 
