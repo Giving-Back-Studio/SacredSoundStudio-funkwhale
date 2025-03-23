@@ -20,7 +20,7 @@ const ShortcutsModal = defineAsyncComponent(() => import('~/components/Shortcuts
 const AudioPlayer = defineAsyncComponent(() => import('~/components/audio/Player.vue'))
 const Sidebar = defineAsyncComponent(() => import('~/components/Sidebar.vue'))
 const Queue = defineAsyncComponent(() => import('~/components/Queue.vue'))
-const Media = defineAsyncComponent(() => import('~/components/audio/multimedia/media.vue'))
+const Media = defineAsyncComponent(() => import('~/components/audio/multimedia/Media.vue'))
 
 const logger = useLogger()
 logger.debug('App setup()')
