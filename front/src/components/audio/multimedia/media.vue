@@ -356,7 +356,12 @@ const run = () => {
       <!-- Playlist Buttons -->
       <div class="flex gap-2 md:gap-3 mt-2">
         <!-- Hide song -->
-        <button class="p-2 bg-gray-700 rounded-full hover:bg-gray-600">
+        <button
+          class="p-2 bg-gray-700 rounded-full hover:bg-gray-600"
+          :aria-label="labels.addArtistContentFilter"
+          :title="labels.addArtistContentFilter"
+          @click="hideArtist"
+        >
           <svg
             class="w-5 h-5 text-white"
             fill="currentColor"
