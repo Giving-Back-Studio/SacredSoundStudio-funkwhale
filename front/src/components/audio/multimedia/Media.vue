@@ -52,7 +52,6 @@ const toggleMobilePlayer = () => {
 onKeyboardShortcut('e', toggleMobilePlayer)
 onKeyboardShortcut('p', () => {
   isPlaying.value = !isPlaying.value
-  run()
 })
 onKeyboardShortcut('s', shuffle)
 onKeyboardShortcut('q', clear)
@@ -130,22 +129,13 @@ const hideArtist = () => {
   }
 }
 
-const run = () => {
-  console.log('bufferProgress:', bufferProgress)
-  console.log('x:', x)
-  console.log('screenWidth:', screenWidth)
-
-  console.log(`${bufferProgress.value - 100}%`)
-  console.log(`${x.value / screenWidth.value * 100 - 100}%`)
-}
-
 </script>
 
 <template>
   <section
     v-if="currentTrack"
     role="complementary"
-    class="bg-gray-900 text-white custom-fixed bottom-0 w-full p-4 z-50"
+    class=" text-white custom-fixed bottom-0 w-full p-4 z-50"
     aria-labelledby="player-label"
   >
     <h1
@@ -155,8 +145,15 @@ const run = () => {
       Player
     </h1>
 
+    <div class="flex flex-row-reverse ">
+      <div
+        id="video-delivery"
+        class="bg-gray-900 p-4 max-w-[640px] h-auto md:rounded-tl-lg"
+      />
+    </div>
+
     <!-- Player Controls -->
-    <div class="flex flex-col md:flex-row items-center justify-between gap-4 mt-2">
+    <div class="bg-gray-900 p-4 flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-4">
         <!-- Track Cover -->
         <div
@@ -387,7 +384,6 @@ const run = () => {
         </button>
         <!-- Volume -->
         <VolumeCtrl class="expandable" />
-
 
         <!-- Queue -->
         <button class="p-2 bg-gray-700 rounded-full hover:bg-gray-600">
