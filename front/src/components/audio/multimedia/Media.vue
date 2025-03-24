@@ -196,6 +196,25 @@ const run = () => {
 
         <!--  Favorite icon button -->
         <Favorite :track="currentTrack" />
+
+        <!-- Playlist -->
+        <button
+          class="p-2 bg-gray-700 rounded-full hover:bg-gray-600"
+          @click.stop="$store.commit('playlists/chooseTrack', currentTrack)"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-list-plus"
+          ><path d="M11 12H3" /><path d="M16 6H3" /><path d="M16 18H3" /><path d="M18 9v6" /><path d="M21 12h-6" /></svg>
+        </button>
       </div>
 
       <!-- Progress Bar, Timestamps & Playback Controls -->
@@ -369,28 +388,27 @@ const run = () => {
         <!-- Volume -->
         <VolumeCtrl class="expandable" />
 
-        <!-- Playlist -->
-        <button
-          class="p-2 bg-gray-700 rounded-full hover:bg-gray-600"
-          @click.stop="$store.commit('playlists/chooseTrack', currentTrack)"
-        >
-          <svg
-            class="w-5 h-5 text-white"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path d="M4 4h16v2H4V4zm0 14h16v2H4v-2zM12 11h8v2h-8v-2z" />
-          </svg>
-        </button>
+
         <!-- Queue -->
         <button class="p-2 bg-gray-700 rounded-full hover:bg-gray-600">
           <svg
-            class="w-5 h-5 text-white"
-            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
             viewBox="0 0 24 24"
-          >
-            <path d="M3 3h18v2H3V3zm0 4h18v2H3V7zm0 4h18v2H3v-2zm0 4h18v2H3v-2zm0 4h18v2H3v-2z" />
-          </svg>
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-rows-4"
+          ><rect
+            width="18"
+            height="18"
+            x="3"
+            y="3"
+            rx="2"
+          /><path d="M21 7.5H3" /><path d="M21 12H3" /><path d="M21 16.5H3" /></svg>
         </button>
       </div>
     </div>
