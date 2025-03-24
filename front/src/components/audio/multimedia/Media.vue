@@ -11,7 +11,7 @@ import onKeyboardShortcut from '~/composables/onKeyboardShortcut'
 import time from '~/utils/time'
 
 import Favorite from '~/components/audio/multimedia/Favorite.vue'
-import VolumeCtrl from "~/components/audio/multimedia/VolumeCtrl.vue";
+import VolumeCtrl from '~/components/audio/multimedia/VolumeCtrl.vue'
 
 const {
   LoopingMode,
@@ -370,7 +370,10 @@ const run = () => {
         <VolumeCtrl class="expandable" />
 
         <!-- Playlist -->
-        <button class="p-2 bg-gray-700 rounded-full hover:bg-gray-600">
+        <button
+          class="p-2 bg-gray-700 rounded-full hover:bg-gray-600"
+          @click.stop="$store.commit('playlists/chooseTrack', currentTrack)"
+        >
           <svg
             class="w-5 h-5 text-white"
             fill="currentColor"
