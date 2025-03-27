@@ -57,7 +57,7 @@ export class HTMLVideo implements Video {
   onVideoEnd: EventHookOn<HTMLVideo>
   onSoundLoop: EventHookOn<HTMLVideo>
 
-  constructor(sources: VideoSource[]) {
+  constructor (sources: VideoSource[]) {
     this.onVideoEnd = this.#videoEndEventHook.on
     this.onSoundLoop = this.#videoEndEventHook.on
     const source = sources[0]?.url
@@ -88,14 +88,26 @@ export class HTMLVideo implements Video {
     })
   }
 
-  async preload() {
+  private ensureVideoElement () {
+    let videoContainer = document.getElementById('video-delivery')
+    if (!videoContainer) {
+      videoContainer = document.createElement('div')
+      videoContainer.id = 'video-delivery'
+      document.body.appendChild(videoContainer)
+    }
+
+    videoContainer.appendChild(this.#video)
+  }
+
+  async preload () {
+    this.ensureVideoElement()
     this.isDisposed.value = false
     this.isErrored.value = false
     logger.log('CALLING VIDEO PRELOAD ON', this)
     this.#video.load()
   }
 
-  async dispose() {
+  async dispose () {
     if (this.isDisposed.value) return
 
     this.#scope.stop()
@@ -105,7 +117,8 @@ export class HTMLVideo implements Video {
     this.isDisposed.value = true
   }
 
-  async play() {
+  async play () {
+    this.ensureVideoElement()
     try {
       await this.#video.play()
     } catch (err) {
@@ -114,28 +127,31 @@ export class HTMLVideo implements Video {
     }
   }
 
-  async pause() {
+  async pause () {
+    this.ensureVideoElement()
     return this.#video.pause()
   }
 
-  async seekTo(seconds: number) {
+  async seekTo (seconds: number) {
+    this.ensureVideoElement()
     this.#video.currentTime = seconds
   }
 
-  async seekBy(seconds: number) {
+  async seekBy (seconds: number) {
+    this.ensureVideoElement()
     this.#video.currentTime += seconds
   }
 
-  get playable() {
+  get playable () {
     return this.#video.src !== '' || this.isErrored.value
   }
 
-  get duration() {
+  get duration () {
     const { duration } = this.#video
     return isNaN(duration) ? 0 : duration
   }
 
-  get buffered() {
+  get buffered () {
     if (this.duration > 0) {
       const { length } = this.#video.buffered
       for (let i = 0; i < length; i++) {
@@ -147,23 +163,23 @@ export class HTMLVideo implements Video {
     return 0
   }
 
-  get currentTime() {
+  get currentTime () {
     return this.#video.currentTime
   }
 
-  get looping() {
+  get looping () {
     return this.#video.loop
   }
 
-  set looping(value: boolean) {
+  set looping (value: boolean) {
     this.#video.loop = value
   }
 
-  get muted() {
+  get muted () {
     return this.#video.muted
   }
 
-  set muted(value: boolean) {
+  set muted (value: boolean) {
     this.#video.muted = value
   }
 }

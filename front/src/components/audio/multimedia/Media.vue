@@ -3,7 +3,7 @@ import { usePlayer } from '~/composables/audio/player'
 import { useQueue } from '~/composables/audio/queue'
 
 import { useMouse, useWindowSize } from '@vueuse/core'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useStore } from '~/store'
 import { useI18n } from 'vue-i18n'
 
@@ -12,6 +12,7 @@ import time from '~/utils/time'
 
 import Favorite from '~/components/audio/multimedia/Favorite.vue'
 import VolumeCtrl from '~/components/audio/multimedia/VolumeCtrl.vue'
+import MediaQueue from '~/components/audio/multimedia/MediaQueue.vue'
 
 const {
   LoopingMode,
@@ -35,6 +36,10 @@ const {
   hasNext,
   queue,
   currentIndex,
+  dequeue,
+  playTrack,
+  reorder,
+  endsIn,
   currentTrack,
   isShuffled,
   shuffle,
@@ -85,10 +90,6 @@ const labels = computed(() => ({
   addArtistContentFilter: t('components.audio.Player.label.addArtistContentFilter')
 }))
 
-const switchTab = () => {
-  store.commit('ui/queueFocused', store.state.ui.queueFocused === 'player' ? 'queue' : 'player')
-}
-
 const progressBar = ref<HTMLDivElement | null>(null)
 const { x } = useMouse({ type: 'client' })
 const { width: screenWidth } = useWindowSize({ includeScrollbar: false })
@@ -129,6 +130,17 @@ const hideArtist = () => {
   }
 }
 
+// State to control the visibility of MediaQueue
+const isQueueVisible = ref(false)
+
+const toggleQueue = () => {
+  isQueueVisible.value = !isQueueVisible.value
+  if (!isQueueVisible.value && isPlaying.value) {
+    isPlaying.value = false
+    isPlaying.value = true
+  }
+}
+
 </script>
 
 <template>
@@ -145,11 +157,26 @@ const hideArtist = () => {
       Player
     </h1>
 
-    <div class="flex flex-row-reverse ">
-      <div
-        id="video-delivery"
-        class="bg-gray-900 p-4 max-w-[640px] h-auto md:rounded-tl-lg"
-      />
+    <div
+      class="flex flex-row-reverse "
+    >
+      <template v-if="isQueueVisible && screenWidth < 768">
+        <MediaQueue
+          class="w-[100%] md:w-auto items-center justify-between gap-4"
+          :toggle-queue-event="toggleQueue"
+        />
+      </template>
+      <template v-else>
+        <MediaQueue
+          v-if="isQueueVisible"
+          :toggle-queue-event="toggleQueue"
+        />
+        <div
+          v-if="currentTrack.sources[0].mimetype.startsWith('video')"
+          id="video-delivery"
+          class="bg-gray-900 p-4 items-center justify-between max-w-[640px] h-auto md:rounded-tl-lg"
+        />
+      </template>
     </div>
 
     <!-- Player Controls -->
@@ -386,7 +413,12 @@ const hideArtist = () => {
         <VolumeCtrl class="expandable" />
 
         <!-- Queue -->
-        <button class="p-2 bg-gray-700 rounded-full hover:bg-gray-600">
+        <button
+          class="p-2 bg-gray-700 rounded-full hover:bg-gray-600"
+          :title="labels.expandQueue"
+          :aria-label="labels.expandQueue"
+          @click="toggleQueue"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -397,14 +429,8 @@ const hideArtist = () => {
             stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
-            class="lucide lucide-rows-4"
-          ><rect
-            width="18"
-            height="18"
-            x="3"
-            y="3"
-            rx="2"
-          /><path d="M21 7.5H3" /><path d="M21 12H3" /><path d="M21 16.5H3" /></svg>
+            class="lucide lucide-list"
+          ><path d="M8 6H21" /><path d="M8 12H21" /><path d="M8 18H21" /><path d="M3 6H3.01" /><path d="M3 12H3.01" /><path d="M3 18H3.01" /></svg>
         </button>
       </div>
     </div>
