@@ -158,7 +158,7 @@ const toggleQueue = () => {
     </h1>
 
     <div
-      class="flex flex-row-reverse "
+      :class="['flex flex-row-reverse', { 'bg-gray-900 h-96 md:h-[1060px] overflow-hidden': isQueueVisible }]"
     >
       <template v-if="isQueueVisible && screenWidth < 768">
         <MediaQueue
@@ -171,11 +171,24 @@ const toggleQueue = () => {
           v-if="isQueueVisible"
           :toggle-queue-event="toggleQueue"
         />
-        <div
-          v-if="currentTrack.sources[0].mimetype.startsWith('video')"
-          id="video-delivery"
-          class="bg-gray-900 p-4 items-center justify-between max-w-[640px] h-auto md:rounded-tl-lg"
-        />
+        <div :class="['flex justify-center items-center']">
+          <div
+            v-if="currentTrack.sources[0].mimetype.startsWith('video')"
+            id="video-delivery"
+            :class="['bg-gray-900 p-4 md:rounded-tl-lg', {'w-4/6': isQueueVisible, 'max-w-[480px] h-auto': !isQueueVisible}]"
+          />
+          <div
+            v-else-if="isQueueVisible"
+            id="audio-delivery"
+            :class="['bg-gray-900 p-4 md:rounded-tl-lg w-[640px] h-auto']"
+          >
+            <img
+              :src="$store.getters['instance/absoluteUrl'](currentTrack.coverUrl)"
+              alt="Track Cover"
+              class="w-full h-full object-cover"
+            >
+          </div>
+        </div>
       </template>
     </div>
 

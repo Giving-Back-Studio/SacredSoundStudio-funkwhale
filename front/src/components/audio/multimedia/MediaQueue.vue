@@ -5,6 +5,7 @@ import { usePlayer } from '~/composables/audio/player'
 import { useQueue } from '~/composables/audio/queue'
 import { useTracks } from '~/composables/audio/tracks'
 import Favorite from '~/components/audio/multimedia/Favorite.vue'
+import {useWindowSize} from "@vueuse/core";
 
 const {
   isPlaying,
@@ -29,6 +30,7 @@ const {
 } = useQueue()
 
 const { currentSound } = useTracks()
+const { width: screenWidth } = useWindowSize({ includeScrollbar: false })
 
 const props = defineProps({
   toggleQueueEvent: {
@@ -39,7 +41,9 @@ const props = defineProps({
 
 const play = async (index: number) => {
   isPlaying.value = true
-  props.toggleQueueEvent()
+  if (screenWidth.value < 768) {
+    props.toggleQueueEvent()
+  }
   return playTrack(index)
 }
 
@@ -50,7 +54,7 @@ const reorderTracks = (event: { oldIndex: number, newIndex: number }) => {
 </script>
 
 <template>
-  <div class="bg-gray-900 p-4 text-white w-96">
+  <div class="bg-gray-900 p-4 text-white w-96 md:w-1/3 h-full">
     <div class="flex justify-between items-center mb-4">
       <div class="">
         <h2 class="text-lg font-semibold">
