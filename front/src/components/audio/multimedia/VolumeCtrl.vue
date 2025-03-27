@@ -42,7 +42,7 @@ const volumeIcon = computed(() => {
 </script>
 
 <template>
-  <div class="flex items-center">
+  <div class="flex items-center gap-1">
     <button
       class="p-2 bg-gray-700 rounded-full hover:bg-gray-600 circular control button"
       :class="['component-volume-control', {'expanded': expanded}]"
@@ -56,7 +56,9 @@ const volumeIcon = computed(() => {
         class="w-6 h-6 text-white"
       />
     </button>
-    <div class="popup">
+    <div
+      class="popup"
+    >
       <label
         for="volume-slider"
         class="visually-hidden"
@@ -64,6 +66,7 @@ const volumeIcon = computed(() => {
       <input
         id="volume-slider"
         v-model="volume"
+        class="cursor-pointer accent-green-500"
         type="range"
         step="any"
         min="0"
