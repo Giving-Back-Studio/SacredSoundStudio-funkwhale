@@ -175,7 +175,7 @@ const toggleQueue = () => {
           <div
             v-if="currentTrack.sources[0].mimetype.startsWith('video')"
             id="video-delivery"
-            :class="['bg-gray-900 p-4 md:rounded-tl-lg', {'w-4/6': isQueueVisible, 'max-w-[480px] h-auto': !isQueueVisible}]"
+            :class="['bg-gray-900 p-4 md:rounded-tl-lg', {'w-4/6': isQueueVisible, 'max-w-[640px] h-auto': !isQueueVisible}]"
           />
           <div
             v-else-if="isQueueVisible"
