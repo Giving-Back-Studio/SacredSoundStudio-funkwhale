@@ -20,6 +20,7 @@ const ShortcutsModal = defineAsyncComponent(() => import('~/components/Shortcuts
 const AudioPlayer = defineAsyncComponent(() => import('~/components/audio/Player.vue'))
 const Sidebar = defineAsyncComponent(() => import('~/components/Sidebar.vue'))
 const Queue = defineAsyncComponent(() => import('~/components/Queue.vue'))
+const Media = defineAsyncComponent(() => import('~/components/audio/multimedia/Media.vue'))
 
 const logger = useLogger()
 logger.debug('App setup()')
@@ -126,7 +127,8 @@ const handleSidebarCollapse = (collapsed: boolean) => {
       </router-view>
     </main>
 
-    <audio-player />
+<!--    <audio-player />-->
+    <media />
     <playlist-modal v-if="store.state.auth.authenticated" />
     <channel-upload-modal v-if="store.state.auth.authenticated" />
     <filter-modal v-if="store.state.auth.authenticated" />
