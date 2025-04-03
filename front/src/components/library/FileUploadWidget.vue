@@ -4,6 +4,7 @@ import type { VueUploadItem } from 'vue-upload-component'
 import { useCookies } from '@vueuse/integrations/useCookies'
 import { computed, ref, watch, getCurrentInstance } from 'vue'
 import { useStore } from '~/store'
+import axios from 'axios'
 
 import FileUpload from 'vue-upload-component'
 
@@ -48,9 +49,69 @@ const patchFileData = (file: VueUploadItem, data: Record<string, unknown> = {}) 
 
 const uploadAction = async (file: VueUploadItem, self: any): Promise<VueUploadItem> => {
   file.data = patchFileData(file, file.data)
-
-  // NOTE: We're only patching the file data. The rest of the process should remain the same:
-  // https://github.com/lian-yue/vue-upload-component/blob/1bd3be3a56e8ed2934dbe0beae151e9026ca51f9/src/FileUpload.vue#L973-L987
+  
+  // Check if the file is large (over 100MB) and should use S3 direct upload
+  // @ts-expect-error Taken from 3.1.2
+  const fileSize = file.size || file.file?.size || 0
+  const isLargeFile = fileSize > 100 * 1024 * 1024 // 100MB threshold
+  
+  if (isLargeFile) {
+    try {
+      // Get pre-signed URL from our API
+      const response = await axios.post(
+        store.getters['instance/absoluteUrl']('/api/v1/uploads/s3-presigned-url'),
+        {
+          filename: file.name,
+          file_size: fileSize,
+          content_type: file.type,
+          library: file.data.library,
+          channel: file.data.channel,
+          import_status: file.data.import_status,
+          import_metadata: file.data.import_metadata
+        },
+        { headers }
+      )
+      
+      // Upload directly to S3 using the pre-signed URL
+      const formData = new FormData()
+      
+      // Add all the fields from the presigned URL response
+      Object.entries(response.data.fields).forEach(([key, value]) => {
+        formData.append(key, value as string)
+      })
+      
+      // Add the file as the last field
+      formData.append('file', file.file)
+      
+      // Upload to S3
+      await axios.post(response.data.presigned_url, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (e) => {
+          // Update progress
+          file.progress = Math.round((e.loaded * 100) / (e.total || fileSize))
+          self.update(file)
+        }
+      })
+      
+      // Update the file with the upload UUID from the response
+      file.response = { uuid: response.data.upload_uuid }
+      file.success = true
+      file.error = false
+      file.active = false
+      
+      return file
+    } catch (error) {
+      file.error = true
+      file.success = false
+      file.active = false
+      console.error('S3 upload error:', error)
+      return file
+    }
+  }
+  
+  // For smaller files, use the standard upload process
   if (self.features.html5) {
     if (self.shouldUseChunkUpload(file)) return self.uploadChunk(file)
     if (file.putAction) return self.uploadPut(file)

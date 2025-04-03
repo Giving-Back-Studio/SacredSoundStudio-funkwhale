@@ -220,6 +220,8 @@ Resources:
         Image: !Ref BaseImage
         NginxImage: !Ref NginxImage
         MaxContainers: 2
+        Cpu: 1024
+        Memory: 2GB
         AutoScalingTargetValue: 75
         AutoScalingRequestCountValue: 150
         RDSConnectionSecret: !GetAtt RDSCluster.Outputs.ConnectionSecret
@@ -274,63 +276,18 @@ Resources:
                   - !Ref DjangoSecretKey
                   - !Ref MuxSecret
 
-  TranscoderRule:
-    Type: AWS::Events::Rule
+  TranscoderLambda:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: Transcoder
     Properties:
-      Description: "Rule to trigger transcoder on video upload"
-      EventPattern:
-        source: ["aws.s3"]
-        detail-type: ["Object Created"]
-        detail:
-          bucket:
-            name: [!Ref StaticSiteBucket]
-          object:
-            key:
-              - prefix: "videos/"
-      State: "ENABLED"
-      Targets:
-        - Arn: !Sub "arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:cluster/${Cluster}"
-          Id: "TranscoderTask"
-          RoleArn: !GetAtt EventsRole.Arn
-          EcsParameters:
-            TaskDefinitionArn: !GetAtt Transcoder.Outputs.TaskDefinition
-            TaskCount: 1
-            LaunchType: FARGATE
-            NetworkConfiguration:
-              AwsVpcConfiguration:
-                Subnets:
-                  - !GetAtt VPC.Outputs.PrivateSubnet0
-                  - !GetAtt VPC.Outputs.PrivateSubnet1
-                SecurityGroups:
-                  - !GetAtt VPC.Outputs.ContainerSecurityGroup
-          InputTransformer:
-            InputPathsMap:
-              key: "$.detail.object.key"
-            InputTemplate: '{"containerOverrides":[{"name":"transcoder","command":["funkwhale-manage","transcode_video","<key>"]}]}'
-
-  EventsRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: events.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: AllowECSTaskRun
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action: "ecs:RunTask"
-                Resource: !GetAtt Transcoder.Outputs.TaskDefinition
-              - Effect: Allow
-                Action: "iam:PassRole"
-                Resource: 
-                  - !GetAtt TaskRole.Arn
-                  - !GetAtt ExecutionRole.Arn
+      Parameters:
+        ClusterName: !Ref Cluster
+        TaskDefinition: !GetAtt Transcoder.Outputs.TaskDefinition
+        SubnetA: !GetAtt VPC.Outputs.PrivateSubnet0
+        SubnetB: !GetAtt VPC.Outputs.PrivateSubnet1
+        SecurityGroup: !GetAtt VPC.Outputs.ContainerSecurityGroup
+        S3Bucket: !Ref StaticSiteBucket
+      TemplateURL: TranscoderLambda.yaml
 
   Transcoder:
     Type: AWS::CloudFormation::Stack

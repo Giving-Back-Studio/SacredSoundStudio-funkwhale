@@ -2,7 +2,9 @@ import base64
 import datetime
 import logging
 import urllib.parse
+import uuid
 
+import boto3
 import django.db.utils
 import requests.exceptions
 from django.conf import settings
@@ -36,6 +38,8 @@ from funkwhale_api.users.oauth import permissions as oauth_permissions
 from . import filters, licenses, models, serializers, tasks, utils
 
 logger = logging.getLogger(__name__)
+
+s3_client = boto3.client('s3')
 
 TAG_PREFETCH = Prefetch(
     "tagged_items",
@@ -790,6 +794,103 @@ class UploadViewSet(
         if cover_data and "content" in cover_data:
             cover_data["content"] = base64.b64encode(cover_data["content"])
         return Response(payload, status=200)
+
+    @extend_schema(
+        request=serializers.S3PresignedUrlSerializer,
+        responses={200: {"type": "object", "properties": {
+            "presigned_url": {"type": "string"},
+            "upload_uuid": {"type": "string"},
+            "fields": {"type": "object"}
+        }}},
+        operation_id="get_s3_presigned_url",
+    )
+    @action(methods=["post"], detail=False, url_path="s3-presigned-url")
+    def s3_presigned_url(self, request, *args, **kwargs):
+        serializer = serializers.S3PresignedUrlSerializer(
+            data=request.data, context={"user": request.user}
+        )
+        serializer.is_valid(raise_exception=True)
+        
+        # Create a new upload record
+        upload_uuid = str(uuid.uuid4())
+        filename = serializer.validated_data["filename"]
+        file_size = serializer.validated_data["file_size"]
+        content_type = serializer.validated_data["content_type"]
+        
+        # Determine media type based on content type
+        media_type = models.MEDIA_TYPE_VIDEO if content_type.startswith('video/') else models.MEDIA_TYPE_AUDIO
+        
+        # Create a placeholder upload record first
+        upload_data = {
+            'uuid': upload_uuid,
+            'size': file_size,
+            'filename': filename,
+            'mimetype': content_type,
+            'media_type': media_type,
+            'import_status': serializer.validated_data.get('import_status', 'draft')
+        }
+        
+        # Add library or channel
+        if 'library' in serializer.validated_data:
+            try:
+                library = request.user.actor.libraries.get(uuid=serializer.validated_data['library'])
+                upload_data['library'] = library
+            except models.Library.DoesNotExist:
+                return Response({"detail": "Library not found"}, status=400)
+        elif 'channel' in serializer.validated_data:
+            from funkwhale_api.audio.models import Channel
+            try:
+                channel = Channel.objects.get(
+                    uuid=serializer.validated_data['channel'],
+                    attributed_to=request.user.actor
+                )
+                upload_data['library'] = channel.library
+            except Channel.DoesNotExist:
+                return Response({"detail": "Channel not found"}, status=400)
+        
+        # Add import metadata if provided
+        if 'import_metadata' in serializer.validated_data:
+            upload_data['import_metadata'] = serializer.validated_data['import_metadata']
+        
+        # Create the upload record
+        upload = models.Upload.objects.create(**upload_data)
+        
+        # Get the S3 bucket name from settings
+        bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+        
+        # Generate the correct S3 key based on media type
+        # This follows the same path convention as in models.get_file_path
+        if media_type == models.MEDIA_TYPE_VIDEO:
+            s3_key = f"videos/{upload_uuid}/{filename.replace('/', '-')}"
+        else:
+            # For audio files, use the chunked path
+            chunks = [upload_uuid[i:i+2] for i in range(0, 8, 2)]
+            s3_key = f"tracks/{chunks[0]}/{chunks[1]}/{chunks[2]}/{filename}"
+        
+        # Update the source field with the correct S3 path
+        upload.source = f"s3://{s3_key}"
+        upload.save(update_fields=["source"])
+        
+        # Generate presigned URL for direct upload to S3
+        presigned_post = s3_client.generate_presigned_post(
+            Bucket=bucket_name,
+            Key=s3_key,
+            Fields={
+                'Content-Type': content_type,
+                'Content-Length-Range': [1, file_size + 1000]  # Add a small buffer
+            },
+            Conditions=[
+                {'Content-Type': content_type},
+                ['content-length-range', 1, file_size + 1000]
+            ],
+            ExpiresIn=3600  # URL expires in 1 hour
+        )
+        
+        return Response({
+            'presigned_url': presigned_post['url'],
+            'fields': presigned_post['fields'],
+            'upload_uuid': upload_uuid
+        })
 
     @action(methods=["post"], detail=False)
     def action(self, request, *args, **kwargs):

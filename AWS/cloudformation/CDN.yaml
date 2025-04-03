@@ -242,6 +242,8 @@ Resources:
               OriginProtocolPolicy: https-only
               OriginSSLProtocols:
                 - TLSv1.2
+              OriginReadTimeout: 60
+              OriginKeepaliveTimeout: 60
           - Id: s3-bucket
             DomainName: !Sub "${Bucket}.s3.amazonaws.com"
             OriginAccessControlId: !GetAtt CloudFrontOriginAccess.Id
